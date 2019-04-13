@@ -1,0 +1,104 @@
+<template>
+  <div class="all_files">
+    <FileOperation></FileOperation>
+    <table>
+      <thead>
+        <tr>
+          <td class="checked"></td>
+          <td class="importance"></td>
+          <td class="name">|文件名称</td>
+          <td class="time">|修改日期</td>
+          <td class="size">|大小</td>
+          <td class="star">|标记</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(item, index) in allFiles" :key="index" @click="clickItem(index)" :class="{item_checked:item.itemChecked}">
+          <td ><span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span></td>
+          <td class="file_importance">
+            <svg @click="changeImportance(index)" class="icon" aria-hidden="true"><use :xlink:href="`#icon-importance${item.importance}`"></use></svg>
+          </td>
+          <td><div class="file_name" @click.stop="openFile">
+            <svg class="icon" aria-hidden="true"><use xlink:href="#icon-aFile"></use></svg>
+            <span >{{item.name}}</span>
+          </div></td>
+          <td>{{item.time}}</td>
+          <td>{{item.size}}</td>
+          <td class="star"><svg class="icon" aria-hidden="true" @click="toggleCollection(index)">
+            <use v-show="!item.collection" xlink:href="#icon-collection"></use>
+            <use v-show="item.collection" xlink:href="#icon-collection_fill"></use>
+            </svg><svg class="icon" aria-hidden="true" @click="toggleLike(index)">
+            <use v-show="!item.like" xlink:href="#icon-like"></use>
+            <use v-show="item.like" xlink:href="#icon-like_fill"></use>
+          </svg></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</template>
+
+<script>
+  import axios from "axios"
+  import FileOperation from "../../../components/FileOperation"
+  import { toggleCollection,toggleLike,clickItem,unixChange } from "../../../publics/public"
+  export default {
+    data() {
+      return {
+        nowChecked:[],
+        allFiles:[
+          {
+            importance:0,// -1,0,1
+            name:'汇总',
+            time:new Date(),
+            size:'22k',
+            collection:true,
+            like:true,
+            itemChecked:false
+          }
+        ],
+        childFiles:[],
+        isChild:false
+      }
+    },
+    mounted(){
+      var url = '' // 获取所有文件
+      axios.get(url).then(function (response) {
+        if("succss") {
+          // this.allFiles = JSON.parse(response.data.xxx)
+        }
+      })
+    },
+    components:{
+      FileOperation: FileOperation
+    },
+    methods:{
+      clickItem(index){
+        clickItem(this.allFiles, index, this.nowChecked)
+      },
+      toggleCollection(index){
+        toggleCollection(this, this.allFiles, index)
+      },
+      toggleLike(index){
+        toggleLike(this, this.allFiles, index)
+      },
+      changeImportance(index){
+
+      },
+      openFile(){
+        this.isChild = true
+      }
+    }
+  }
+</script>
+
+<style scoped>
+  .all_files{
+     overflow: hidden;
+     position: relative;
+     padding-left: 50px;
+  }
+  .file_name{
+    display: inline-block;
+  }
+
+</style>

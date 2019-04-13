@@ -1,0 +1,120 @@
+*{
+  margin: 0;
+  padding: 0;
+}
+html,body{
+  min-height: 100%;
+}
+.opacity{
+  opacity: .7;
+}
+.icon {
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.15em;
+  fill: currentColor;
+  overflow: hidden;
+}
+table{
+  /*border-collapse: separate;*/
+  border-spacing: 0px;
+}
+
+table thead{
+  color: #5e5e5e;
+}
+table tr td{
+  padding: 10px 0px;
+}
+table tbody tr:hover{
+  background-color: rgba(131, 138, 140, 0.11);
+  border-radius: 5px;
+}
+.item_checked{
+  background-color: rgba(178, 185, 187, 0.11);
+  border-radius: 5px;
+}
+.checked{
+  width: 1.5%;
+}
+.importance{
+  width: 2%;
+}
+.preview{
+  width: 5%;
+}
+.name{
+  width: 20%;
+}
+.time{
+  width: 30%;
+}
+.size{
+  width: 10%;
+}
+.star{
+  width: 10%;
+}
+.star svg{
+  width: 30px;
+  cursor: pointer;
+  margin-right: 20px;
+  font-size: 20px;
+}
+.file_name svg{
+  font-size: 30px;
+  margin-right: 10px;
+}
+.file_name span{
+  cursor: pointer;
+}
+.file_name span:hover{
+  color: #3781a3;
+}
+.file_importance svg{
+  font-size: 25px;
+}
+.task_list .el-input--prefix .el-input__inner {
+  border: none;
+  /*opacity: 0 ;*/
+  width: 85px;
+  background: transparent;
+  padding: 0px !important;
+}
+.task_list .el-date-editor--month .el-input__prefix,.el-date-editor--month  .el-input__suffix {
+  position: static !important;
+  cursor: pointer;
+}
+.sidebar .el-input__inner{
+  width: 325px;
+  border-radius: 5px;
+  height: 35px;
+  padding: 5px 10px;
+  border: 1px solid rgba(112, 112, 112, 0.73);
+}
+/*所有的标签显示*/
+.tag{
+  display: inline-block;
+  background-color: #dbdbdb;
+  border: 1px solid #f5f5f5;
+  border-radius:5px;
+  padding: 2px 5px;
+  margin: 5px 10px 5px 0px;
+}
+.tag img{
+  cursor: pointer;
+}
+/*所有的关键字显示*/
+.keyword{
+  display: inline-block;
+  margin: 5px 10px 5px 0px;
+}
+.clearFix:before,
+.clearFix:after{
+  content: '';
+  display: table;
+  clear: both;
+}
+.clearFix{
+  zoom: 1;
+}
