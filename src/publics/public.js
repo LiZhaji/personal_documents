@@ -166,3 +166,13 @@ export const formatTime = (second = 0) =>{
     h, m, s
   }
 }
+export const fetchList = (childUrl)=>{
+  // 获取所有文档
+  const url = window.baseUrl + childUrl
+  return axios.get(url).then(response => {
+    if (response.status === 200){
+      console.log(response.data)
+      return response.data
+    }
+  })
+}

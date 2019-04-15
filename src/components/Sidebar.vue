@@ -215,12 +215,12 @@
         formData.append("uploadfile", this.curFile)
         formData.append("tag", this.newTag)
         // 3.提交到后台，成功后显示消息
-        var url = 'http://192.168.0.133:8080/upload' // 上传地址
+        var url = window.baseUrl + '/upload' // 上传地址
         axios.post(url, formData).then(function (response) {
           console.log('response:',response)
           if(response.status >= 200 && response.status < 300 ) {
             upFileSucceed(this)
-
+            window.EE.emit('fetchDocuments')
           }
         })
         // this.$store.commit('setFile',this.curFile)

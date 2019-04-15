@@ -44,7 +44,15 @@
   import axios from "axios"
   import FileOperation from "../../../components/FileOperation"
   import { mapState } from "vuex"
-  import { toggleTip,toggleCollection,toggleAttention,clickItem,unixChange,getFileSize } from "../../../publics/public"
+  import {
+    toggleTip,
+    toggleCollection,
+    toggleAttention,
+    clickItem,
+    unixChange,
+    getFileSize,
+    fetchList
+  } from "../../../publics/public"
   export default {
     components:{
       FileOperation: FileOperation
@@ -68,24 +76,23 @@
     },
     mounted(){
       window.doc = this
-      // 获取所有文档
-      var url = 'http://192.168.0.133:8080/docuinfo'
-      axios.get(url).then(response => {
-        if (response.status === 200){
-          console.log(response.data)
-          this.allDocuments = response.data
-          this.allDocuments.forEach(element =>{
-            element.itemChecked = false
-          })
-        }
-      }).catch(error => {
-        toggleTip(this,error)
-      })
+      this.fetchList()
+      window.EE.on('fetchDocuments', ()=>this.fetchList())
     },
     beforeDestroy(){
       alert('aaaaa')
     },
     methods:{
+      fetchList() {
+        fetchList('/docuinfo').then(data=>{
+          this.allDocuments = data
+          this.allDocuments.forEach(element =>{
+            element.itemChecked = false
+          })
+        }).catch(error => {
+          toggleTip(this,error)
+        })
+      },
       showFile(url, index){
         let nowFile = this.allDocuments[index]
         let pdfUrlTemp = url.split('.').slice(0, url.split('.').length - 1)
