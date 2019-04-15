@@ -62,6 +62,7 @@
   .header{
     padding: 20px 0px 20px 50px;
     color: gray;
+    width: 1225px;
   }
   .search{
     width: 700px;

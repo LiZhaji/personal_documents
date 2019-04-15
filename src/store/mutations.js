@@ -10,5 +10,9 @@ export default {
   setFile(state,newFile){
     console.log("mutation" + newFile)
     state.allDocuments.push(newFile)
+  },
+  audioPlay(state,nowAudio){
+    state.isAudioPlay = true
+    state.nowAudio = nowAudio
   }
 }

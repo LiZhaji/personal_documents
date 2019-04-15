@@ -1,6 +1,9 @@
 <template>
   <div class="all_files">
     <FileOperation></FileOperation>
+    <div class="file_nav">
+      <span >全部文件</span>
+    </div>
     <table>
       <thead>
         <tr>
@@ -22,12 +25,12 @@
             <svg class="icon" aria-hidden="true"><use xlink:href="#icon-aFile"></use></svg>
             <span >{{item.name}}</span>
           </div></td>
-          <td>{{item.time}}</td>
-          <td>{{item.size}}</td>
+          <td>{{unixChange(item.createTime)}}</td>
+          <td>{{getFileSize(item.size)}}</td>
           <td class="star"><svg class="icon" aria-hidden="true" @click="toggleCollection(index)">
             <use v-show="!item.collection" xlink:href="#icon-collection"></use>
             <use v-show="item.collection" xlink:href="#icon-collection_fill"></use>
-            </svg><svg class="icon" aria-hidden="true" @click="toggleLike(index)">
+            </svg><svg class="icon" aria-hidden="true" @click="toggleAttention(index)">
             <use v-show="!item.like" xlink:href="#icon-like"></use>
             <use v-show="item.like" xlink:href="#icon-like_fill"></use>
           </svg></td>
@@ -40,7 +43,7 @@
 <script>
   import axios from "axios"
   import FileOperation from "../../../components/FileOperation"
-  import { toggleCollection,toggleLike,clickItem,unixChange } from "../../../publics/public"
+  import {toggleCollection, toggleAttention, clickItem, unixChange, getFileSize} from "../../../publics/public"
   export default {
     data() {
       return {
@@ -71,6 +74,14 @@
     components:{
       FileOperation: FileOperation
     },
+    mounted(){
+      var url = 'http://192.168.0.133:8080/fileinfo'
+      axios.get(url).then(response =>{
+        if (response.status === 200){
+          this.allFiles = response.data
+        }
+      })
+    },
     methods:{
       clickItem(index){
         clickItem(this.allFiles, index, this.nowChecked)
@@ -78,8 +89,14 @@
       toggleCollection(index){
         toggleCollection(this, this.allFiles, index)
       },
-      toggleLike(index){
-        toggleLike(this, this.allFiles, index)
+      toggleAttention(index){
+        toggleAttention(this, this.allFiles, index)
+      },
+      unixChange(timeStamp){
+        return unixChange(timeStamp)
+      },
+      getFileSize(size){
+        return getFileSize(size)
       },
       changeImportance(index){
 
@@ -100,5 +117,10 @@
   .file_name{
     display: inline-block;
   }
-
+  .file_nav{
+    width: 100%;
+    margin: 20px 0px;
+    font-size: 14px;
+    height: 20px;
+  }
 </style>

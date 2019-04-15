@@ -1,4 +1,5 @@
 //定义公共方法
+import axios from "axios"
 export const toggleTip = (obj, msg) =>{
   obj.$notify({
     title: '',
@@ -8,21 +9,85 @@ export const toggleTip = (obj, msg) =>{
     offset: 80
   })
 }
-export const  toggleCollection =(obj, list, index)=>{
-  list[index].collection = !list[index].collection
-  if(list[index].collection) {
-    toggleTip(obj, '已收藏')
-  }else{
-    toggleTip(obj, '已取消收藏')
-  }
+export const toggleCollection =(obj, list, index)=>{
+  let id = list[index].id
+  let collect = list[index].collection ? 1 : 0
+  let formData=new FormData()
+  formData.append("id",id)
+  formData.append("collect",collect);
+  var url = "http://192.168.0.133:8080/collect"
+  axios.post(url, formData).then( (response) => {
+    if (response.data.success) {
+      list[index].collection = !list[index].collection
+      if(list[index].collection ) {
+        toggleTip(obj, '已收藏')
+      }else{
+        toggleTip(obj, '已取消收藏')
+      }
+    }
+  }).catch(function (error) {
+    toggleTip(obj, error)
+  })
 }
-export const toggleLike =(obj, list, index)=>{
-  list[index].like = !list[index].like
-  if(list[index].like) {
-    toggleTip(obj, '已关注')
-  }else{
-    toggleTip(obj, '已取消关注')
-  }
+export const toggleAttention =(obj, list, index)=>{
+  let id = list[index].id
+  let attention = list[index].attention ? 1 : 0
+  let formData=new FormData()
+  formData.append("id",id)
+  formData.append("attention",attention);
+  var url = "http://192.168.0.133:8080/collect"
+  axios.post(url, formData).then( (response) => {
+    if (response.data.success) {
+      list[index].attention = !list[index].attention
+      if(list[index].attention ) {
+        toggleTip(obj, '已收藏')
+      }else{
+        toggleTip(obj, '已取消收藏')
+      }
+    }
+  }).catch(function (error) {
+    toggleTip(obj, error)
+  })
+}
+export const toggleCollectionNotIndex =(obj, fileItem)=>{
+  let id = fileItem.id
+  let collect = fileItem.collection ? 1 : 0
+  let formData=new FormData()
+  formData.append("id",id)
+  formData.append("collect",collect);
+  var url = "http://192.168.0.133:8080/collect"
+  axios.post(url, formData).then( (response) => {
+    if (response.data.success) {
+      fileItem.collection = !fileItem.collection
+      if(fileItem.collection ) {
+        toggleTip(obj, '已收藏')
+      }else{
+        toggleTip(obj, '已取消收藏')
+      }
+    }
+  }).catch(function (error) {
+    toggleTip(obj, error)
+  })
+}
+export const toggleAttentionNotIndex =(obj, fileItem)=>{
+  let id = fileItem.id
+  let collect = fileItem.attention ? 1 : 0
+  let formData=new FormData()
+  formData.append("id",id)
+  formData.append("collect",collect);
+  var url = "http://192.168.0.133:8080/collect"
+  axios.post(url, formData).then( (response) => {
+    if (response.data.success) {
+      fileItem.attention = !fileItem.attention
+      if(fileItem.attention ) {
+        toggleTip(obj, '已收藏')
+      }else{
+        toggleTip(obj, '已取消收藏')
+      }
+    }
+  }).catch(function (error) {
+    toggleTip(obj, error)
+  })
 }
 export const upFileSucceed =(obj)=>{
     toggleTip(obj, '上传成功')
@@ -34,6 +99,7 @@ export const clickItem =(list, index, nowChecked)=>{
   }else{
     nowChecked.splice(index, 1)
   }
+  console.log('list[index].itemChecked:',list[index].itemChecked)
 }
 export const inputIsEmpty =(obj,msg)=> {
   obj.$alert(msg, '', {
@@ -76,18 +142,20 @@ export const getFileSize = (size)=> {
   }
 }
 export const getNowDay = ()=>{
-  var date = new Date()
-  var year = date.getFullYear()
-  var month = date.getMonth() + 1 //可选值是0-11
-  var date = date.getDate()
-  if(month >=1 && month <=9) {
-    month = "0" + month
-  }
-  if(date >=0 && date <=9) {
-    date = "0" + date
-  }
-  var curDate = year + "-" + month + "-" + date
-  return curDate
+  var timeStamp = Date.now()
+  return unixChange(timeStamp)
+  // var year = date.getFullYear()
+  // var month = date.getMonth() + 1 //可选值是0-11
+  // var date = date.getDate()
+  // var hour = date.get
+  // if(month >=1 && month <=9) {
+  //   month = "0" + month
+  // }
+  // if(date >=0 && date <=9) {
+  //   date = "0" + date
+  // }
+  // var curDate = year + "-" + month + "-" + date
+  // return curDate
 }
 
 export const formatTime = (second = 0) =>{

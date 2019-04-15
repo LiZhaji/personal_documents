@@ -9,7 +9,7 @@
         </keep-alive>
       </div>
     </div>
-      <div class="audios_play clearFix" v-show="audioPlay" ref="audiosPlay">
+      <div class="audios_play clearFix" v-show=" isAudioPlay" ref="audiosPlay">
         <div class="header" ref="handle">
           <span class="iconfont icon-audios">&nbsp&nbsp&nbsp{{nowAudio.name}}</span>
           <span class="close" @click="closeAudioPlay" title="点击关闭">&times</span>
@@ -27,7 +27,7 @@
             <p><span>上传时间</span><span>{{nowAudio.time}}</span></p>
             <p><span>关键词</span><span class="keyword" v-for="item in nowAudio.keywords">{{item}}</span></p>
             <div class="tag_audio"><span>标签</span>
-              <span class="tag" v-for="(item,index) in nowAudio.tags" :key="index">
+              <span class="tag" v-for="(item,index) in nowAudio.tag" :key="index">
               {{item}} <img @click="delOneTag(index)" src="../assets/img/close.png" alt="删除" title="点击删除">
               </span>
               <div class="input_outer">
@@ -50,6 +50,7 @@
 </template>
 
 <script>
+  import axios from "axios"
   import { formatTime } from "../publics/public";
   import Siderbar from '../components/Sidebar'
   import Headerbar from '../components/Headerbar';
@@ -66,8 +67,9 @@
     },
     data () {
       return {
+        // audioUrl: this.getAudioUrl,
         audioUrl: 'https://src.fanmingfei.com/nigel.mp3',
-        // audioUrl: '../assert/godSay.mp3',
+        // audioUrl:'',
         isOpacity:false,
         isModifyRemark:false,
         newTag:'',
@@ -76,13 +78,13 @@
       }
     },
     computed:{
-      ...mapState(['audioPlay','nowAudio']),
-      audioPlay:{
+      ...mapState([' isAudioPlay','nowAudio']),
+      isAudioPlay:{
         get(){
-          return this.$store.state.audioPlay
+          return this.$store.state. isAudioPlay
         },
         set(val){
-          this.$store.state.audioPlay = val
+          this.$store.state. isAudioPlay = val
         }
       },
       nowAudio:{
@@ -103,6 +105,10 @@
       // this.play()
     },
     methods: {
+      getAudioUrl(){
+        var baseUrl = ''
+        this.audioUrl = baseUrl + this.nowAudio.url
+      },
       createWaveSurfer(){
         this.wavesurfer = WaveSurfer.create({
           container: this.$refs.wave,
@@ -117,7 +123,7 @@
         this.wavesurfer.on('ready',()=>{
           console.log('readyreayready')
           this.getDuration()
-         // this.wavesurfer.play()
+          // this.wavesurfer.play()
         })
       },
       playOrPause(){
@@ -126,7 +132,6 @@
       },
       getCurrent() {
         const current = formatTime(this.wavesurfer.getCurrentTime())
-
         this.current = current
       },
       getDuration(){
@@ -136,16 +141,15 @@
         //console.log(this.wavesurfer.getDuration())
         //abcd.wavepur
       },
-      play(){
-        this.wavesurfer.load(this.audioUrl)
-      },
       closeAudioPlay(){
-        this.audioPlay = false
+        // 1.停止播放 2.弹窗关闭
+        this.wavesurfer.pause()
+        this. isAudioPlay = false
       },
       delOneTag(index) {
         // 1. 通知后台删除此标签
         // 2. 本地删除
-        this.nowAudio.tags.splice(index, 1)
+        this.nowAudio.tag.splice(index, 1)
       },
       addTag() {
         // 1.本地验证
@@ -155,7 +159,7 @@
         }
         // 2.通知后台添加标签
         // 3.本地显示添加
-        this.nowAudio.tags.push(this.newTag)
+        this.nowAudio.tag.push(this.newTag)
         this.newTag = ''
       },
       modifyRemark() {
@@ -190,8 +194,8 @@
     width:350px;
     background: white;
     /*border:1px solid rgba(211, 211, 211, 0.65);*/
-    right: 10px;
-    bottom: 150px;
+    left: 200px;
+    top: 15px;
     height: auto!important;
     border-radius: 5px;
     font-size: 14px;

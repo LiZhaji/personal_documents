@@ -1,6 +1,9 @@
 <template>
   <div class="audios">
     <FileOperation></FileOperation>
+    <div class="file_nav">
+      <span >全部音频</span>
+    </div>
     <table>
       <thead>
       <tr>
@@ -18,8 +21,8 @@
         <td class="file_importance">
           <svg @click.stop="changeImportance(index)" class="icon" aria-hidden="true"><use :xlink:href="`#icon-importance${item.importance}`"></use></svg>
         </td>
-        <td><div class="file_name">
-          <svg class="icon aFile" aria-hidden="true"><use xlink:href="#icon-file_mp3"></use></svg>
+        <td><div class="file_name" @click="audioPlay(index)">
+          <svg class="icon" aria-hidden="true"><use xlink:href="#icon-file_mp3"></use></svg>
           <span >{{item.name}}</span>
         </div></td>
         <td>{{unixChange(item.lastModified)}}</td>
@@ -27,7 +30,7 @@
         <td class="star"><svg class="icon" aria-hidden="true" @click.stop="toggleCollection(index)">
           <use v-show="!item.collection" xlink:href="#icon-collection"></use>
           <use v-show="item.collection" xlink:href="#icon-collection_fill"></use>
-        </svg><svg class="icon" aria-hidden="true" @click.stop="toggleLike(index)">
+        </svg><svg class="icon" aria-hidden="true" @click.stop="toggleAttention(index)">
           <use v-show="!item.like" xlink:href="#icon-like"></use>
           <use v-show="item.like" xlink:href="#icon-like_fill"></use>
         </svg></td>
@@ -38,19 +41,36 @@
 </template>
 
 <script>
-
+  import axios from "axios"
   import FileOperation from "../../../components/FileOperation"
-  import { toggleCollection,toggleLike,clickItem } from "../../../publics/public"
+  import { mapState } from "vuex"
+  import { toggleTip,toggleCollection,toggleAttention,clickItem,unixChange,getFileSize } from "../../../publics/public"
   export default {
+    components:{
+      FileOperation: FileOperation
+    },
     data() {
       return {
         allAudios:[]
       }
     },
-    components:{
-      FileOperation: FileOperation
+    mounted(){
+      // 获取所有音乐文件
+      // var url = ''
+      // axios.get(url).then((response)=> {
+      //   if (response.status === 200){
+      //     console.log('allAudios:',response.data)
+      //     this.allAudios = response.data
+      //   }
+      // }).catch(error =>{
+      //   toggleTip(this,error)
+      // })
     },
     methods:{
+      audioPlay(index){
+        let nowAudio = this.allAudios[index]
+        this.$store.commit('audioPlay',nowAudio)
+      },
       clickItem(index){
         clickItem(this.allAudios, index, this.nowChecked)
       },
@@ -58,8 +78,14 @@
         console.log(this.allAudios[index].collection)
         toggleCollection(this, this.allAudios, index)
       },
-      toggleLike(index){
-        toggleLike(this, this.allAudios, index)
+      toggleAttention(index){
+        toggleAttention(this, this.allAudios, index)
+      },
+      unixChange(timeStamp){
+        return unixChange(timeStamp)
+      },
+      getFileSize(size){
+        return getFileSize(size)
       }
     }
   }
@@ -71,4 +97,5 @@
     position: relative;
     padding-left: 50px;
   }
+
 </style>

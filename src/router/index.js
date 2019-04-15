@@ -2,9 +2,10 @@ import Vue from 'vue'
 import Router from 'vue-router'
 
 Vue.use(Router)
-import PicturesInfo from "../independent_pages/PicturesInfo";
 import Login from "../independent_pages/Login";
 import Main from "../independent_pages/Main";
+import PicturesInfo from "../independent_pages/PicturesInfo";
+import VideoInfo from "../independent_pages/VideoInfo";
 
 import AllFiles from "../views/my_files/all_files/AllFiles";
 import Audios from "../views/my_files/audios/Audios";
@@ -13,6 +14,7 @@ import LatelyFiles from "../views/my_files/lately_files/LatelyFiles";
 import Others from "../views/my_files/others/Others";
 import Pictures from "../views/my_files/pictures/Pictures";
 import Videos from "../views/my_files/videos/Videos";
+import ShowFile from  "../views/show_file/ShowFile";
 
 import Empty from "../views/empty/Empty";
 import Feedback from "../views/feedback/Feedback";
@@ -84,11 +86,20 @@ export default new Router({
         }, {
           path: '/main/useTimes',
           component:UseTimes
+        },{
+          path: '/main/showFile',
+          name:'ShowFile',
+          component:ShowFile
         }
       ]
     },{
       path: '/picturesInfo',
+      name:'PicturesInfo',
       component:PicturesInfo
+    },{
+      path: '/videoInfo',
+      name: 'VideoInfo',
+      component: VideoInfo
     }
   ]
 })

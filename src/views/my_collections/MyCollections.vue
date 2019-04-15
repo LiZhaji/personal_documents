@@ -2,6 +2,9 @@
 <template>
   <div class="my_collections">
     <FileOperation></FileOperation>
+    <div class="file_nav">
+      <span >我的收藏</span>
+    </div>
     <table>
       <thead>
       <tr>
@@ -28,7 +31,7 @@
         <td class="star"><svg class="icon" aria-hidden="true" @click.stop="toggleCollection(index)">
           <use v-show="!item.collection" xlink:href="#icon-collection"></use>
           <use v-show="item.collection" xlink:href="#icon-collection_fill"></use>
-        </svg><svg class="icon" aria-hidden="true" @click.stop="toggleLike(index)">
+        </svg><svg class="icon" aria-hidden="true" @click.stop="toggleAttention(index)">
           <use v-show="!item.like" xlink:href="#icon-like"></use>
           <use v-show="item.like" xlink:href="#icon-like_fill"></use>
         </svg></td>
@@ -40,10 +43,10 @@
 
 <script>
   import FileOperation from "../../components/FileOperation"
-  import { toggleCollection,toggleLike,clickItem } from "../../publics/public"
+  import { toggleCollection,toggleAttention,clickItem } from "../../publics/public"
   export default {
     components:{
-      FileOperation: FileOperation
+      FileOperation: FileOperation,
     },
     data() {
       return {
@@ -68,8 +71,8 @@
       toggleCollection(index){
         toggleCollection(this, this.myCollections, index)
       },
-      toggleLike(index){
-        toggleLike(this, this.myCollections, index)
+      toggleAttention(index){
+        toggleAttention(this, this.myCollections, index)
       },
       changeImportance(index){
 
@@ -84,5 +87,10 @@
     position: relative;
     padding-left: 50px;
   }
-
+  .file_nav{
+    width: 100%;
+    margin: 20px 0px;
+    font-size: 14px;
+    height: 20px;
+  }
 </style>

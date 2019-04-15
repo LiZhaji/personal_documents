@@ -43,9 +43,9 @@
     <transition name="alertTip">
       <div class="up_file_box" v-show="isUpFile">
         <p class="box_title">上传文件</p>
-        <p><span class="location_file">上传至</span><input class="location_file_input" type="text"></p>
+        <p><span class="location_file">上传至</span><input v-model="fileLocation" class="location_file_input" type="text"></p>
         <p><span class="choose_file">选择文件</span><span class="choose_file_input" placeholder="点击选择"><span>{{curFile.name}}</span><input type="file" @change="getFile" title="点击选择文件"></span></p>
-        <p><span class="tag_file">标签</span><input class="tag_file_input" type="text" v-model="tag" placeholder="以空格分隔"></p>
+        <p><span class="tag_file">标签</span><input class="tag_file_input" type="text" v-model="newTag" placeholder="以空格分隔"></p>
         <div class="importance_file"><span class="importance_title">标记</span>
           <input id="importance-11" class="importance-1" name="importance" type="radio" value=-1 @click="getFolderImportance"><label for="importance-11">重要</label>
           <input id="importance11" class="importance1" name="importance" type="radio" value=1 @click="getFolderImportance"><label for="importance11">重要吗</label>
@@ -72,7 +72,7 @@
         </div>
         <p><span class="tag_new_task">标签</span> <el-select class="" v-model="newTask.tag" placeholder="请选择">
           <el-option
-            v-for="item in tags"
+            v-for="item in tag"
             :key="item.value"
             :label="item.label"
             :value="item.value">
@@ -110,13 +110,14 @@
   export default {
     data() {
       return {
+        fileLocation:'/我的文件',
         isMyFile: false,
         file: '',
         isUpFile: false,
         isNewTask:false,
         isNewFolder:false,
         curFile:{name:'点击选择',tag:''},
-        tags: [{
+        tag: [{
           value: '重要紧急',
           label: '重要紧急'
         }, {
@@ -130,7 +131,7 @@
           label: '普通'
         }],
         newTask:{content: '', createTime: '', tag: '',tipTime:'', remark:'',state:''},
-        tag:'',
+        newTag:'',
         newFolder:{name:'',importance:0}
       }
     },
@@ -194,8 +195,9 @@
         this.$emit('needOpacity',this.isUpFile)
       },
       getFile() {
-        const {name, lastModified, size, collection, like, itemChecked} = event.target.files[0]
-        this.curFile = {name, lastModified, size, collection, like, itemChecked}
+        // const {name, lastModified, size, collection, attention, itemChecked} = event.target.files[0]
+        // this.curFile = {name, lastModified, size, collection, attention, itemChecked}
+        this.curFile = event.target.files[0]
         console.log(this.curFile)
       },
       submitFile() {
@@ -203,24 +205,25 @@
         if(!this.curFile) {
           inputIsEmpty(this,'请选择文件')
         }
-        this.curFile.tag = this.tag.split(" ")
-        this.curFile.collection = false
-        this.curFile.like = false
-        this.curFile.itemChecked = false
+        // this.curFile.tag = this.tag.split(" ")
+        // this.curFile.collection = false
+        // this.curFile.attention = false
+        // this.curFile.itemChecked = false
         console.log(this.curFile)
         // 2.实例化一个表单数据对象，遍历curFile数组插入到表单数据对象中,这里只有一个文件，所以不需要遍历了
         let formData = new FormData()
-        formData.append("uploadfile", this.curFile[0])
+        formData.append("uploadfile", this.curFile)
+        formData.append("tag", this.newTag)
         // 3.提交到后台，成功后显示消息
-        var url = 'http://192.168.0.181:8000/pic/upload/'// 上传地址
+        var url = 'http://192.168.0.133:8080/upload' // 上传地址
         axios.post(url, formData).then(function (response) {
-          console.log('response'+response)
-          if(response.data.state === 200) {
+          console.log('response:',response)
+          if(response.status >= 200 && response.status < 300 ) {
             upFileSucceed(this)
+
           }
         })
-
-        this.$store.commit('setFile',this.curFile)
+        // this.$store.commit('setFile',this.curFile)
         this.isUpFile = false
       },
       newFile() {

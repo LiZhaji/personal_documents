@@ -5,7 +5,7 @@
                    indicator-position="outside" :autoplay="F" height="690px" :initial-index="initIndex">
         <el-carousel-item v-for="(item,index) in allPictures " :key="index">
           <span></span>
-          <img :src="item.url" alt="图片详情" >
+          <img :src="getPicUrl(item.url)" alt="图片详情" >
         </el-carousel-item>
       </el-carousel>
     </div>
@@ -17,18 +17,23 @@
     </div>
     <div class="specificInfo" v-show="showSpecificInfo" >
       <p class="info_title"><span class="cancel iconfont icon-close2" @click="cancelSpecificInfo" title="点击关闭详情"></span>图片详情</p>
-      <p><span>文件信息</span>{{nowPicture.name}}{{getFileSize(nowPicture.size)}}</p>
-      <p><span>拍摄时间</span>{{nowPicture.createTime}}</p>
-      <p><span>拍摄参数</span>{{nowPicture.modal}}</p>
-      <p><span>拍摄地点</span>{{nowPicture.location}}</p>
-      <p><span>关键词</span><span class="keyword" v-for="(item,index) in nowPicture.keywords" :key="index">{{item}}</span></p>
-      <div><span>色系</span>
-        <div class="color">
-          <div v-for="(item, index) in nowPicture.color" :key="index" style="background-color: rbg()"></div>
+      <div><span>文件信息</span>
+        <span>{{nowPicture.name}}</span>
+        <p class="WHAndSize"><span>{{getFileSize(nowPicture.size)}}&nbsp&nbsp&nbsp</span><span>{{nowPicture.info.width}}&times;{{nowPicture.info.height}}px</span></p>
+      </div>
+      <p><span>拍摄时间</span>{{unixChange(nowPicture.info.createTime)}}</p>
+      <p><span>拍摄参数</span>{{nowPicture.info.modal}}<span v-show="!nowPicture.info.modal">未知</span></p>
+      <p><span>拍摄地点</span>{{nowPicture.info.location}}<span v-show="!nowPicture.info.location">未知</span></p>
+      <div class="clearFix"><span class="color_title">色系</span>
+        <div class="color clearFix">
+          <div v-for="(colorItem, index) in nowPicture.info.colors" :key="index" :style="getColorWidth(colorItem)"></div>
         </div>
       </div>
+      <div><span class="keyword_title">关键词</span>
+        <div class="keyword_outer"><span class="keyword" v-for="(item,index) in nowPicture.keyword" :key="index">{{item}}</span></div>
+      </div>
       <div class="tag_pic_info"><span>标签</span>
-         <span class="tag" v-for="(item,index) in nowPicture.tags" :key="index">
+         <span class="tag" v-for="(item,index) in nowPicture.tag" :key="index">
           {{item}} <img @click="delOneTag(index)" src="../assets/img/close.png" alt="删除" title="点击删除">
         </span>
         <div class="input_outer">
@@ -49,25 +54,14 @@
 </template>
 
 <script>
-  import { getFileSize,inputIsEmpty } from "../publics/public"
+  import axios from "axios"
+  import { toggleTip,getFileSize,inputIsEmpty,unixChange } from "../publics/public"
   export default {
     data() {
       return {
         F:false,
         markup:'',
-        allPictures: [
-          {
-            url:require("../assets/img/1.jpg"),
-            name:'aa',
-            keywords:['猫','脊椎动物','哺乳动物','中小型猫科动物','猫科动物','络腮胡子','虎斑猫','美国短发'],
-            tags:['喜欢'],
-            remark:'aaaaaa'
-          },
-          {
-            url:require('../assets/img/2.jpg'),
-            name:'bb'
-          }
-        ],
+        allPictures: [],
         showSpecificInfo:true,
         nowPicture:{},
         initIndex:0,
@@ -77,18 +71,49 @@
       }
     },
     mounted() {
-      // 1.获取所有图片
-
-      // 2.显示之前点击图片
-      this.initIndex = localStorage.getItem("initIndex") || this.initIndex
-      this.nowPicture = this.allPictures[this.initIndex]
-      // localStorage.removeItem("initIndex")
-      console.log(this.nowPicture)
-    },
-    computed:{
-      // ...mapState(['initIndex'])
+      // 1.获取所有图片  2.显示之前点击图片
+      console.log('this.$route.params.index:',this.$route.query.index)
+      this.initIndex = this.$route.query.index
+      var url = "http://192.168.0.133:8080/imageinfo"
+      axios.get(url).then(response =>{
+        if (response.status === 200){
+          this.allPictures = response.data
+          this.allPictures.forEach(ele=>{
+            ele.info = JSON.parse(ele.info)
+            // console.log('key:',ele.keyword)
+            // console.log('tag:',ele.tag)
+            if (ele.keyword) {
+              ele.keyword = ele.keyword.split(',')
+            }
+            if (ele.tag) {
+              ele.tag = ele.tag.split(',')
+            }
+          })
+          this.nowPicture = this.allPictures[this.initIndex]
+          console.log(this.nowPicture)
+        }
+      }).catch(error=>{
+        toggleTip(this,error)
+      })
     },
     methods:{
+      getPicUrl(url){
+        var baseUrl = "http://192.168.0.133:8080/testpreview/"
+        console.log(baseUrl + url)
+        return baseUrl + url
+      },
+      unixChange(timeStamp){
+        return  unixChange(timeStamp)
+      },
+      getColorWidth(item){
+        let r = item.red
+        let g = item.green
+        let b = item.blue
+        let bgc = ("background-color: rgb(" + r + "," + g + "," + b + ");")
+        console.log(bgc)
+        let w = (Math.round( item.score * Math.pow( 10, 2 + 2 ) ) / Math.pow( 10, 2 ) ).toFixed(2) + '%'
+        return  bgc + ("width: " + w)
+      },
       modifyRemark() {
         this.isModifyRemark = true
       },
@@ -100,7 +125,7 @@
       delOneTag(index) {
         // 1. 通知后台删除此标签
         // 2. 本地删除
-        this.nowPicture.tags.splice(index, 1)
+        this.nowPicture.tag.splice(index, 1)
       },
       addTag() {
         // 1.本地验证
@@ -110,7 +135,7 @@
         }
         // 2.通知后台添加标签
         // 3.本地显示添加
-        this.nowPicture.tags.push(this.newTag)
+        this.nowPicture.tag.push(this.newTag)
         this.newTag = ''
       },
       getFileSize(size){
@@ -166,6 +191,30 @@
     color: rgba(133, 127, 127, 0.85);
     display: inline-block;
     width: 80px;
+  }
+  .specificInfo>div .WHAndSize{
+    color: #c1c1c1;
+    padding:5px 0  5px 85px;
+    font-size: 14px;
+  }
+  .specificInfo .color_title{
+    float: left;
+  }
+  .specificInfo .color{
+    display: inline-block;
+    width: 235px;
+    height: 30px;
+  }
+  .specificInfo .color>div{
+    height: 30px;
+    float: left;
+  }
+  .specificInfo .keyword_title{
+    float: left;
+  }
+  .specificInfo .keyword_outer{
+    width: 235px;
+    display: inline-block;
   }
   .info_title{
     color: rgba(51, 51, 51, 0.8);

@@ -107,7 +107,8 @@ table tbody tr:hover{
 /*所有的关键字显示*/
 .keyword{
   display: inline-block;
-  margin: 5px 10px 5px 0px;
+  /*margin: 5px 10px 5px 0px;*/
+  padding: 0 10px 5px 0px;
 }
 .clearFix:before,
 .clearFix:after{
@@ -117,4 +118,10 @@ table tbody tr:hover{
 }
 .clearFix{
   zoom: 1;
+}
+.file_nav{
+  width: 100%;
+  margin: 20px 0px;
+  font-size: 14px;
+  height: 20px;
 }

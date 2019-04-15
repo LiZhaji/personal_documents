@@ -1,6 +1,9 @@
 <template>
   <div class="documents">
     <FileOperation></FileOperation>
+    <div class="file_nav">
+      <span >全部文档</span>
+    </div>
     <table>
       <thead>
       <tr>
@@ -18,65 +21,84 @@
         <td class="file_importance">
           <svg @click.stop="changeImportance(index)" class="icon" aria-hidden="true"><use :xlink:href="`#icon-importance${item.importance}`"></use></svg>
         </td>
-        <td><div class="file_name">
+        <td><div class="file_name" >
           <svg class="icon aFile" aria-hidden="true"><use :xlink:href=fileIconsOrOthers(index)></use></svg>
-          <span >{{item.name}}</span>
+          <span @click.stop="showFile(item.url,index)" title="点击查看详情">{{item.name}}</span>
         </div></td>
-        <td>{{unixChange(item.lastModified)}}</td>
+        <td>{{unixChange(item.serverTime)}}</td>
         <td>{{getFileSize(item.size)}}</td>
         <td class="star"><svg class="icon" aria-hidden="true" @click.stop="toggleCollection(index)">
           <use v-show="!item.collection" xlink:href="#icon-collection"></use>
           <use v-show="item.collection" xlink:href="#icon-collection_fill"></use>
-        </svg><svg class="icon" aria-hidden="true" @click.stop="toggleLike(index)">
+        </svg><svg class="icon" aria-hidden="true" @click.stop="toggleAttention(index)">
           <use v-show="!item.like" xlink:href="#icon-like"></use>
           <use v-show="item.like" xlink:href="#icon-like_fill"></use>
         </svg></td>
       </tr>
       </tbody>
     </table>
-    <a href="http://www.xdocin.com/xdoc?_func=to&amp;_format=html&amp;_cache=1&amp;_xdoc=http://www.xdocin.com/demo/demo.docx" target="_blank" rel="nofollow">XDOC</a>
   </div>
 </template>
 
 <script>
+  import axios from "axios"
   import FileOperation from "../../../components/FileOperation"
   import { mapState } from "vuex"
-  import { toggleCollection,toggleLike,clickItem,unixChange,getFileSize } from "../../../publics/public"
+  import { toggleTip,toggleCollection,toggleAttention,clickItem,unixChange,getFileSize } from "../../../publics/public"
   export default {
     components:{
       FileOperation: FileOperation
     },
     computed:{
-      ...mapState(['file_icons','allDocuments'])
+      ...mapState(['file_icons','nowFile']),
+      nowFile:{
+        get(){
+          return this.$store.state.nowFile
+        },
+        set(val){
+          this.$store.state.newFile = val
+        }
+      }
     },
     data() {
       return {
         nowChecked:[],
-        // allDocuments:[
-        //   {
-        //     importance:0,// -1,0,1
-        //     name:'服务外包省赛概要.doc',
-        //     lastModified:new Date(),
-        //     type:'doc',
-        //     size:'22k',
-        //     collection:true,
-        //     like:true,
-        //     itemChecked:false
-        //   },
-        //   {
-        //     importance:1,// -1,0,1
-        //     name:'你好好密密麻麻.xls',
-        //     lastModified:new Date(),
-        //     type:'xls',
-        //     size:'19k',
-        //     collection:false,
-        //     like:true,
-        //     itemChecked:false
-        //   }
-        // ]
+        allDocuments:[]
       }
     },
+    mounted(){
+      window.doc = this
+      // 获取所有文档
+      var url = 'http://192.168.0.133:8080/docuinfo'
+      axios.get(url).then(response => {
+        if (response.status === 200){
+          console.log(response.data)
+          this.allDocuments = response.data
+          this.allDocuments.forEach(element =>{
+            element.itemChecked = false
+          })
+        }
+      }).catch(error => {
+        toggleTip(this,error)
+      })
+    },
+    beforeDestroy(){
+      alert('aaaaa')
+    },
     methods:{
+      showFile(url, index){
+        let nowFile = this.allDocuments[index]
+        let pdfUrlTemp = url.split('.').slice(0, url.split('.').length - 1)
+        pdfUrlTemp.push('.pdf')
+        let pdfUrl = pdfUrlTemp.join("")
+        this.$router.push({
+          name: 'ShowFile',
+          params: {
+            fileUrl: pdfUrl,
+            nowFile: nowFile
+          }
+        })
+      },
       unixChange (timestamp){
         return unixChange(timestamp)
       },
@@ -91,15 +113,11 @@
         clickItem(this.allDocuments, index, this.nowChecked)
       },
       toggleCollection(index){
-        console.log(this.allDocuments[index].collection)
         toggleCollection(this, this.allDocuments, index)
       },
-      toggleLike(index){
-        toggleLike(this, this.allDocuments, index)
+      toggleAttention(index){
+        toggleAttention(this, this.allDocuments, index)
       }
-    },
-    mounted(){
-      window.doc = this
     }
   }
 </script>

@@ -1,6 +1,9 @@
 <template>
   <div class="others">
     <FileOperation></FileOperation>
+    <div class="file_nav">
+      <span >全部文档</span>
+    </div>
     <table>
       <thead>
       <tr>
@@ -18,7 +21,7 @@
         <td class="file_importance">
           <svg @click="changeImportance(index)" class="icon" aria-hidden="true"><use :xlink:href="`#icon-importance${item.importance}`"></use></svg>
         </td>
-        <td><div class="file_name">
+        <td><div class="file_name" @click.stop="showFile">
           <svg class="icon aFile" aria-hidden="true"><use :xlink:href=fileIconsOrOthers(index)></use></svg>
           <span >{{item.name}}</span>
         </div></td>
@@ -27,7 +30,7 @@
         <td class="star"><svg class="icon" aria-hidden="true" @click.stop="toggleCollection(index)">
           <use v-show="!item.collection" xlink:href="#icon-collection"></use>
           <use v-show="item.collection" xlink:href="#icon-collection_fill"></use>
-        </svg><svg class="icon" aria-hidden="true" @click.stop="toggleLike(index)">
+        </svg><svg class="icon" aria-hidden="true" @click.stop="toggleAttention(index)">
           <use v-show="!item.like" xlink:href="#icon-like"></use>
           <use v-show="item.like" xlink:href="#icon-like_fill"></use>
         </svg></td>
@@ -38,8 +41,9 @@
 </template>
 
 <script>
+  import axios from "axios"
   import FileOperation from "../../../components/FileOperation"
-  import { toggleCollection,toggleLike,clickItem } from "../../../publics/public"
+  import { toggleCollection,toggleAttention,clickItem } from "../../../publics/public"
   export default {
     components:{
       FileOperation: FileOperation
@@ -82,10 +86,12 @@
       toggleCollection(index){
         toggleCollection(this, this.others, index)
       },
-      toggleLike(index){
-        toggleLike(this, this.others, index)
+      toggleAttention(index) {
+        toggleAttention(this, this.others, index)
+      },
+      showFile(){
+        window.open('http://192.168.0.133:8080/testpreview/zzz/%E6%97%B6%E9%97%B4%E8%A1%A8.pdf', '_blank');
       }
-
     }
   }
 </script>
