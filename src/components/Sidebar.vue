@@ -17,7 +17,7 @@
     <transition name="sidebarNav_right">
       <ul class="activities_of_files" v-show="isMyFile">
         <li @click="toActivities"><span class="iconfont icon-undo"></span><span class="activity_name">返回</span></li>
-        <router-link to="/main/latelyFiles"><li :class="{chosen: '/main/latelyFiles'=== $route.path}"><span class="iconfont icon-lately-files"></span><span class="activity_name">最近文件</span></li></router-link>
+        <router-link to="/main/insight"><li :class="{chosen: '/main/insight'=== $route.path}"><span class="iconfont icon-lately-files"></span><span class="activity_name">洞见</span></li></router-link>
         <router-link to="/main/allFiles"><li :class="{chosen: '/main/allFiles'=== $route.path}"><span class="iconfont icon-all-files"></span><span class="activity_name">全部文件</span></li></router-link>
         <router-link to="/main/pictures"><li :class="{chosen: '/main/pictures'=== $route.path}"><span class="iconfont icon-picture"></span><span class="activity_name">图片</span></li></router-link>
         <router-link to="/main/documents"><li :class="{chosen: '/main/documents'=== $route.path}"><span class="iconfont icon-documents"></span><span class="activity_name">文档</span></li></router-link>
@@ -106,7 +106,7 @@
 
 <script>
   import axios from "axios";
-  import { upFileSucceed,inputIsEmpty,getNowDay } from "../publics/public"
+  import {upFileSucceed, inputIsEmpty, getNowDay, toggleTip} from "../publics/public"
   export default {
     data() {
       return {
@@ -117,6 +117,7 @@
         isNewTask:false,
         isNewFolder:false,
         curFile:{name:'点击选择',tag:''},
+        curType:'',
         tag: [{
           value: '重要紧急',
           label: '重要紧急'
@@ -198,7 +199,19 @@
         // const {name, lastModified, size, collection, attention, itemChecked} = event.target.files[0]
         // this.curFile = {name, lastModified, size, collection, attention, itemChecked}
         this.curFile = event.target.files[0]
-        console.log(this.curFile)
+        this.curType = this.curFile.name.split('.').pop()
+        console.log(this.curType)
+        if(['doc','docx','pdf','xls','txt'].indexOf(this.curType) >= 0){
+          this.curType = 'docu'
+        }else if (['jpg','png','gif'].indexOf(this.curType) >= 0){
+          this.curType = 'image'
+        }else if (['movie','mp4','avi'].indexOf(this.curType) >= 0){
+          this.curType = 'video'
+        }else if (['mp3','wav'].indexOf(this.curType) >= 0) {
+          this.curType = 'audio'
+        }else{
+          this.curType = 'others'
+        }
       },
       submitFile() {
         // 1.本地验证输入
@@ -209,8 +222,7 @@
         // this.curFile.collection = false
         // this.curFile.attention = false
         // this.curFile.itemChecked = false
-        console.log(this.curFile)
-        // 2.实例化一个表单数据对象，遍历curFile数组插入到表单数据对象中,这里只有一个文件，所以不需要遍历了
+        // 2.实例化一个表单数据对象，遍历curFile数组插入到表单数据对象中,这里只有一个文件，所以不需要遍历
         let formData = new FormData()
         formData.append("uploadfile", this.curFile)
         formData.append("tag", this.newTag)
@@ -220,10 +232,19 @@
           console.log('response:',response)
           if(response.status >= 200 && response.status < 300 ) {
             upFileSucceed(this)
-            window.EE.emit('fetchDocuments')
+            // 执行/发布一个事件用来自动更新列表
+            switch (this.curType) {
+              case "docu": window.EE.emit('fetchDocuments');break;
+              case "image": window.EE.emit('fetchImages');break;
+              case "video": window.EE.emit('fetchVideos');break;
+              case "audio": window.EE.emit('fetchAudios');break;
+              case "others": window.EE.emit('fetchOthers');break;
+            }
+            window.EE.emit('fetchAllFiles')
           }
+        }).catch((error)=>{
+          toggleTip(this,error)
         })
-        // this.$store.commit('setFile',this.curFile)
         this.isUpFile = false
       },
       newFile() {
@@ -400,7 +421,7 @@
     position: fixed;
     height: 100%;
     width: 240px;
-    background-color: rgba(203, 203, 203, 0.27);
+    background-color: rgb(240, 240, 240);
     z-index: 99;
   }
   .logo{

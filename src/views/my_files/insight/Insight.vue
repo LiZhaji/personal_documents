@@ -2,8 +2,10 @@
   <div class="lately_files">
     <FileOperation></FileOperation>
     <div class="file_nav">
-      <span >最近文件</span>
+      <span >洞于此见</span>
     </div>
+    <div class="intelligent_orders"></div>
+    <div class="owned_folders"></div>
     <table>
       <thead>
       <tr>
@@ -59,7 +61,6 @@
             like:true,
             itemChecked:false
           }
-
         ]
       }
     },

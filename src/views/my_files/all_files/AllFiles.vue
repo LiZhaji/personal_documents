@@ -16,73 +16,88 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(item, index) in allFiles" :key="index" @click="clickItem(index)" :class="{item_checked:item.itemChecked}">
-          <td ><span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span></td>
-          <td class="file_importance">
-            <svg @click="changeImportance(index)" class="icon" aria-hidden="true"><use :xlink:href="`#icon-importance${item.importance}`"></use></svg>
-          </td>
-          <td><div class="file_name" @click.stop="openFile">
-            <svg class="icon" aria-hidden="true"><use xlink:href="#icon-aFile"></use></svg>
-            <span >{{item.name}}</span>
-          </div></td>
-          <td>{{unixChange(item.createTime)}}</td>
-          <td>{{getFileSize(item.size)}}</td>
-          <td class="star"><svg class="icon" aria-hidden="true" @click="toggleCollection(index)">
-            <use v-show="!item.collection" xlink:href="#icon-collection"></use>
-            <use v-show="item.collection" xlink:href="#icon-collection_fill"></use>
-            </svg><svg class="icon" aria-hidden="true" @click="toggleAttention(index)">
-            <use v-show="!item.like" xlink:href="#icon-like"></use>
-            <use v-show="item.like" xlink:href="#icon-like_fill"></use>
-          </svg></td>
-        </tr>
+      <tr v-for="(item, index) in allFolders" :key="index" @click="clickItem(index)" :class="{item_checked:item.itemChecked}">
+        <td ><span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span></td>
+        <td class="file_importance">
+          <svg @click="changeImportance(index)" class="icon" aria-hidden="true"><use :xlink:href="`#icon-importance${item.importance}`"></use></svg>
+        </td>
+        <td><div class="file_name" @click.stop="openFile">
+          <svg class="icon" aria-hidden="true"><use xlink:href="#icon-aFile"></use></svg>
+          <span >{{item.name}}</span>
+        </div></td>
+        <td>{{unixChange(item.createTime)}}</td>
+        <td>\</td>
+        <td class="star"><svg class="icon" aria-hidden="true" @click="toggleCollection(index)">
+          <use v-show="!item.collection" xlink:href="#icon-collection"></use>
+          <use v-show="item.collection" xlink:href="#icon-collection_fill"></use>
+        </svg><svg class="icon" aria-hidden="true" @click="toggleAttention(index)">
+          <use v-show="!item.like" xlink:href="#icon-like"></use>
+          <use v-show="item.like" xlink:href="#icon-like_fill"></use>
+        </svg></td>
+      </tr>
+      <tr v-for="(item, index) in allFiles" :key="index" @click="clickItem(index)" :class="{item_checked:item.itemChecked}">
+        <td ><span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span></td>
+        <td class="file_importance">
+          <svg @click="changeImportance(index)" class="icon" aria-hidden="true"><use :xlink:href="`#icon-importance${item.importance}`"></use></svg>
+        </td>
+        <td><div class="file_name" @click.stop="openFile">
+          <svg class="icon" aria-hidden="true"><use :xlink:href="fileIconsOrOthers(index)"></use></svg>
+          <span >{{item.name}}</span>
+        </div></td>
+        <td>{{unixChange(item.createTime)}}</td>
+        <td>{{getFileSize(item.size)}}</td>
+        <td class="star"><svg class="icon" aria-hidden="true" @click="toggleCollection(index)">
+          <use v-show="!item.collection" xlink:href="#icon-collection"></use>
+          <use v-show="item.collection" xlink:href="#icon-collection_fill"></use>
+        </svg><svg class="icon" aria-hidden="true" @click="toggleAttention(index)">
+          <use v-show="!item.like" xlink:href="#icon-like"></use>
+          <use v-show="item.like" xlink:href="#icon-like_fill"></use>
+        </svg></td>
+      </tr>
       </tbody>
     </table>
   </div>
 </template>
 
 <script>
-  import axios from "axios"
   import FileOperation from "../../../components/FileOperation"
-  import {toggleCollection, toggleAttention, clickItem, unixChange, getFileSize} from "../../../publics/public"
+  import {
+    toggleCollection,
+    toggleAttention,
+    clickItem,
+    unixChange,
+    getFileSize,
+    fetchList
+  } from "../../../publics/public"
   export default {
     data() {
       return {
         nowChecked:[],
+        allFolders:[],
         allFiles:[
-          {
-            importance:0,// -1,0,1
-            name:'汇总',
-            time:new Date(),
-            size:'22k',
-            collection:true,
-            like:true,
-            itemChecked:false
-          }
         ],
         childFiles:[],
         isChild:false
       }
     },
-    mounted(){
-      var url = '' // 获取所有文件
-      axios.get(url).then(function (response) {
-        if("succss") {
-          // this.allFiles = JSON.parse(response.data.xxx)
-        }
-      })
-    },
     components:{
       FileOperation: FileOperation
     },
     mounted(){
-      var url = 'http://192.168.0.133:8080/fileinfo'
-      axios.get(url).then(response =>{
-        if (response.status === 200){
-          this.allFiles = response.data
-        }
-      })
+      this.fetchList()
+      window.EE.on('fetchAllFiles',()=>this.fetchList())
     },
     methods:{
+      fetchList(){
+        fetchList('/fileinfo').then(data=>{
+          this.allFolders = data.folders
+          this.allFiles = data.files
+        })
+      },
+      fileIconsOrOthers(index){
+        const ext =this.allDocuments[index].name.split('.').pop()
+        return "#icon-file_" + (this.file_icons.indexOf(ext) < 0 ? 'others' : ext)
+      },
       clickItem(index){
         clickItem(this.allFiles, index, this.nowChecked)
       },

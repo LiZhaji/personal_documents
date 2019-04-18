@@ -44,7 +44,15 @@
   import axios from "axios"
   import FileOperation from "../../../components/FileOperation"
   import { mapState } from "vuex"
-  import { toggleTip,toggleCollection,toggleAttention,clickItem,unixChange,getFileSize } from "../../../publics/public"
+  import {
+    toggleTip,
+    toggleCollection,
+    toggleAttention,
+    clickItem,
+    unixChange,
+    getFileSize,
+    fetchList
+  } from "../../../publics/public"
   export default {
     components:{
       FileOperation: FileOperation
@@ -55,18 +63,17 @@
       }
     },
     mounted(){
-      // 获取所有音乐文件
-      // var url = ''
-      // axios.get(url).then((response)=> {
-      //   if (response.status === 200){
-      //     console.log('allAudios:',response.data)
-      //     this.allAudios = response.data
-      //   }
-      // }).catch(error =>{
-      //   toggleTip(this,error)
-      // })
+      this.fetchList()
+      window.EE.on('fetchAudios',()=>{this.fetchList()})
     },
     methods:{
+      fetchList(){
+        fetchList('').then(data=>{
+          this.allAudios = data
+        }).catch(error=>{
+          toggleTip(this,error)
+        })
+      },
       audioPlay(index){
         let nowAudio = this.allAudios[index]
         this.$store.commit('audioPlay',nowAudio)

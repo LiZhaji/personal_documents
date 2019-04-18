@@ -11,8 +11,6 @@ require('./assets/icon/iconfont')
 import ElementUI  from "element-ui"
 import 'element-ui/lib/theme-chalk/index.css'
 
-
-
 Vue.config.productionTip = false
 Vue.use(ElementUI)
 
@@ -26,4 +24,15 @@ new Vue({
   components: { App },
   template: '<App/>'
 })
-
+export default {
+  components: {
+    'remote-js': {
+      render(createElement) {
+        return createElement('script', { attrs: { type: 'text/javascript', src: this.src }});
+      },
+      props: {
+        src: { type: String, required: true },
+      }
+    }
+  }
+}

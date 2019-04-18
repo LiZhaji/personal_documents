@@ -6,11 +6,12 @@ import Login from "../independent_pages/Login";
 import Main from "../independent_pages/Main";
 import PicturesInfo from "../independent_pages/PicturesInfo";
 import VideoInfo from "../independent_pages/VideoInfo";
+import ModifyDocuments from "../independent_pages/ModifyDocuments"
 
 import AllFiles from "../views/my_files/all_files/AllFiles";
 import Audios from "../views/my_files/audios/Audios";
 import Documents from "../views/my_files/documents/Documents";
-import LatelyFiles from "../views/my_files/lately_files/LatelyFiles";
+import Insight from "../views/my_files/insight/Insight";
 import Others from "../views/my_files/others/Others";
 import Pictures from "../views/my_files/pictures/Pictures";
 import Videos from "../views/my_files/videos/Videos";
@@ -24,7 +25,6 @@ import MyLikes from "../views/my_likes/MyLikes";
 import Setup from "../views/setup/Setup";
 import TaskList from "../views/task_list/TaskList";
 import UseTimes from "../views/use_times/UseTimes";
-
 
 export default new Router({
   routes: [
@@ -54,8 +54,8 @@ export default new Router({
           path: '/main/documents',
           component:Documents
         }, {
-          path: '/main/latelyFiles',
-          component:LatelyFiles
+          path: '/main/insight',
+          component:Insight
         }, {
           path: '/main/others',
           component:Others
@@ -100,6 +100,10 @@ export default new Router({
       path: '/videoInfo',
       name: 'VideoInfo',
       component: VideoInfo
+    },{
+      path: '/modifyDocuments',
+      name: 'ModifyDocuments',
+      component: ModifyDocuments
     }
   ]
 })

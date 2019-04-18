@@ -54,8 +54,7 @@
 </template>
 
 <script>
-  import axios from "axios"
-  import { toggleTip,getFileSize,inputIsEmpty,unixChange } from "../publics/public"
+  import { toggleTip,getFileSize,inputIsEmpty,unixChange,fetchList } from "../publics/public"
   export default {
     data() {
       return {
@@ -63,7 +62,7 @@
         markup:'',
         allPictures: [],
         showSpecificInfo:true,
-        nowPicture:{},
+        nowPicture:{info: {}},
         initIndex:0,
         isEntering:true,
         isModifyRemark:false,
@@ -71,35 +70,31 @@
       }
     },
     mounted() {
+      window.picInfo = this
+      var nowId = this.$route.query.id
+      console.log('nowId：',nowId)
       // 1.获取所有图片  2.显示之前点击图片
-      console.log('this.$route.params.index:',this.$route.query.index)
-      this.initIndex = this.$route.query.index
-      var url = "http://192.168.0.133:8080/imageinfo"
-      axios.get(url).then(response =>{
-        if (response.status === 200){
-          this.allPictures = response.data
-          this.allPictures.forEach(ele=>{
-            ele.info = JSON.parse(ele.info)
-            // console.log('key:',ele.keyword)
-            // console.log('tag:',ele.tag)
-            if (ele.keyword) {
-              ele.keyword = ele.keyword.split(',')
-            }
-            if (ele.tag) {
-              ele.tag = ele.tag.split(',')
-            }
-          })
-          this.nowPicture = this.allPictures[this.initIndex]
-          console.log(this.nowPicture)
-        }
-      }).catch(error=>{
-        toggleTip(this,error)
+      fetchList('/imageinfo').then(data=>{
+        data.forEach(el=>{
+          if (el.keyword) {
+            el.keyword = el.keyword.split(',')
+          }
+          if (el.tag) {
+            el.tag = el.tag.split(',')
+          }else {
+            el.tag = []
+          }
+        })
+        this.allPictures = data
+        this.initIndex = this.allPictures.findIndex(el=>{return el.id == nowId})
+        this.nowPicture = this.allPictures[this.initIndex]
+      }).catch( (error) =>{
+        toggleTip(this, error)
       })
     },
     methods:{
       getPicUrl(url){
-        var baseUrl = "http://192.168.0.133:8080/testpreview/"
-        console.log(baseUrl + url)
+        var baseUrl = window.baseUrl +  "/testpreview/"
         return baseUrl + url
       },
       unixChange(timeStamp){

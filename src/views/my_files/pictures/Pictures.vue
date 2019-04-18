@@ -27,7 +27,7 @@
       </tr>
       </thead>
       <tbody>
-      <tr v-for="(item, index) in allPictures" :key="index" @click="clickItem(index)" :class="{item_checked:item.itemChecked}" >
+      <tr v-for="(item, index) in allPictures" :key="index" @click="clickItem(item.id)" :class="item.itemChecked ? 'item_checked' : ''" >
         <td ><span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span></td>
         <td class="file_importance">
           <svg class="icon" aria-hidden="true"><use :xlink:href="`#icon-importance${item.importance}`"></use></svg>
@@ -36,7 +36,7 @@
           <!--<svg class="icon" aria-hidden="true"><use xlink:href="#icon-file_jpg"></use></svg>-->
           <img :src="getPicUrl(item.url)" alt="预览图" style="width: 35px; ">
         </td>
-        <td class="file_name"><span @click.stop="showInfo(index)">{{item.name}}</span></td>
+        <td class="file_name"><span @click.stop="showInfo(item.id)">{{item.name}}</span></td>
         <td>{{unixChange(item.serverTime)}}</td>
         <td>{{getFileSize(item.size)}}</td>
         <td class="star"><svg class="icon" aria-hidden="true" @click.stop="toggleCollection(index)">
@@ -50,9 +50,12 @@
       </tbody>
     </table>
     <div v-show="isTimeLine" class="time_line">
-      <div v-for="(item, key, index) in timeLinePics"   class="month_div">
+      <div v-for="(item, key) in timeLinePics" class="month_div">
         <div><svg class="icon" aria-hidden="true"><use xlink:href="#icon-importance1"></use></svg>{{key}}</div>
-        <div class="img_outer" v-for="(smallItem,index) in item"><img :src="getPicUrl(smallItem.url)" alt="图片"></div>
+        <div class="img_outer_outer" v-for="smallItem in item" :class="{blockItemChecked: item.itemChecked}">
+          <span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span>
+          <div class="img_outer" @mouseover="mouseOvering(item)" @mouseout="mouseDowning(item)" @click="showInfo(smallItem.id)" :style="{'background-image': 'url('+getPicUrl(smallItem.url)+')'}"></div>
+        </div>
       </div>
       <div class="the_time_line"></div>
     </div>
@@ -62,7 +65,7 @@
 <script>
   import axios from "axios"
   import FileOperation from "../../../components/FileOperation"
-  import { toggleTip,toggleCollection,toggleAttention,clickItem,unixChange,getFileSize } from "../../../publics/public"
+  import { toggleTip,toggleCollection,toggleAttention,clickItem,unixChange,getFileSize,fetchList } from "../../../publics/public"
   export default {
     data() {
       return {
@@ -72,7 +75,8 @@
         isTimeLine:false,
         timeLinePics:{},
         isIntelligenceOrder:false,
-        intelligenceOrderPics:[]
+        intelligenceOrderPics:[],
+        isTimeLineChecking:false,
       }
     },
     components:{
@@ -80,20 +84,32 @@
     },
     mounted(){
       // 获取所有图片
-      var url = "http://192.168.0.133:8080/imageinfo"
-      axios.get(url).then(response =>{
-        if (response.status === 200){
-          this.allPictures = response.data
-          this.allPictures.forEach(element =>{
-            element.itemChecked = false
-          })
-          console.log("picturesin:",this.allPictures)
-        }
-      }).catch(error=>{
-        toggleTip(this,error)
-      })
+      this.fetchList()
+      window.EE.on('fetchImages',()=>{this.fetchList()})
     },
     methods:{
+      fetchList(){
+        //fetchList('/imageinfo')
+      Promise.resolve([{
+        id:1,
+        name: '123.jpg',
+        itemChecked: false,
+      },{
+        id:2,
+        name: '345.jpg'
+      },{
+        id:3,
+        name: '677.jpg'
+      }]).then(data=>{
+        data.forEach(element => {
+            element.itemChecked = false
+          })
+        this.allPictures = data
+        // console.log(this.allPictures[0].itemChecked)
+        }).catch(error=>{
+          toggleTip(this,error)
+        })
+      },
       defaultOrder(){
         this.isDefaultOrder = true
         this.isTimeLine = false
@@ -104,39 +120,50 @@
         this.isDefaultOrder = false
         this.isIntelligenceOrder = false
         // 从后台请求数据
-        var url = "http://192.168.0.133:8080/sortimage"
-        axios.get(url).then( (response)=> {
-          if (response.status === 200){
-            console.log(response.data)
-            this.timeLinePics = response.data
-            console.log('aaaa',this.timeLinePics)
-          }
+        fetchList('/sortimage').then(data=>{
+          this.timeLinePics = data
+          // for ()
         }).catch( (error) =>{
-          // console.log(error)
           toggleTip(this, error)
         })
       },
+      mouseOvering(item){
+        item.itemChecked = true
+      },
+      mouseDowning(item){
+        item.itemChecked = false
+      },
+      blockItemChecked(item){
+        item.itemChecked = true
+        this.nowChecked.push(item)
+      },
       getPicUrl(url){
-        var baseUrl = "http://192.168.0.133:8080/testpreview/"
+        var baseUrl = window.baseUrl +  "/testpreview/"
         console.log(baseUrl + url)
         return baseUrl + url
       },
-      clickItem(index){
-        clickItem(this.allPictures, index, this.nowChecked)
+      clickItem(id){
+        var itemChecked = this.allPictures.find(el=>{return el.id === id})
+        console.log(itemChecked)
+        itemChecked.itemChecked = !itemChecked.itemChecked
+        console.log('id:',id,'itemChecked:',itemChecked.itemChecked)
+        if (itemChecked.itemChecked && this.nowChecked.indexOf(id)=== -1){
+          this.nowChecked.push(id)
+        }
+        // clickItem(this.allPictures, index, this.nowChecked)
       },
-
       toggleCollection(index){
         toggleCollection(this, this.allPictures, index)
       },
       toggleAttention(index){
         toggleAttention(this, this.allPictures, index)
       },
-      showInfo(index){
+      showInfo(id){
         // localStorage.setItem("initIndex",index)
-        let id = this.allPictures[index].id
+        // let id = this.allPictures[index].id
         let routeData = this.$router.resolve({
           path:'/picturesInfo',
-          query:{ index: index}
+          query:{ id:id }
         });
         window.open(routeData.href, '_blank');
       },
@@ -170,15 +197,32 @@
     font-size: 25px;
     margin-right: 20px;
   }
-  .month_div>.img_outer{
+  .month_div>.img_outer_outer{
     display: inline-block;
-    padding: 5px;
+    padding: 10px;
+    margin: 10px;
+    position: relative;
   }
-  .month_div>div>img{
+  .month_div>.img_outer_outer .icon-checked_circle{
+    cursor: pointer;
+    position: absolute;
+    font-size: 17px;
+  }
+  .month_div>.img_outer_outer>.img_outer{
     width: 150px;
-    height: auto;
+    height: 150px;
+    display: inline-block;
+    transition: opacity linear .15s;
+    background-position: center center;
+    background-repeat: no-repeat;
+    cursor: pointer;
   }
+  .month_div>.img_outer_outer:hover{
+    background-color: rgba(221, 221, 221, 0.78);
+  }
+  .blockItemChecked{
 
+  }
   /*时光轴结束*/
   .file_preview>svg{
     font-size: 30px;

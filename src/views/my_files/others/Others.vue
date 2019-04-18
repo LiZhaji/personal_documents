@@ -43,7 +43,7 @@
 <script>
   import axios from "axios"
   import FileOperation from "../../../components/FileOperation"
-  import { toggleCollection,toggleAttention,clickItem } from "../../../publics/public"
+  import { toggleTip,toggleCollection,toggleAttention,clickItem,fetchList } from "../../../publics/public"
   export default {
     components:{
       FileOperation: FileOperation
@@ -74,7 +74,18 @@
         ]
       }
     },
+    mounted(){
+      this.fetchList()
+      window.EE.on('fetchOthers',()=>{this.fetchList()})
+    },
     methods:{
+      fetchList(){
+        fetchList('/').then(data=>{
+          this.others = data
+        }).catch(error=>{
+          toggleTip(this,error)
+        })
+      },
       fileIconsOrOthers(index){
         let temp = this.file_icons.indexOf(this.others[index].type) < 0 ? 'others' : this.others[index].type
         return "#icon-file_" + temp

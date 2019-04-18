@@ -41,7 +41,6 @@
 </template>
 
 <script>
-  import axios from "axios"
   import FileOperation from "../../../components/FileOperation"
   import { mapState } from "vuex"
   import {
@@ -58,29 +57,30 @@
       FileOperation: FileOperation
     },
     computed:{
-      ...mapState(['file_icons','nowFile']),
-      nowFile:{
-        get(){
-          return this.$store.state.nowFile
-        },
-        set(val){
-          this.$store.state.newFile = val
-        }
-      }
+      ...mapState(['file_icons','nowFile'])
     },
     data() {
       return {
         nowChecked:[],
-        allDocuments:[]
+        allDocuments:[{
+          name:'xxxxxxx.doc',
+          url:'....',
+          tag:['x','aa'],
+          keyword:['xas'],
+          info:'{"wordCloudUrl":"xxxx"}',
+          collection:false,
+          attention:false
+        }]
       }
     },
     mounted(){
       window.doc = this
       this.fetchList()
+      // 订阅一个事件
       window.EE.on('fetchDocuments', ()=>this.fetchList())
     },
     beforeDestroy(){
-      alert('aaaaa')
+      alert('document组件即将销毁')
     },
     methods:{
       fetchList() {
@@ -98,13 +98,8 @@
         let pdfUrlTemp = url.split('.').slice(0, url.split('.').length - 1)
         pdfUrlTemp.push('.pdf')
         let pdfUrl = pdfUrlTemp.join("")
-        this.$router.push({
-          name: 'ShowFile',
-          params: {
-            fileUrl: pdfUrl,
-            nowFile: nowFile
-          }
-        })
+        this.$store.commit('setNowFile',{nowFile,pdfUrl})
+        this.$router.push('/main/showFile')
       },
       unixChange (timestamp){
         return unixChange(timestamp)

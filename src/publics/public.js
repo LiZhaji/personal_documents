@@ -144,18 +144,6 @@ export const getFileSize = (size)=> {
 export const getNowDay = ()=>{
   var timeStamp = Date.now()
   return unixChange(timeStamp)
-  // var year = date.getFullYear()
-  // var month = date.getMonth() + 1 //可选值是0-11
-  // var date = date.getDate()
-  // var hour = date.get
-  // if(month >=1 && month <=9) {
-  //   month = "0" + month
-  // }
-  // if(date >=0 && date <=9) {
-  //   date = "0" + date
-  // }
-  // var curDate = year + "-" + month + "-" + date
-  // return curDate
 }
 
 export const formatTime = (second = 0) =>{
@@ -167,11 +155,11 @@ export const formatTime = (second = 0) =>{
   }
 }
 export const fetchList = (childUrl)=>{
-  // 获取所有文档
+  // 获取所有列表
   const url = window.baseUrl + childUrl
   return axios.get(url).then(response => {
     if (response.status === 200){
-      console.log(response.data)
+      console.log('response.data:',response.data)
       return response.data
     }
   })

@@ -4,7 +4,7 @@
       <video src="http://192.168.0.133:8080/testpreview/zzz/VIDEO/81191347-1-6.mp4" controls></video>
     </div>
     <div class="specific_info" v-show="showSpecificInfo">
-      <p class="info_title"><span class="cancel iconfont icon-close2" @click="cancelSpecificInfo" title="点击关闭详情"></span>图片详情</p>
+      <p class="info_title"><span class="cancel iconfont icon-close2" @click="cancelSpecificInfo" title="点击关闭详情"></span>视频详情</p>
       <div><span>文件信息</span><span>{{nowVideo.name}}</span>
       </div>
       <p><span>文件大小</span>{{getFileSize(nowVideo.size)}}</p>
@@ -35,26 +35,22 @@
 </template>
 
 <script>
+  import { mapState } from "vuex"
   import { inputIsEmpty,getFileSize,unixChange } from "../publics/public"
   export default {
     name: "VideoInfo",
     data(){
       return{
-        nowVideo:{
-          name:'抗日战争.MP4',
-          size:123283982,
-          createTime:23244343,
-          keyword:['xxs','ssssss'],
-          tag:['xsxs']
-        },
+        nowVideo:{},
         showSpecificInfo:true,
         isModifyRemark:false,
         newTag:'',
         showSpecificInfo:true
       }
     },
-    mounted() {
-      this.nowVideo = this.$router.query.nowVideo
+    mounted(){
+      console.log(this.$route.query.nowVideo)
+      this.nowVideo = JSON.parse(this.$route.query.nowVideo)
     },
     methods:{
       cancelSpecificInfo(){

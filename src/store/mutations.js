@@ -14,5 +14,11 @@ export default {
   audioPlay(state,nowAudio){
     state.isAudioPlay = true
     state.nowAudio = nowAudio
+  },
+  setNowFile(state,{nowFile,pdfUrl}){
+    state.nowFile = nowFile
+    state.pdfUrl = pdfUrl
+    console.log('mutation:',state.nowFile)
+    console.log('mutation:',state.pdfUrl)
   }
 }

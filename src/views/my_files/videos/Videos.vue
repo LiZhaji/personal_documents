@@ -22,7 +22,7 @@
           <svg class="icon" aria-hidden="true"><use :xlink:href="`#icon-importance${item.importance}`"></use></svg>
         </td>
         <td class="file_name"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-file_mp4"></use></svg>
-          <span @click.stop="videoPlay(index)">{{item.name}}</span></td>
+          <span @click.stop="videoPlay(item.id)">{{item.name}}</span></td>
         <td>{{unixChange(item.serverTime)}}</td>
         <td>{{getFileSize(item.size)}}</td>
         <td class="star"><svg class="icon" aria-hidden="true" @click.stop="toggleCollection(index)">
@@ -41,7 +41,16 @@
 <script>
   import axios from "axios"
   import FileOperation from "../../../components/FileOperation"
-  import { toggleCollection,toggleAttention,clickItem,inputIsEmpty,getFileSize,unixChange } from "../../../publics/public"
+  import {
+    toggleCollection,
+    toggleAttention,
+    clickItem,
+    inputIsEmpty,
+    getFileSize,
+    unixChange,
+    toggleTip,
+    fetchList
+  } from "../../../publics/public"
   export default {
     data() {
       return {
@@ -54,23 +63,26 @@
       FileOperation: FileOperation
     },
     mounted(){
-      var url = 'http://192.168.0.133:8080/videoinfo'
-      axios.get(url).then(response => {
-        if (response.status === 200){
-          this.allVideos = response.data
-        }
-      })
+      this.fetchList()
+      window.EE.on('fetchVideos',()=>{this.fetchList()})
     },
     methods:{
-      videoPlay(index){
-        var nowVideo = this.allVideos[index]
-        console.log('nowVideo111:',nowVideo)
+      fetchList(){
+        fetchList('/videoinfo').then(data=>{
+          this.allVideos = data
+        }).catch(error=>{
+          toggleTip(this,error)
+        })
+      },
+      videoPlay(id){
+        var nowVideo = this.allVideos.find(el=>{return el.id === id})
         let routerData = this.$router.resolve({
-          path:'/videoInfo',
+          name:'VideoInfo',
           query:{
-            nowVideo: nowVideo
+            nowVideo:JSON.stringify(nowVideo)
           }
         })
+        console.log('nowVideo:',nowVideo)
         window.open(routerData.href, '_blank')
       },
       getVideoUrl(url){
