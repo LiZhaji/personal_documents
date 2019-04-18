@@ -62,15 +62,7 @@
     data() {
       return {
         nowChecked:[],
-        allDocuments:[{
-          name:'xxxxxxx.doc',
-          url:'....',
-          tag:['x','aa'],
-          keyword:['xas'],
-          info:'{"wordCloudUrl":"xxxx"}',
-          collection:false,
-          attention:false
-        }]
+        allDocuments:[]
       }
     },
     mounted(){
@@ -85,10 +77,18 @@
     methods:{
       fetchList() {
         fetchList('/docuinfo').then(data=>{
-          this.allDocuments = data
-          this.allDocuments.forEach(element =>{
+          data.forEach(el=>{
             element.itemChecked = false
+            if (el.keyword) {
+              el.keyword = el.keyword.split(' ')
+            }
+            if (el.tag) {
+              el.tag = el.tag.split(',')
+            }else {
+              el.tag = []
+            }
           })
+          this.allDocuments = data
         }).catch(error => {
           toggleTip(this,error)
         })

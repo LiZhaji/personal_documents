@@ -26,6 +26,7 @@
         <router-link to="/main/others"><li :class="{chosen: '/main/others'=== $route.path}"><span class="iconfont icon-others"></span><span class="activity_name">其他</span></li></router-link>
       </ul>
     </transition>
+    <!-- 上传和操作操作入口   -->
     <div class="operations">
       <span class="iconfont icon-up-file up_file" title="点击上传文件" @click="upFile">&nbsp上传</span>
       <el-popover
@@ -40,6 +41,7 @@
         <!--<el-button slot="reference"class="new_file"><span  class="iconfont icon-add " title="点击新建文件"  @click="newFile">&nbsp新建</span></el-button>-->
       </el-popover>
     </div>
+    <!-- 上传文件  -->
     <transition name="alertTip">
       <div class="up_file_box" v-show="isUpFile">
         <p class="box_title">上传文件</p>
@@ -57,6 +59,7 @@
         </div>
       </div>
     </transition>
+    <!-- 新建任务-->
     <transition name="alertTip">
       <div class="new_task_box" v-show="isNewTask">
         <p class="box_title">新建任务</p>
@@ -85,6 +88,7 @@
         </div>
       </div>
     </transition>
+    <!-- 新建文件夹-->
     <transition name="alertTip">
       <div class="new_folder_box" v-show="isNewFolder">
         <p class="box_title">新建文件夹</p>
@@ -230,7 +234,7 @@
         var url = window.baseUrl + '/upload' // 上传地址
         axios.post(url, formData).then(function (response) {
           console.log('response:',response)
-          if(response.status >= 200 && response.status < 300 ) {
+          if(response.status >= 200 && response.status < 300 && response.data.success) {
             upFileSucceed(this)
             // 执行/发布一个事件用来自动更新列表
             switch (this.curType) {

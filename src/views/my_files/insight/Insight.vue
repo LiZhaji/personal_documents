@@ -44,25 +44,17 @@
 
 <script>
   import FileOperation from "../../../components/FileOperation"
+  import { mapState } from "vuex"
   import { toggleCollection,toggleAttention,clickItem } from "../../../publics/public"
   export default {
     data() {
       return {
-        file_icons:['doc','exe','zip','txt','pdf','ppt','xls','css','mp3','avi','mp4','movie','jpg','png','gif'],
         nowChecked:[],
-        latelyFiles:[
-          {
-            importance:0,// -1,0,1
-            name:'服务外包省赛概要.doc',
-            time:new Date(),
-            type:'doc',
-            size:'22k',
-            collection:true,
-            like:true,
-            itemChecked:false
-          }
-        ]
+        latelyFiles:[]
       }
+    },
+    computed:{
+      ...mapState(['file_icons'])
     },
     components:{
       FileOperation: FileOperation

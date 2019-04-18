@@ -150,16 +150,13 @@ export const formatTime = (second = 0) =>{
   const h = parseInt(second / 60 / 60).toString().padStart(2,'0')
   const m = parseInt(second / 60 % 60).toString().padStart(2,'0')
   const s = parseInt(second % 60).toString().padStart(2,'0')
-  return {
-    h, m, s
-  }
+  return (h + ':'+ m + ':' + s)
 }
 export const fetchList = (childUrl)=>{
   // 获取所有列表
   const url = window.baseUrl + childUrl
   return axios.get(url).then(response => {
     if (response.status === 200){
-      console.log('response.data:',response.data)
       return response.data
     }
   })

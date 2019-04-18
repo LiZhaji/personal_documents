@@ -3,6 +3,19 @@
     <!--搜索-->
     <div class="search">
       <input type="text" placeholder="搜索关键字" v-model="searchKey">
+      <el-dropdown trigger="click" placement="top-start" >
+        <span class="el-dropdown-link search_way_show" title="点击选择搜索方法">
+          <span class="iconfont icon-filter_border" ></span>
+          <span class="show_word">{{nowSearchWay}}</span>
+        </span>
+        <el-dropdown-menu slot="dropdown" class="search_way">
+          <el-dropdown-item @click.native="chooseSearchWay(1)">路径搜索</el-dropdown-item>
+          <el-dropdown-item @click.native="chooseSearchWay(2)">语义检索</el-dropdown-item>
+          <el-dropdown-item @click.native="chooseSearchWay(3)">关键词标签搜索</el-dropdown-item>
+          <el-dropdown-item @click.native="chooseSearchWay(4)">评论搜索</el-dropdown-item>
+          <el-dropdown-item @click.native="chooseSearchWay(5)">全部搜索</el-dropdown-item>
+        </el-dropdown-menu>
+      </el-dropdown>
       <span class="iconfont icon-search" @click="search"></span>
     </div>
     <!--通知和历史操作-->
@@ -46,11 +59,22 @@
           vip:true,
           usedSize:'100',
           totalSize:'600'
-        }
+        },
+        nowSearchWay:'全部',
       }
     },
     methods:{
-      search() {
+      chooseSearchWay(wayId){
+        console.log('wayId:',wayId)
+        switch (wayId) {
+          case 1: this.nowSearchWay = '路径';break;
+          case 2: this.nowSearchWay = '语义';break;
+          case 3: this.nowSearchWay = '短语';break;
+          case 4: this.nowSearchWay = '评论';break;
+          case 5: this.nowSearchWay = '全部';break;
+        }
+      },
+      search(){
 
       }
     }
@@ -70,23 +94,35 @@
     float: left;
   }
   .search input{
-    width: 94%;
+    width: 90%;
     height: 40px;
     border-radius: 5px;
     border: 1px solid rgba(203, 203, 203, 0.27) ;
     background-color: rgba(203, 203, 203, 0.27);
-    padding: 2px 3%;
+    padding: 2px 15px 2px 65px;
     font-size: 15px;
   }
   .search input:hover, .search input:focus{
     border: 1px solid rgba(100, 100, 100, 0.27);
     outline: none;
   }
-  .search span{
+  .search span.icon-search, .search .search_way_show{
     position: absolute;
-    top: 32%;
-    right: 10px;
     cursor: pointer;
+    top: 22%;
+  }
+  .search .search_way_show{
+    top: -50px;
+    left: 12px;
+    color: cornflowerblue;
+    width: 50px;
+  }
+  .search .search_way_show .show_word{
+    top: 33%;
+    font-size: 13px;
+  }
+  .search span.icon-search{
+    right: 10px;
   }
   .two_icon{
     float: left;

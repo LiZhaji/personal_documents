@@ -125,3 +125,12 @@ table tbody tr:hover{
   font-size: 14px;
   height: 20px;
 }
+.el-dropdown-menu{
+  padding: 5px !important;
+  top: 55px !important;
+}
+.el-dropdown-menu li:hover{
+  background-color: rgba(203, 203, 203, 0.27) !important;
+  border-radius:5px;
+  color: #616161 !important;
+}

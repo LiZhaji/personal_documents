@@ -18,7 +18,7 @@
           <div>
             <div class="play" ref="wave"></div>
             <el-button @click="playOrPause">播放/暂停</el-button>
-            <div id="Container " class="Container ">{{current.h}}:{{current.m}}:{{current.s}}/{{duration.h}}:{{duration.m}}:{{duration.s}}</div>
+            <div id="Container " class="Container ">{{current}}/{{duration}}</div>
           </div>
           <div class="line"></div>
           <div class="info">

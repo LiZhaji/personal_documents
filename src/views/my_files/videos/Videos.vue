@@ -69,6 +69,17 @@
     methods:{
       fetchList(){
         fetchList('/videoinfo').then(data=>{
+          data.forEach(el=>{
+            el.itemChecked = false
+            if (el.keyword) {
+              el.keyword = el.keyword.split(',')
+            }
+            if (el.tag) {
+              el.tag = el.tag.split(',')
+            }else {
+              el.tag = []
+            }
+          })
           this.allVideos = data
         }).catch(error=>{
           toggleTip(this,error)

@@ -3,6 +3,7 @@
     <FileOperation></FileOperation>
     <div class="file_nav">
       <span >全部图片</span>
+      <span v-show="nowCheckedDefault || nowCheckedTimeLine || nowCheckedIntelOrder">存入文件夹</span>
       <el-popover
         popper-class="order_picker"
         placement="top"
@@ -27,7 +28,7 @@
       </tr>
       </thead>
       <tbody>
-      <tr v-for="(item, index) in allPictures" :key="index" @click="clickItem(item.id)" :class="item.itemChecked ? 'item_checked' : ''" >
+      <tr v-for="(item, index) in allPictures" :key="index" @click="itemCheckedDefault(item)" :class="item.itemChecked ? 'item_checked' : ''" >
         <td ><span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span></td>
         <td class="file_importance">
           <svg class="icon" aria-hidden="true"><use :xlink:href="`#icon-importance${item.importance}`"></use></svg>
@@ -52,9 +53,10 @@
     <div v-show="isTimeLine" class="time_line">
       <div v-for="(item, key) in timeLinePics" class="month_div">
         <div><svg class="icon" aria-hidden="true"><use xlink:href="#icon-importance1"></use></svg>{{key}}</div>
-        <div class="img_outer_outer" v-for="smallItem in item" :class="{blockItemChecked: item.itemChecked}">
-          <span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span>
-          <div class="img_outer" @mouseover="mouseOvering(item)" @mouseout="mouseDowning(item)" @click="showInfo(smallItem.id)" :style="{'background-image': 'url('+getPicUrl(smallItem.url)+')'}"></div>
+        <div v-for="smallItem in item" class="img_outer_outer" :class="smallItem.itemChecked ? 'blockItemCheckedClass' : ''"
+             @mouseover="mouseOvering(smallItem)" @mouseout="mouseDowning(smallItem)">
+          <span v-show="smallItem.itemChecked" class="iconfont icon-checked_circle" @click.stop="itemCheckedTimeLine(smallItem)"></span>
+          <div class="img_outer" @click="showInfo(smallItem.id)" :style="{'background-image': 'url('+getPicUrl(smallItem.url)+')'}"></div>
         </div>
       </div>
       <div class="the_time_line"></div>
@@ -65,18 +67,19 @@
 <script>
   import axios from "axios"
   import FileOperation from "../../../components/FileOperation"
-  import { toggleTip,toggleCollection,toggleAttention,clickItem,unixChange,getFileSize,fetchList } from "../../../publics/public"
+  import { toggleTip,toggleCollection,toggleAttention,unixChange,getFileSize,fetchList } from "../../../publics/public"
   export default {
     data() {
       return {
-        isDefaultOrder:true,
         allPictures:[],
-        nowChecked:[],
-        isTimeLine:false,
+        isDefaultOrder:true,
+        nowCheckedDefault:[],
         timeLinePics:{},
-        isIntelligenceOrder:false,
+        isTimeLine:false,
+        nowCheckedTimeLine:[],
         intelligenceOrderPics:[],
-        isTimeLineChecking:false,
+        isIntelligenceOrder:false,
+        nowCheckedIntelOrder:[],
       }
     },
     components:{
@@ -89,18 +92,7 @@
     },
     methods:{
       fetchList(){
-        //fetchList('/imageinfo')
-      Promise.resolve([{
-        id:1,
-        name: '123.jpg',
-        itemChecked: false,
-      },{
-        id:2,
-        name: '345.jpg'
-      },{
-        id:3,
-        name: '677.jpg'
-      }]).then(data=>{
+        fetchList('/imageinfo').then(data=>{
         data.forEach(element => {
             element.itemChecked = false
           })
@@ -121,8 +113,14 @@
         this.isIntelligenceOrder = false
         // 从后台请求数据
         fetchList('/sortimage').then(data=>{
+          console.log(data)
+          for(let key in data){
+            console.log(data[key])
+            data[key].forEach(el=>{
+              el.itemChecked = false
+            })
+          }
           this.timeLinePics = data
-          // for ()
         }).catch( (error) =>{
           toggleTip(this, error)
         })
@@ -133,30 +131,28 @@
       mouseDowning(item){
         item.itemChecked = false
       },
-      blockItemChecked(item){
-        item.itemChecked = true
-        this.nowChecked.push(item)
-      },
-      getPicUrl(url){
-        var baseUrl = window.baseUrl +  "/testpreview/"
-        console.log(baseUrl + url)
-        return baseUrl + url
-      },
-      clickItem(id){
-        var itemChecked = this.allPictures.find(el=>{return el.id === id})
-        console.log(itemChecked)
-        itemChecked.itemChecked = !itemChecked.itemChecked
-        console.log('id:',id,'itemChecked:',itemChecked.itemChecked)
-        if (itemChecked.itemChecked && this.nowChecked.indexOf(id)=== -1){
-          this.nowChecked.push(id)
+      itemCheckedTimeLine(item){
+        console.log(item)
+        console.log('前：',item.itemChecked)
+        item.itemChecked = !item.itemChecked
+        console.log('后:',item.itemChecked)
+        if (item.itemChecked && this.nowCheckedDefault.indexOf(item.id)=== -1){
+          this.nowCheckedTimeLine.push(item.id)
+        }else {
+          let index = this.nowCheckedTimeLine.findIndex(el=>{return el.id == item.id})
+          this.nowCheckedTimeLine.splice(index, 1)
         }
-        // clickItem(this.allPictures, index, this.nowChecked)
+        console.log('nowCheckedTimeLine:',this.nowCheckedTimeLine)
       },
-      toggleCollection(index){
-        toggleCollection(this, this.allPictures, index)
-      },
-      toggleAttention(index){
-        toggleAttention(this, this.allPictures, index)
+      itemCheckedDefault(item){
+        item.itemChecked = !item.itemChecked
+        if (item.itemChecked && this.nowCheckedDefault.indexOf(item.id)=== -1){
+          this.nowCheckedDefault.push(item.id)
+        }else {
+          let index = this.nowCheckedDefault.findIndex(el=>{return el.id == item.id})
+          this.nowCheckedDefault.splice(index, 1)
+        }
+        console.log('nowCheckedDefault:',this.nowCheckedDefault)
       },
       showInfo(id){
         // localStorage.setItem("initIndex",index)
@@ -166,6 +162,16 @@
           query:{ id:id }
         });
         window.open(routeData.href, '_blank');
+      },
+      getPicUrl(url){
+        var baseUrl = window.baseUrl +  "/testpreview/"
+        return baseUrl + url
+      },
+      toggleCollection(index){
+        toggleCollection(this, this.allPictures, index)
+      },
+      toggleAttention(index){
+        toggleAttention(this, this.allPictures, index)
       },
       unixChange(timeStamp){
         return unixChange(timeStamp)
@@ -220,8 +226,8 @@
   .month_div>.img_outer_outer:hover{
     background-color: rgba(221, 221, 221, 0.78);
   }
-  .blockItemChecked{
-
+  .blockItemCheckedClass{
+    background-color: rgba(221, 221, 221, 0.78);
   }
   /*时光轴结束*/
   .file_preview>svg{

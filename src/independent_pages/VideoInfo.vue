@@ -1,17 +1,28 @@
 <template>
   <div class="video_info clearFix">
-    <div class="video_play_outer" :class="{showSpecificInfo:showSpecificInfo,cancelSpecificInfo:!showSpecificInfo}">
-      <video src="http://192.168.0.133:8080/testpreview/zzz/VIDEO/81191347-1-6.mp4" controls></video>
+    <div class="shot_labels">
+      <p v-for="(item, key) in validShotLabels" @click="showSegment(item)">{{item.shotlabel}}</p>
     </div>
+    <div class="center_outer clearFix" :class="{showSpecificInfo:showSpecificInfo,cancelSpecificInfo:!showSpecificInfo}">
+      <div class="video_play_outer">
+        <video id="media" :src="getVideoUrl()" controls></video>
+      </div>
+      <div class="shot_labels_show_outer"><span>{{labelName}}</span>
+        <div class="shot_labels_show" id="shot_labels_show">
+          <span @click="timeLocation(item.startTime)" v-for="(item, index) in validSegments" :key="index" class="small_shots"
+                :style="{width: (item.width + 'px'),left: (item.startPosition) + 'px'}"></span></div>
+        </div>
+      </div>
     <div class="specific_info" v-show="showSpecificInfo">
       <p class="info_title"><span class="cancel iconfont icon-close2" @click="cancelSpecificInfo" title="点击关闭详情"></span>视频详情</p>
-      <div><span>文件信息</span><span>{{nowVideo.name}}</span>
-      </div>
+      <div><span>文件信息</span><span class="name_info">{{nowVideo.name}}</span></div>
       <p><span>文件大小</span>{{getFileSize(nowVideo.size)}}</p>
       <p><span>拍摄时间</span>{{unixChange(nowVideo.createTime)}}</p>
-      <p><span>视频信息</span>{{nowVideo.location}}<span v-show="!nowVideo.location">未知</span></p>
+      <p><span>时长</span><span>{{formatTime(nowVideo.info.duration)}}</span><span v-show="!nowVideo.info.duration">未知</span></p>
+      <p><span>比特率</span><span>{{nowVideo.info.bitrate}}</span><span v-show="!nowVideo.info.bitrate">未知</span></p>
+      <p><span class="code_title">编码信息</span><span class="code_info">{{nowVideo.info.code}}</span><span v-show="!nowVideo.info.code">未知</span></p>
       <div><span class="keyword_title">关键词</span>
-        <div class="keyword_outer"><span class="keyword" v-for="(item,index) in nowVideo.keyword" :key="index">{{item}}</span></div>
+        <div class="keyword_outer"><span class="keyword" v-for="(item,index) in nowVideo.info.videoResults.videoLabels" :key="index">{{item.videolabel}}</span></div>
       </div>
       <div class="tag_video_info"><span>标签</span>
         <span class="tag" v-for="(item,index) in nowVideo.tag" :key="index">
@@ -36,7 +47,7 @@
 
 <script>
   import { mapState } from "vuex"
-  import { inputIsEmpty,getFileSize,unixChange } from "../publics/public"
+  import { inputIsEmpty,getFileSize,unixChange,formatTime } from "../publics/public"
   export default {
     name: "VideoInfo",
     data(){
@@ -45,14 +56,74 @@
         showSpecificInfo:true,
         isModifyRemark:false,
         newTag:'',
-        showSpecificInfo:true
+        showSpecificInfo:true,
+        validShotLabels:[],
+        validSegments:[],
+        labelName:'暂无选择',
+        segments:[
+          {
+            "starttime":18.601916,
+            "endtime":19.060708,
+            "confidence":0.5779658
+          },
+          {
+            "starttime":45.879166,
+            "endtime":47.130416,
+            "confidence":0.6630262
+          },
+          {
+            "starttime":65.273541,
+            "endtime":66.649916,
+            "confidence":0.5163992
+          },
+          {
+            "starttime":236.277708,
+            "endtime":238.029458,
+            "confidence":0.5163992
+          }
+        ]
       }
     },
     mounted(){
-      console.log(this.$route.query.nowVideo)
-      this.nowVideo = JSON.parse(this.$route.query.nowVideo)
+      let nowVideo = this.$route.query.nowVideo
+      this.nowVideo = JSON.parse(nowVideo)
+      this.nowVideo.info = JSON.parse(this.nowVideo.info)
+      this.getShotLabels()
     },
     methods:{
+      showSegment(shotLabelsItem){
+        this.labelName = shotLabelsItem.shotlabel
+        // let duration = parseInt(this.nowVideo.info.duration)
+        // let parentW = parseInt(document.getElementById("shot_labels_show").offsetWidth)
+        let parentW = 1100
+        let duration = 309
+        console.log(duration)
+        shotLabelsItem.segments.forEach(el=>{
+          let w = (el.endtime - el.starttime) / duration * parentW
+          let st = el.starttime / duration * parentW
+          this.validSegments.push({startPosition: st, width: w, startTime:el.starttime})
+        })
+        console.log('validSegments:',this.validSegments)
+      },
+      timeLocation(time){
+        var media = document.getElementById("media")
+        media.currentTime = time
+      },
+      getVideoUrl(){
+        var baseUrl = window.baseUrl + '/testpreview/'
+        console.log(baseUrl + this.nowVideo.url)
+        return baseUrl + this.nowVideo.url
+      },
+      getShotLabels(){
+        var shotLabels = this.nowVideo.info.videoResults.shotLabels
+        shotLabels.forEach(el=>{
+          if (!el.segments) {
+            return
+          }
+          this.validShotLabels.push(el)
+        })
+        console.log(this.validShotLabels)
+      },
       cancelSpecificInfo(){
         this.showSpecificInfo = false
       },
@@ -89,47 +160,114 @@
       },
       getFileSize(size){
         return getFileSize(size)
+      },
+      formatTime(second){
+        return formatTime(second)
       }
     }
   }
 </script>
 
 <style scoped>
+  .shot_labels{
+    padding: 10px;
+    width: 90px;
+    float: left;
+    height: 700px;
+    overflow: auto;
+  }
+  .shot_labels>p{
+    padding: 5px;
+    cursor: pointer;
+    background-color: #e8e8e8;
+    border-radius: 5px;
+    margin: 5px;
+    font-size: 12px;
+    color: #252525;
+
+  }
+  .shot_labels>p:hover{
+    font-size: 14px;
+    color: cornflowerblue;
+  }
+  .center_outer{
+    float: left;
+    width: 1100px;
+  }
   .video_play_outer{
     background-color: #444444;
-    float: left;
     padding: 10px;
     box-sizing: border-box;
+    height: 600px;
   }
   .video_play_outer video{
     width: 100%;
+    height: 100%;
+  }
+  .shot_labels_show_outer{
+    width: 100%;
+    margin-top: 20px;
+  }
+  .shot_labels_show_outer>span{
+    display: inline-block;
+    text-align: center;
+    padding: 10px;
+    width: 70px;
+    vertical-align: middle;
+    color: #b3b3b3;
+    word-break: break-all;
+  }
+  .shot_labels_show{
+    vertical-align: middle;
+    display: inline-block;
+    width: 90%;
+    height: 30px;
+    background-color: yellow;
+    margin:10px 0;
+    box-sizing: border-box;
+    position: relative;
+  }
+  .shot_labels_show span.small_shots{
+    background-color: red;
+    height: 30px;
+    position: absolute;
+    cursor: pointer;
   }
   .showSpecificInfo{
-    width: 74%;
+    /*width: 72%;*/
   }
   .cancelSpecificInfo{
-    width: 100%;
+    width: 90%;
   }
   .specific_info{
     background-color: white;
     float: left;
-    width: 24%;
+    width: 20%;
+  }
+  .specific_info .name_info{
+    width: 180px;
+    word-break: break-word;
+    display: inline-block;
+  }
+  .specific_info .code_info{
+    font-size: 13px;
+    width: 180px;
+    word-break: break-word;
+    display: inline-block;
   }
   .specific_info>p>span:first-child,
   .specific_info>div>span:first-child{
     color: rgba(133, 127, 127, 0.85);
     display: inline-block;
     width: 80px;
+    float: left;
   }
   .specific_info .color>div{
     height: 30px;
     float: left;
   }
-  .specific_info .keyword_title{
-    float: left;
-  }
   .specific_info .keyword_outer{
-    width: 235px;
+    width: 180px;
     display: inline-block;
   }
   .specific_info .info_title{
@@ -155,7 +293,7 @@
     display: inline-block;
   }
   .specific_info .tag_video_info .input_outer{
-    margin-left: 85px;
+    margin-left: 80px;
   }
   .specific_info .tag_input,
   .specific_info .remark_input{

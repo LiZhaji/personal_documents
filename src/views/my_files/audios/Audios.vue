@@ -68,7 +68,17 @@
     },
     methods:{
       fetchList(){
-        fetchList('').then(data=>{
+        fetchList('/audioinfo').then(data=>{
+          data.forEach(el=>{
+            if (el.keyword) {
+              el.keyword = el.keyword.split(',')
+            }
+            if (el.tag) {
+              el.tag = el.tag.split(',')
+            }else {
+              el.tag = []
+            }
+          })
           this.allAudios = data
         }).catch(error=>{
           toggleTip(this,error)

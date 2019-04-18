@@ -17,11 +17,12 @@
     </div>
     <div class="specificInfo" v-show="showSpecificInfo" >
       <p class="info_title"><span class="cancel iconfont icon-close2" @click="cancelSpecificInfo" title="点击关闭详情"></span>图片详情</p>
-      <div><span>文件信息</span>
-        <span>{{nowPicture.name}}</span>
+      <div><span class="info_name_title">文件信息</span>
+        <span class="info_name">{{nowPicture.name}}</span>
         <p class="WHAndSize"><span>{{getFileSize(nowPicture.size)}}&nbsp&nbsp&nbsp</span><span>{{nowPicture.info.width}}&times;{{nowPicture.info.height}}px</span></p>
       </div>
-      <p><span>拍摄时间</span>{{unixChange(nowPicture.info.createTime)}}</p>
+      <p v-show="nowPicture.info.createTime"><span>拍摄时间</span><span>{{unixChange(nowPicture.info.createTime)}}</span></p>
+      <p v-show="!nowPicture.info.createTime"><span>上传时间</span><span>{{unixChange(nowPicture.uploadTime)}}</span></p>
       <p><span>拍摄参数</span>{{nowPicture.info.modal}}<span v-show="!nowPicture.info.modal">未知</span></p>
       <p><span>拍摄地点</span>{{nowPicture.info.location}}<span v-show="!nowPicture.info.location">未知</span></p>
       <div class="clearFix"><span class="color_title">色系</span>
@@ -72,10 +73,10 @@
     mounted() {
       window.picInfo = this
       var nowId = this.$route.query.id
-      console.log('nowId：',nowId)
       // 1.获取所有图片  2.显示之前点击图片
       fetchList('/imageinfo').then(data=>{
         data.forEach(el=>{
+          el.info = JSON.parse(el.info)
           if (el.keyword) {
             el.keyword = el.keyword.split(',')
           }
@@ -181,6 +182,14 @@
     top: 0;
     right: 0;
   }
+  .specificInfo .info_name_title{
+    float: left;
+  }
+  .specificInfo .info_name{
+    display: inline-block;
+    width:225px;
+    word-break: break-word;
+  }
   .specificInfo>p>span:first-child,
   .specificInfo>div>span:first-child{
     color: rgba(133, 127, 127, 0.85);
@@ -189,7 +198,7 @@
   }
   .specificInfo>div .WHAndSize{
     color: #c1c1c1;
-    padding:5px 0  5px 85px;
+    padding:5px 0  5px 80px;
     font-size: 14px;
   }
   .specificInfo .color_title{
