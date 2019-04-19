@@ -46,7 +46,7 @@
 </template>
 
 <script>
-  import { mapState} from "vuex"
+  import { mapState } from "vuex"
   import {
     getFileSize,
     unixChange,
@@ -67,13 +67,18 @@
       }
     },
     computed: {
+      ...mapState(['nowFile']),
       editName(){
         return 'edit/' + this.nowFile.id
       },
       url(){
-        return window.baseUrl + '/testpreview/' + this.pdfUrl
+        const childUrl = this.getPdfUrl(this.nowFile.url)
+        return window.baseUrl + '/testpreview/' + childUrl
       },
       type() {
+        if (!this.nowFile) {
+          return
+        }
         const ext = this.nowFile.name.split('.').pop()
         return ext
       },
@@ -82,11 +87,7 @@
       },
       lastTime() {
         return unixChange(this.nowFile.createTime)
-      },
-      ...mapState(['nowFile','pdfUrl']),
-    },
-    mounted() {
-      window.showFile = this
+      }
     },
     methods: {
       editFile(){
@@ -94,12 +95,11 @@
       },
       backToAll() {
         this.$router.replace('/main/documents')
-        // this.$destroy()
       },
-      getFileUrl() {
-        var baseUrl = window.baseUrl + '/testpreview/'
-        console.log("completeUrl:", baseUrl + this.url)
-        return baseUrl + this.url
+      getPdfUrl(url) {
+        const pdfUrlTemp = url.split('.').slice(0, url.split('.').length - 1)
+        pdfUrlTemp.push('.pdf')
+        return pdfUrlTemp.join("")
       },
       toggleCollectionNotIndex() {
         toggleCollectionNotIndex(this, this.nowFile)

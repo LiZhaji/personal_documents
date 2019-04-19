@@ -21,7 +21,7 @@
         <td class="file_importance">
           <svg @click.stop="changeImportance(index)" class="icon" aria-hidden="true"><use :xlink:href="`#icon-importance${item.importance}`"></use></svg>
         </td>
-        <td><div class="file_name" @click="audioPlay(index)">
+        <td><div class="file_name" @click="audioPlay(item.id)">
           <svg class="icon" aria-hidden="true"><use xlink:href="#icon-file_mp3"></use></svg>
           <span >{{item.name}}</span>
         </div></td>
@@ -84,8 +84,8 @@
           toggleTip(this,error)
         })
       },
-      audioPlay(index){
-        let nowAudio = this.allAudios[index]
+      audioPlay(id){
+        let nowAudio = this.allAudios.find(el=>{return el.id == id})
         this.$store.commit('audioPlay',nowAudio)
       },
       clickItem(index){

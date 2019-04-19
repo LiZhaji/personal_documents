@@ -86,14 +86,10 @@
         })
       },
       videoPlay(id){
-        var nowVideo = this.allVideos.find(el=>{return el.id === id})
         let routerData = this.$router.resolve({
-          name:'VideoInfo',
-          query:{
-            nowVideo:JSON.stringify(nowVideo)
-          }
+          path: '/videoInfo',
+          query: {id: id}
         })
-        console.log('nowVideo:',nowVideo)
         window.open(routerData.href, '_blank')
       },
       getVideoUrl(url){

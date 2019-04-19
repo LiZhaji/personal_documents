@@ -22,8 +22,8 @@
           <svg @click.stop="changeImportance(index)" class="icon" aria-hidden="true"><use :xlink:href="`#icon-importance${item.importance}`"></use></svg>
         </td>
         <td><div class="file_name" >
-          <svg class="icon aFile" aria-hidden="true"><use :xlink:href=fileIconsOrOthers(index)></use></svg>
-          <span @click.stop="showFile(item.url,index)" title="点击查看详情">{{item.name}}</span>
+          <svg class="icon aFile" aria-hidden="true"><use :xlink:href=fileIconsOrOthers(item.id)></use></svg>
+          <span @click.stop="showFile(item.id)" title="点击查看详情">{{item.name}}</span>
         </div></td>
         <td>{{unixChange(item.serverTime)}}</td>
         <td>{{getFileSize(item.size)}}</td>
@@ -57,7 +57,7 @@
       FileOperation: FileOperation
     },
     computed:{
-      ...mapState(['file_icons','nowFile'])
+      ...mapState(['file_icons'])
     },
     data() {
       return {
@@ -66,19 +66,16 @@
       }
     },
     mounted(){
-      window.doc = this
       this.fetchList()
       // 订阅一个事件
       window.EE.on('fetchDocuments', ()=>this.fetchList())
-    },
-    beforeDestroy(){
-      alert('document组件即将销毁')
     },
     methods:{
       fetchList() {
         fetchList('/docuinfo').then(data=>{
           data.forEach(el=>{
-            element.itemChecked = false
+            el.info = JSON.parse(el.info)
+            el.itemChecked = false
             if (el.keyword) {
               el.keyword = el.keyword.split(' ')
             }
@@ -93,12 +90,9 @@
           toggleTip(this,error)
         })
       },
-      showFile(url, index){
-        let nowFile = this.allDocuments[index]
-        let pdfUrlTemp = url.split('.').slice(0, url.split('.').length - 1)
-        pdfUrlTemp.push('.pdf')
-        let pdfUrl = pdfUrlTemp.join("")
-        this.$store.commit('setNowFile',{nowFile,pdfUrl})
+      showFile(id){
+        const nowFile = this.allDocuments.find(el=>{return el.id == id})
+        this.$store.commit('setNowFile', nowFile)
         this.$router.push('/main/showFile')
       },
       unixChange (timestamp){
@@ -107,8 +101,9 @@
       getFileSize(size){
         return getFileSize(size)
       },
-      fileIconsOrOthers(index){
-        const ext =this.allDocuments[index].name.split('.').pop()
+      fileIconsOrOthers(id){
+        const nowFile = this.allDocuments.find(el=>{ return el.id == id})
+        const ext = nowFile.name.split('.').pop()
         return "#icon-file_" + (this.file_icons.indexOf(ext) < 0 ? 'others' : ext)
       },
       clickItem(index){

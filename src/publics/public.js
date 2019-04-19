@@ -157,6 +157,15 @@ export const fetchList = (childUrl)=>{
   const url = window.baseUrl + childUrl
   return axios.get(url).then(response => {
     if (response.status === 200){
+      console.log('response:',response)
+      return response.data
+    }
+  })
+}
+export const uploadOrUpdate = (childUrl, formData)=>{
+  const url = window.baseUrl + childUrl
+  return axios.post(url, formData).then(response => {
+    if (response.status === 200){
       return response.data
     }
   })

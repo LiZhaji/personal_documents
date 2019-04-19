@@ -63,7 +63,9 @@
         markup:'',
         allPictures: [],
         showSpecificInfo:true,
-        nowPicture:{info: {}},
+        nowPicture:{
+          info: {}
+          },
         initIndex:0,
         isEntering:true,
         isModifyRemark:false,
@@ -71,8 +73,7 @@
       }
     },
     mounted() {
-      window.picInfo = this
-      var nowId = this.$route.query.id
+      const nowId = this.$route.query.id
       // 1.获取所有图片  2.显示之前点击图片
       fetchList('/imageinfo').then(data=>{
         data.forEach(el=>{

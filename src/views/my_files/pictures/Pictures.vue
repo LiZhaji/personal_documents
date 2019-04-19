@@ -8,14 +8,14 @@
         popper-class="order_picker"
         placement="top"
         width="150">
-        <p>智能分类</p>
+        <p @click="intelOrder">智能分类</p>
         <p @click="timeLine">时光轴</p>
         <p @click="defaultOrder">默认排序</p>
         <span slot="reference" class="iconfont icon-order"></span>
         <!--<el-button >删除</el-button>-->
       </el-popover>
     </div>
-    <table v-show="isDefaultOrder">
+    <table v-if="isDefaultOrder">
       <thead>
       <tr>
         <td class="checked"></td>
@@ -50,16 +50,26 @@
       </tr>
       </tbody>
     </table>
-    <div v-show="isTimeLine" class="time_line">
+    <div v-if="isTimeLine" class="time_line">
       <div v-for="(item, key) in timeLinePics" class="month_div">
         <div><svg class="icon" aria-hidden="true"><use xlink:href="#icon-importance1"></use></svg>{{key}}</div>
         <div v-for="smallItem in item" class="img_outer_outer" :class="smallItem.itemChecked ? 'blockItemCheckedClass' : ''"
              @mouseover="mouseOvering(smallItem)" @mouseout="mouseDowning(smallItem)">
-          <span v-show="smallItem.itemChecked" class="iconfont icon-checked_circle" @click.stop="itemCheckedTimeLine(smallItem)"></span>
+          <span class="checkbox iconfont icon-checked_circle" @click.stop="itemCheckedTimeLine(smallItem)"></span>
           <div class="img_outer" @click="showInfo(smallItem.id)" :style="{'background-image': 'url('+getPicUrl(smallItem.url)+')'}"></div>
         </div>
       </div>
       <div class="the_time_line"></div>
+    </div>
+    <div v-if="isIntelligenceOrder" class="intelligence_order">
+      <div v-for="(item, index) in intelligenceOrderPics" :key="'iop'+index" class="month_div">
+        <div class="img_outer_outer" :class="item.itemChecked ? 'blockItemCheckedClass' : ''"
+             @mouseover="mouseOvering(item)" @mouseout="mouseDowning(item)">
+          <span v-show="item.itemChecked" class="iconfont icon-checked_circle" @click.stop="itemCheckedIntelOrder(item)"></span>
+          <div class="img_outer" @click="showInfo(item.id)" :style="{'background-image': 'url('+getPicUrl(item.url)+')'}"></div>
+          <span>{{item.name}}</span>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -71,15 +81,16 @@
   export default {
     data() {
       return {
-        allPictures:[],
         isDefaultOrder:true,
+        allPictures:[],
         nowCheckedDefault:[],
-        timeLinePics:{},
         isTimeLine:false,
+        timeLinePics:{},
         nowCheckedTimeLine:[],
-        intelligenceOrderPics:[],
         isIntelligenceOrder:false,
+        intelligenceOrderPics:[],
         nowCheckedIntelOrder:[],
+        asHover: true
       }
     },
     components:{
@@ -97,7 +108,6 @@
             element.itemChecked = false
           })
         this.allPictures = data
-        // console.log(this.allPictures[0].itemChecked)
         }).catch(error=>{
           toggleTip(this,error)
         })
@@ -112,7 +122,11 @@
         this.isDefaultOrder = false
         this.isIntelligenceOrder = false
         // 从后台请求数据
-        fetchList('/sortimage').then(data=>{
+        // fetchList('/sortimage').
+        Promise.resolve({
+          a:[{name:'x'},{name:'c'}],
+          b:[{name:'w'},{name:'cq'}]
+        }).then(data=>{
           console.log(data)
           for(let key in data){
             console.log(data[key])
@@ -125,16 +139,29 @@
           toggleTip(this, error)
         })
       },
+      intelOrder(){
+        this.isIntelligenceOrder = true
+        this.isTimeLine = false
+        this.isDefaultOrder = false
+        // 从后台请求数据
+        fetchList('/getimageinsight ').then(data=>{
+          this.intelligenceOrderPics = data
+        }).catch( (error) =>{
+          toggleTip(this, error)
+        })
+      },
+      itemCheckedIntelOrder(){
+
+      },
       mouseOvering(item){
-        item.itemChecked = true
       },
       mouseDowning(item){
-        item.itemChecked = false
       },
       itemCheckedTimeLine(item){
         console.log(item)
         console.log('前：',item.itemChecked)
         item.itemChecked = !item.itemChecked
+        this.asHover = !this.asHover
         console.log('后:',item.itemChecked)
         if (item.itemChecked && this.nowCheckedDefault.indexOf(item.id)=== -1){
           this.nowCheckedTimeLine.push(item.id)
@@ -155,11 +182,9 @@
         console.log('nowCheckedDefault:',this.nowCheckedDefault)
       },
       showInfo(id){
-        // localStorage.setItem("initIndex",index)
-        // let id = this.allPictures[index].id
         let routeData = this.$router.resolve({
-          path:'/picturesInfo',
-          query:{ id:id }
+          name:'PicturesInfo',
+          query:{ id: id }
         });
         window.open(routeData.href, '_blank');
       },
@@ -229,6 +254,16 @@
   .blockItemCheckedClass{
     background-color: rgba(221, 221, 221, 0.78);
   }
+  .blockItemCheckedClass .checkbox {
+    display: block
+  }
+  .checkbox {
+    display: none;
+  }
+  .img_outer_outer:hover .checkbox {
+    display: block;
+  }
+
   /*时光轴结束*/
   .file_preview>svg{
     font-size: 30px;

@@ -1,6 +1,7 @@
 <template>
   <div class="video_info clearFix">
     <div class="shot_labels">
+      <img :src="nowVideo.info.wordCloudUrl" alt="视频词云">
       <p v-for="(item, key) in validShotLabels" @click="showSegment(item)">{{item.shotlabel}}</p>
     </div>
     <div class="center_outer clearFix" :class="{showSpecificInfo:showSpecificInfo,cancelSpecificInfo:!showSpecificInfo}">
@@ -46,13 +47,12 @@
 </template>
 
 <script>
-  import { mapState } from "vuex"
-  import { inputIsEmpty,getFileSize,unixChange,formatTime } from "../publics/public"
+  import {inputIsEmpty, getFileSize, unixChange, formatTime, fetchList} from "../publics/public"
   export default {
     name: "VideoInfo",
     data(){
       return{
-        nowVideo:{},
+        nowVideo:{info:{}},
         showSpecificInfo:true,
         isModifyRemark:false,
         newTag:'',
@@ -85,18 +85,30 @@
       }
     },
     mounted(){
-      let nowVideo = this.$route.query.nowVideo
-      this.nowVideo = JSON.parse(nowVideo)
-      this.nowVideo.info = JSON.parse(this.nowVideo.info)
-      this.getShotLabels()
+      const id = this.$route.query.id
+      const childUrl = '/fileinfo/' + id
+      fetchList(childUrl).then(data=>{
+        data.info = JSON.parse(data.info)
+        if (data.keyword) {
+          data.keyword = data.keyword.split(',')
+        }
+        if (data.tag) {
+          data.tag = data.tag.split(',')
+        }else {
+          data.tag = []
+        }
+        this.nowVideo = data
+        this.getShotLabels()
+      })
     },
     methods:{
       showSegment(shotLabelsItem){
+        this.validSegments = []
         this.labelName = shotLabelsItem.shotlabel
-        // let duration = parseInt(this.nowVideo.info.duration)
-        // let parentW = parseInt(document.getElementById("shot_labels_show").offsetWidth)
-        let parentW = 1100
-        let duration = 309
+        let duration = parseInt(this.nowVideo.info.duration)
+        let parentW = parseInt(document.getElementById("shot_labels_show").offsetWidth)
+        // let parentW = 1100
+        // let duration = 309
         console.log(duration)
         shotLabelsItem.segments.forEach(el=>{
           let w = (el.endtime - el.starttime) / duration * parentW
@@ -171,12 +183,18 @@
 <style scoped>
   .shot_labels{
     padding: 10px;
-    width: 90px;
+    width: 180px;
     float: left;
     height: 700px;
     overflow: auto;
   }
+  .shot_labels>img{
+    width: 160px;
+    display: block;
+  }
   .shot_labels>p{
+    display: inline-block;
+    width: 60px;
     padding: 5px;
     cursor: pointer;
     background-color: #e8e8e8;
@@ -184,7 +202,6 @@
     margin: 5px;
     font-size: 12px;
     color: #252525;
-
   }
   .shot_labels>p:hover{
     font-size: 14px;
@@ -192,7 +209,7 @@
   }
   .center_outer{
     float: left;
-    width: 1100px;
+    width: 1010px;
   }
   .video_play_outer{
     background-color: #444444;
@@ -203,6 +220,7 @@
   .video_play_outer video{
     width: 100%;
     height: 100%;
+    outline: none;
   }
   .shot_labels_show_outer{
     width: 100%;
@@ -234,7 +252,7 @@
     cursor: pointer;
   }
   .showSpecificInfo{
-    /*width: 72%;*/
+    width: 1010px;
   }
   .cancelSpecificInfo{
     width: 90%;
@@ -242,7 +260,7 @@
   .specific_info{
     background-color: white;
     float: left;
-    width: 20%;
+    width: 300px;
   }
   .specific_info .name_info{
     width: 180px;
