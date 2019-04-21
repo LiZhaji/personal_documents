@@ -10,5 +10,9 @@ export default {
   tasks: [],
   nowFile: {},
   intelFileTime:'',
-  nowCheckedIds:[]
+  nowCheckedIds:[],
+  nowCheckedCategories:[],
+  searchWay: 6,
+  searchKey:'',
+
 }

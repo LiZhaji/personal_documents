@@ -80,7 +80,6 @@
         nowChecked:[],
         allFolders:[],
         allFiles:[],
-        childFiles:[],
         isChild:false,
         catalog:[]
       }

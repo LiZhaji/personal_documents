@@ -1,7 +1,9 @@
 <template>
   <div class="insight_info">
     <div class="bg"></div>
-    <div class="file_nav"><span v-show="!type"><span @click="backup">智能归档</span> > {{keyName}}</span></div>
+    <div class="file_nav">
+      <span v-show="forNav"><span @click="backupToInsight">智能归档</span> > {{keyName}}</span>
+    </div>
     <div class="six_info_outer">
       <div class="left">
         <div class="pics_outer">
@@ -9,9 +11,8 @@
           <div class="pics">
             <div class="pics_item" v-for="(item, index) in fives.pics"  :key="index" :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
               <span class="checkbox iconfont icon-checked_circle" @click.stop="itemCheck(item)"></span>
-              <div class="img_outer" @click="showInfo(item.id)">
-<!--                   :style="{'background-image': 'url('+getPicUrl(item.url) +')'}"-->
-                <img :src="getPicUrl(item.url)" alt="图片预览图">
+              <div class="img_outer" @click="showInfo(item.id)" :style="{'background-image': 'url('+getPicUrl(item.url) +')'}">
+<!--                <img :src="getPicUrl(item.url)" alt="图片预览图">-->
               </div>
             </div>
           </div>
@@ -56,6 +57,25 @@
         </div>
       </div>
     </div>
+    <!-- 自定义归档目录 -->
+    <el-popover placement="top" width="160" popper-class="define_catalog_outer">
+      <p class="def_catalog" v-show="chooseDefineCatalog" v-for="item in defineFiles" @click="defCatalogOk(item.id)">
+        <svg v-show="item.id >= 0" class="icon" aria-hidden="true">
+          <use xlink:href="#icon-aFile"></use>
+        </svg>
+        {{item.name}}
+      </p>
+      <span slot="reference" v-show="isDefineFile" class="defBtn" @click="defineFile">归档于</span>
+    </el-popover>
+    <!-- 新建自定义归档-->
+    <div v-show="createDefCatalog" class="newDef">
+      <svg class="icon" aria-hidden="true">
+        <use xlink:href="#icon-aFile"></use>
+      </svg>
+      <input type="text" v-model="defCatName" placeholder="请输入文件名">
+      <span class="iconfont icon-checked_circle" @click="newDefCatOk"></span>
+      <span class="iconfont icon-close" @click="cancelNewDefCat"></span>
+    </div>
   </div>
 </template>
 
@@ -69,12 +89,19 @@
       return {
         keyName:'',
         fives:{docs:[], pics: [], videos:[], audios: [], others: []},
-        haveChecked:[],
-        type: 0,
+        checkedIds:[],
+        checkedCategory:[],
+        fromInsight: false,
+        forNav:false,
+        defineFiles:[],
+        isDefineFile:false,
+        chooseDefineCatalog:false,
+        createDefCatalog: false,
+        defCatName:''
       }
     },
     computed:{
-      ...mapState(['file_icons','intelFileTime','isDefineFile']),
+      ...mapState(['file_icons','intelFileTime','isDefineFile', 'searchKey', 'searchWay']),
       isDefineFile:{
         get(){
           return this.$store.state.isDefineFile
@@ -85,19 +112,29 @@
       }
     },
     mounted(){
+      console.log('insightIndo is coming')
       this.fetchNowTelFile()
     },
     methods:{
-      backup(){
+      backupToInsight(){
         this.$router.push('/main/insight')
       },
       fetchNowTelFile(){
-        // 0表示insight进入，1表示搜索进入
-        this.type = this.$route.params.type
-        if (!this.type){
+        // 有fromInsight表示insight进入，否则默认搜索进入
+        if (this.$route.params.fromInsight){
+          this.fromInsight = true
+          this.forNav = true
+        }
+        if (this.fromInsight){
           this.keyName = this.$route.params.name
           const id = this.$route.params.id
-          const childUrl = '/filefiling/' + id
+          const isTime = this.$route.params.isTime
+          let childUrl
+          if (isTime) {
+            childUrl = '/gettimefile?id=' + id
+          }else{
+            childUrl = '/filefiling/' + id
+          }
           fetchList(childUrl).then(data=>{
             for (let key in data){
               data[key].forEach(el=> {
@@ -113,9 +150,13 @@
             this.fives.audios = data.AUDIO
             this.fives.others = data.OTHER
           })
+          this.fromInsight = false
         }else{
-          const childUrl = ''
+          console.log('way')
+          const childUrl = '/search'
           let formData = new FormData()
+          formData.append('way',this.searchWay)
+          formData.append('text',this.searchKey)
           uploadOrUpdate(childUrl, formData).then(data=>{
             for (let key in data){
               data[key].forEach(el=> {
@@ -139,17 +180,18 @@
       },
       itemCheck(item){
         item.itemChecked = !item.itemChecked
-        if (item.itemChecked && this.haveChecked.indexOf(item.id) === -1){
-          this.haveChecked.push(item.id)
+        if (item.itemChecked && this.checkedIds.indexOf(item.id) === -1){
+          this.checkedIds.push(item.id)
+          this.checkedCategory.push(item.category)
         }else {
-          let index = this.haveChecked.findIndex(el=>{ return el.id == item.id})
-          this.haveChecked.splice(index, 1)
+          let index = this.checkedIds.findIndex(el=>{ return el.id == item.id})
+          this.checkedIds.splice(index, 1)
+          this.checkedCategory.splice(index, 1)
         }
-        if (this.haveChecked) {
+        if (this.checkedIds.length != 0) {
           this.isDefineFile = true
-          this.$store.commit('setNowCheckedIds', this.haveChecked)
         }else{
-          this.isDefineFile = true
+          this.isDefineFile = false
         }
       },
       showInfo(id){
@@ -174,7 +216,61 @@
       showFile(id){
         const nowFile = this.fives.docs.find(el=>{return el.id == id})
         this.$store.commit('setNowFile', nowFile)
-        this.$router.push('/main/showFile')
+        this.$router.push({
+          path:'/main/showFile',
+          params:{
+            fromSearch: true
+          }
+        })
+      },
+      defCatalogOk(id) {
+        // id>=0 表示归档到已有，id<0 表示新建
+        if (id >= 0) {
+          const childUrl = '/movedefined'
+          let formData = new FormData()
+          formData.append('id', id)
+          formData.append('ids', this.checkedIds)
+          formData.append('category', this.checkedCategory)
+          uploadOrUpdate(childUrl, formData).then(data => {
+            if (data.success) {
+              toggleTip(this, '归档成功')
+            }
+          })
+          this.chooseDefineCatalog = false
+          this.isDefineFile = false
+        } else {
+          this.createDefCatalog = true
+        }
+      },
+      newDefCatOk() {
+        if (!this.defCatName) {
+          inputIsEmpty(this, '文件名不能为空')
+          return
+        }
+        const childUrl = '/createdefined'
+        let formData = new FormData()
+        formData.append('name', this.defCatName)
+        formData.append('ids', this.checkedIds)
+        formData.append('category', this.checkedCategory)
+        uploadOrUpdate(childUrl, formData).then(data => {
+          if (data.success) {
+            toggleTip(this, '归档成功')
+          }
+        })
+        this.createDefCatalog = false
+        this.chooseDefineCatalog = false
+        this.isDefineFile = false
+      },
+      cancelNewDefCat() {
+        this.defCatName = ''
+        this.createDefCatalog = false
+      },
+      defineFile() {
+        this.chooseDefineCatalog = true
+        fetchList('/getdefined').then(data => {
+          this.defineFiles = data
+          this.defineFiles.push({id: -1, name: '新建目录'})
+        })
       },
     },
     watch: {
@@ -203,7 +299,50 @@
     font-size: 14px;
     color: cornflowerblue;
   }
-/*  six_info */
+  /*自定义归档*/
+  .def_catalog {
+    padding: 5px;
+    cursor: pointer;
+  }
+
+  .def_catalog:hover {
+    background-color: #efefef;
+    border-radius: 5px;
+  }
+
+  .defBtn {
+    position: absolute;
+    top: 120px;
+    left: 500px;
+    padding: 5px 10px;
+    border: 1px solid #efefef;
+    border-radius: 5px;
+    color: cornflowerblue;
+    background-color: #efefef;
+    cursor: pointer;
+  }
+
+  .newDef {
+    position: fixed;
+    top: 160px;
+    left: 600px;
+    padding: 5px 10px;
+    color: cornflowerblue;
+  }
+
+  .newDef > svg {
+    font-size: 20px;
+  }
+
+  .newDef > input {
+    padding: 5px;
+    font-size: 13px;
+    border: 1px solid #efefef;
+    border-radius: 5px;
+    outline: none;
+  }
+
+  /*  six_info */
   .pics_outer,.videos_outer,.count_show,
   .docs_outer,.audios_outer,.others{
     border: 1px solid lightgray;
@@ -245,6 +384,7 @@
     width: 150px;
     height: 150px;
     display: inline-block;
+    background-size: cover;
     /*transition: opacity linear .15s;*/
     /*background-position: center center;*/
     /*background-repeat: no-repeat;*/

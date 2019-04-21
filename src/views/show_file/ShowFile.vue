@@ -1,10 +1,9 @@
 <template>
   <div class="show_file clearFix">
     <div class="file_nav">
-      <span @click="backToAll">返回</span>
-      <span class="editFile" @click="editFile">
-        在线编辑
-      </span>
+      <span @click="backToAll">返回 </span>
+      <span v-show="fromSearch" @click="backToSearch">返回搜索页面 </span>
+      <span class="editFile" @click="editFile">在线编辑</span>
     </div>
     <div class="file_info">
       <svg class="icon" aria-hidden="true" @click.stop="toggleCollectionNotIndex">
@@ -64,7 +63,11 @@
         isModifyRemark: false,
         newTag: '',
         hackReset: true,
+        fromSearch: false
       }
+    },
+    mounted(){
+      this.fromSearch = this.$route.params.fromSearch
     },
     computed: {
       ...mapState(['nowFile']),
@@ -90,6 +93,9 @@
       }
     },
     methods: {
+      backToSearch(){
+        this.$router.push('/main/insightInfo')
+      },
       editFile(){
        window.POBrowser.openWindowModeless(this.editName,'width=1200px;height=800px;')
       },

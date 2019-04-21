@@ -15,7 +15,7 @@ export const toggleCollection =(obj, list, index)=>{
   let formData=new FormData()
   formData.append("id",id)
   formData.append("collect",collect);
-  var url = "http://192.168.0.133:8080/collect"
+  var url = window.baseUrl + "/collect"
   axios.post(url, formData).then( (response) => {
     if (response.data.success) {
       list[index].collection = !list[index].collection
@@ -35,14 +35,14 @@ export const toggleAttention =(obj, list, index)=>{
   let formData=new FormData()
   formData.append("id",id)
   formData.append("attention",attention);
-  var url = "http://192.168.0.133:8080/collect"
+  var url = window.baseUrl + "/collect"
   axios.post(url, formData).then( (response) => {
     if (response.data.success) {
       list[index].attention = !list[index].attention
       if(list[index].attention ) {
-        toggleTip(obj, '已收藏')
+        toggleTip(obj, '已关注')
       }else{
-        toggleTip(obj, '已取消收藏')
+        toggleTip(obj, '已取消关注')
       }
     }
   }).catch(function (error) {
@@ -55,7 +55,7 @@ export const toggleCollectionNotIndex =(obj, fileItem)=>{
   let formData=new FormData()
   formData.append("id",id)
   formData.append("collect",collect);
-  var url = "http://192.168.0.133:8080/collect"
+  var url = window.baseUrl + "/collect"
   axios.post(url, formData).then( (response) => {
     if (response.data.success) {
       fileItem.collection = !fileItem.collection
@@ -75,14 +75,14 @@ export const toggleAttentionNotIndex =(obj, fileItem)=>{
   let formData=new FormData()
   formData.append("id",id)
   formData.append("collect",collect);
-  var url = "http://192.168.0.133:8080/collect"
+  var url = window.baseUrl + "/collect"
   axios.post(url, formData).then( (response) => {
     if (response.data.success) {
       fileItem.attention = !fileItem.attention
       if(fileItem.attention ) {
-        toggleTip(obj, '已收藏')
+        toggleTip(obj, '已关注')
       }else{
-        toggleTip(obj, '已取消收藏')
+        toggleTip(obj, '已取消关注')
       }
     }
   }).catch(function (error) {
@@ -164,6 +164,92 @@ export const uploadOrUpdate = (childUrl, formData)=>{
   return axios.post(url, formData).then(response => {
     if (response.status === 200){
       return response.data
+    }
+  })
+}
+export const addTag = (id, newTag)=>{
+  let formData = new FormData()
+  formData.append('id', id)
+  formData.append('name', newTag)
+  const postUrl = window.baseUrl + '/addtag'
+  const getUrl = window.baseUrl + '/fileinfo/' + id
+  return axios.post(postUrl,formData).then(response=>{
+    if (response.status === 200 && response.data.success){
+      return  axios.get(getUrl).then(response=>{
+        if (response.status === 200) {
+          response.data.info = JSON.parse(response.data.info)
+          if (response.data.keyword) {
+            response.data.keyword = response.data.keyword.split(' ')
+          }
+          if (response.data.tag) {
+            response.data.tag = response.data.tag.split(' ')
+          } else {
+            response.data.tag = []
+          }
+          return response.data
+        }
+
+      })
+    }
+  })
+}
+export const delTag = (id ,name)=>{
+  let formData = new FormData()
+  formData.append('id', id)
+  formData.append('name', name)
+  const postUrl = window.baseUrl + '/deltag'
+  // const getUrl = window.baseUrl + '/fileinfo/' + id
+  return axios.post(postUrl,formData).then(response=>{
+    if (response.status === 200 && response.data.success){
+     // return axios.get(getUrl).then(response=>{
+     //    if (response.status === 200) {
+     //      console.log('response.data',response.data)
+          return response.data
+        // }
+      // })
+    }
+  })
+}
+
+export const addRemark = (id, newRemark)=>{
+  let formData = new FormData()
+  formData.append('id', id)
+  formData.append('content', newRemark)
+  const postUrl = window.baseUrl + '/addcomment'
+  const getUrl = window.baseUrl + '/fileinfo/' + id
+  return axios.post(postUrl,formData).then(response=>{
+    if (response.status === 200 && response.data.success){
+      return  axios.get(getUrl).then(response=>{
+        if (response.status === 200) {
+          response.data.info = JSON.parse(response.data.info)
+          if (response.data.keyword) {
+            response.data.keyword = response.data.keyword.split(' ')
+          }
+          if (response.data.tag) {
+            response.data.tag = response.data.tag.split(' ')
+          } else {
+            response.data.tag = []
+          }
+          return response.data
+        }
+
+      })
+    }
+  })
+}
+export const delRemark = (cid)=>{
+  let formData = new FormData()
+  formData.append('cid', cid)
+  const postUrl = window.baseUrl + '/delcomment'
+  // const getUrl = window.baseUrl + '/fileinfo/' + id
+  return axios.post(postUrl,formData).then(response=>{
+    if (response.status === 200 && response.data.success){
+      // return axios.get(getUrl).then(response=>{
+      //    if (response.status === 200) {
+      //      console.log('response.data',response.data)
+      return response.data
+      // }
+      // })
     }
   })
 }

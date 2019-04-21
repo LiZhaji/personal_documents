@@ -13,7 +13,8 @@
           <el-dropdown-item @click.native="chooseSearchWay(2)">语义检索</el-dropdown-item>
           <el-dropdown-item @click.native="chooseSearchWay(3)">关键词标签搜索</el-dropdown-item>
           <el-dropdown-item @click.native="chooseSearchWay(4)">评论搜索</el-dropdown-item>
-          <el-dropdown-item @click.native="chooseSearchWay(5)">全部搜索</el-dropdown-item>
+          <el-dropdown-item @click.native="chooseSearchWay(5)">文件名搜索</el-dropdown-item>
+          <el-dropdown-item @click.native="chooseSearchWay(6)">全部搜索</el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
       <span class="iconfont icon-search" @click="search"></span>
@@ -49,10 +50,13 @@
 </template>
 
 <script>
+  import { mapState } from "vuex"
+  import {inputIsEmpty} from "../publics/public";
+
   export default {
+    inject: ['reload'],
     data() {
       return {
-        searchKey:'',
         personInfo:{
           headPhoto: require('../assets/img/head_photo.jpg'),
           username:'userA',
@@ -63,23 +67,72 @@
         nowSearchWay:'全部',
       }
     },
+    computed:{
+      ...mapState(['searchKey', 'searchWay']),
+      searchKey:{
+        get(){
+          return this.$store.state.searchKey
+        },
+        set(val){
+          this.$store.state.searchKey = val
+        }
+      },
+      searchWay:{
+        get(){
+          return this.$store.state.searchWay
+        },
+        set(val){
+          this.$store.state.searchWay = val
+        }
+      }
+    },
     methods:{
       chooseSearchWay(wayId){
         switch (wayId) {
-          case 1: this.nowSearchWay = '路径';break;
-          case 2: this.nowSearchWay = '语义';break;
-          case 3: this.nowSearchWay = '短语';break;
-          case 4: this.nowSearchWay = '评论';break;
-          case 5: this.nowSearchWay = '全部';break;
+          case 1:
+            this.nowSearchWay = '路径';
+            this.searchWay = 1;
+            break;
+          case 2:
+            this.nowSearchWay = '语义';
+            this.searchWay = 2;
+            break;
+          case 3:
+            this.nowSearchWay = '短语';
+            this.searchWay = 3
+            break;
+          case 4:
+            this.nowSearchWay = '评论';
+            this.searchWay = 4;
+            break;
+          case 5:
+            this.nowSearchWay = '名称';
+            this.searchWay = 5;
+            break;
+          case 6:
+            this.nowSearchWay = '全部';
+            this.searchWay = 6;
+            break;
         }
       },
       search(){
-        this.$router.push({
-          name:'InsightInfo',
-          params:{
-            type: 1
+        if (!this.searchKey) {
+          inputIsEmpty(this,'输入不能为空')
+          return
+        }
+        if (this.searchWay === 1) {
+          if (this.$route.path === '/main/folderResult') {
+            this.reload()
+            return
           }
-        })
+          this.$router.push('/main/folderResult')
+          return
+        }
+        if (this.$route.path === '/main/insightInfo'){
+          this.reload()
+          return
+        }
+        this.$router.push('/main/insightInfo')
       }
     }
   }

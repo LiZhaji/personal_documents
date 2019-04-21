@@ -7,22 +7,8 @@
       <span class="iconfont icon-delete">删除</span>
       <span class="iconfont icon-moveto">移动到</span>
       <span class="iconfont icon-rename">重命名</span>
-      <span class="iconfont icon-file_open">打开目录</span>
       <span class="iconfont icon-refresh">刷新</span>
     </div>
-    <!--<div class="file_nav">-->
-      <!--<span >全部文件</span>-->
-      <!--<el-popover-->
-        <!--class="order"-->
-        <!--placement="top"-->
-        <!--width="160"-->
-        <!--v-model="visible2">-->
-        <!--<p>智能分类</p>-->
-        <!--<p>时光轴</p>-->
-      <!--<span slot="reference" class="iconfont icon-order"></span>-->
-        <!--&lt;!&ndash;<el-button >删除</el-button>&ndash;&gt;-->
-      <!--</el-popover>-->
-    <!--</div>-->
   </div>
 
 </template>

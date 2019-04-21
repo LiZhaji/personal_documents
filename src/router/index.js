@@ -16,6 +16,8 @@ import Others from "../views/my_files/others/Others";
 import Pictures from "../views/my_files/pictures/Pictures";
 import Videos from "../views/my_files/videos/Videos";
 import ShowFile from  "../views/show_file/ShowFile";
+import TimeLinePics from "../views/my_files/pictures/TimeLinePics";
+import IntelligentPics from "../views/my_files/pictures/IntelligentPics";
 
 import Empty from "../views/empty/Empty";
 import Feedback from "../views/feedback/Feedback";
@@ -26,6 +28,7 @@ import Setup from "../views/setup/Setup";
 import TaskList from "../views/task_list/TaskList";
 import UseTimes from "../views/use_times/UseTimes";
 import InsightInfo from "../views/my_files/insight/InsightInfo";
+import FolderResult from "../views/my_files/insight/FolderResult"
 
 export default new Router({
   routes: [
@@ -95,7 +98,17 @@ export default new Router({
           path: '/main/showFile',
           name:'ShowFile',
           component:ShowFile
-        }
+        },{
+          path: '/main/folderResult',
+          name:'FolderResult',
+          component:FolderResult
+        },{
+          path: '/main/timeLinePics',
+          component:TimeLinePics
+        },{
+          path: '/main/intelligentPics',
+          component:IntelligentPics
+        },
       ]
     },{
       path: '/picturesInfo',

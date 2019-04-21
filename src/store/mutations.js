@@ -27,5 +27,11 @@ export default {
   },
   setNowCheckedIds(state,nowCheckedIds){
     state.nowCheckedIds = nowCheckedIds
+    if (state.nowCheckedIds.length == 0){
+      state.isDefineFile = false
+    }
+  },
+  setNowCheckedCategories(state,nowCheckedCategories){
+    state.nowCheckedCategories = nowCheckedCategories
   }
 }

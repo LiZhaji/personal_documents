@@ -1,0 +1,293 @@
+<template>
+  <div class="timeline_ics">
+    <FileOperation></FileOperation>
+    <div class="file_nav">
+      <span>时光轴</span>
+      <el-popover
+        popper-class="order_picker"
+        placement="top"
+        width="150">
+        <p @click="intelOrder">智能分类</p>
+        <p @click="timeLine">时光轴</p>
+        <p @click="defaultOrder">默认排序</p>
+        <span slot="reference" class="iconfont icon-order"></span>
+      </el-popover>
+    </div>
+    <div v-if="isTimeLine" class="time_line">
+      <div v-for="(item, key) in timeLinePics" class="month_div">
+        <div>
+          <svg class="icon" aria-hidden="true">
+            <use xlink:href="#icon-importance1"></use>
+          </svg>
+          {{key}}
+        </div>
+        <div v-for="smallItem in item" class="img_outer_outer"
+             :class="smallItem.itemChecked ? 'blockItemCheckedClass' : ''">
+          <span class="checkbox iconfont icon-checked_circle" @click.stop="itemCheckedTimeLine(smallItem)"></span>
+          <div class="img_outer" @click="showInfo(smallItem.id)"
+               :style="{'background-image': 'url('+getPicUrl(smallItem.url)+')'}">
+
+            <!--            <img :src="getPicUrl(smallItem.url)" alt="图片预览图">-->
+          </div>
+        </div>
+      </div>
+      <div class="the_time_line"></div>
+    </div>
+    <!-- 自定义归档目录 -->
+    <el-popover placement="top" width="160" popper-class="define_catalog_outer">
+      <p class="def_catalog" v-show="chooseDefineCatalog" v-for="item in defineFiles" @click="defCatalogOk(item.id)">
+        <svg v-show="item.id >= 0" class="icon" aria-hidden="true">
+          <use xlink:href="#icon-aFile"></use>
+        </svg>
+        {{item.name}}
+      </p>
+      <span slot="reference" v-show="isDefineFile" class="defBtn" @click="defineFile">归档于</span>
+    </el-popover>
+    <!-- 新建自定义归档-->
+    <div v-show="createDefCatalog" class="newDef">
+      <svg class="icon" aria-hidden="true">
+        <use xlink:href="#icon-aFile"></use>
+      </svg>
+      <input type="text" v-model="defCatName" placeholder="请输入文件名">
+      <span class="iconfont icon-checked_circle" @click="newDefCatOk"></span>
+      <span class="iconfont icon-close" @click="cancelNewDefCat"></span>
+    </div>
+  </div>
+</template>
+
+<script>
+  import FileOperation from "../../../components/FileOperation"
+  import {
+    toggleTip,
+    fetchList,
+    uploadOrUpdate,
+    inputIsEmpty
+  } from "../../../publics/public"
+  export default {
+    components: {
+      FileOperation: FileOperation
+    },
+    data(){
+      return{
+        timeLinePics: {},
+        checkedIds: [],
+        checkedCategory: [],
+        isDefineFile:false,
+        defineFiles:[],
+        chooseDefineCatalog:false,
+        createDefCatalog: false,
+        defCatName:''
+      }
+    },
+    mounted(){
+      this.timeLine()
+    },
+    methods:{
+      timeLine() {
+        // 从后台请求数据
+        fetchList('/sortimage').then(data => {
+          console.log(data)
+          for (let key in data) {
+            data[key].forEach(el => {
+              el.itemChecked = false
+            })
+          }
+          this.timeLinePics = data
+        }).catch((error) => {
+          toggleTip(this, error)
+        })
+      },
+      defaultOrder() {
+        this.$router.push('/main/pictures')
+      },
+      intelOrder() {
+        this.$router.push('/main/intelligentPics')
+      },
+      itemCheckedTimeLine(item) {
+        item.itemChecked = !item.itemChecked
+        if (item.itemChecked && this.checkedIds.indexOf(item.id) === -1) {
+          this.checkedIds.push(item.id)
+          this.checkedIds.push(item.category)
+        } else {
+          let index = this.checkedIds.findIndex(el => {return el.id == item.id})
+          this.checkedIds.splice(index, 1)
+          this.checkedCategory.splice(index, 1)
+        }
+        if (this.checkedIds.length != 0) {
+          this.isDefineFile = true
+        } else {
+          this.isDefineFile = true
+        }
+      },
+      showInfo(id) {
+        let routeData = this.$router.resolve({
+          name: 'PicturesInfo',
+          query: {id: id}
+        });
+        window.open(routeData.href, '_blank');
+      },
+      defCatalogOk(id) {
+        // id>=0 表示归档到已有，id<0 表示新建
+        if (id >= 0) {
+          const childUrl = '/movedefined'
+          let formData = new FormData()
+          formData.append('id', id)
+          formData.append('ids', this.checkedIds)
+          formData.append('category', this.checkedCategory)
+          uploadOrUpdate(childUrl, formData).then(data => {
+            if (data.success) {
+              toggleTip(this, '归档成功')
+            }
+          })
+          this.chooseDefineCatalog = false
+          this.isDefineFile = false
+        } else {
+          this.createDefCatalog = true
+        }
+      },
+      newDefCatOk() {
+        if (!this.defCatName) {
+          inputIsEmpty(this, '文件名不能为空')
+          return
+        }
+        const childUrl = '/createdefined'
+        let formData = new FormData()
+        formData.append('name', this.defCatName)
+        formData.append('ids', this.checkedIds)
+        formData.append('category', this.checkedCategory)
+        uploadOrUpdate(childUrl, formData).then(data => {
+          if (data.success) {
+            toggleTip(this, '归档成功')
+          }
+        })
+        this.createDefCatalog = false
+        this.chooseDefineCatalog = false
+        this.isDefineFile = false
+      },
+      cancelNewDefCat() {
+        this.defCatName = ''
+        this.createDefCatalog = false
+      },
+      defineFile() {
+        this.chooseDefineCatalog = true
+        fetchList('/getdefined').then(data => {
+          this.defineFiles = data
+          this.defineFiles.push({id: -1, name: '新建目录'})
+        })
+      },
+    }
+  }
+</script>
+
+<style scoped>
+  .timeline_ics {
+    overflow: hidden;
+    position: relative;
+    padding-left: 50px;
+  }
+
+  .file_nav>span {
+    color: cornflowerblue;
+  }
+
+  /*自定义归档*/
+  .def_catalog {
+    padding: 5px;
+    cursor: pointer;
+  }
+
+  .def_catalog:hover {
+    background-color: #efefef;
+    border-radius: 5px;
+  }
+
+  .defBtn {
+    position: absolute;
+    top: 160px;
+    left: 500px;
+    padding: 5px 10px;
+    border: 1px solid #efefef;
+    border-radius: 5px;
+    color: cornflowerblue;
+    background-color: #efefef;
+    cursor: pointer;
+  }
+
+  .newDef {
+    position: fixed;
+    top: 160px;
+    left: 600px;
+    padding: 5px 10px;
+    color: cornflowerblue;
+  }
+
+  .newDef > svg {
+    font-size: 20px;
+  }
+
+  .newDef > input {
+    padding: 5px;
+    font-size: 13px;
+    border: 1px solid #efefef;
+    border-radius: 5px;
+    outline: none;
+  }
+
+  /*时光轴开始*/
+  .month_div {
+    padding: 10px 0;
+  }
+
+  .month_div > div > svg {
+    font-size: 25px;
+    margin-right: 20px;
+  }
+
+  .month_div > .img_outer_outer {
+    display: inline-block;
+    padding: 10px;
+    margin: 10px;
+    position: relative;
+  }
+
+  .month_div > .img_outer_outer .icon-checked_circle {
+    cursor: pointer;
+    position: absolute;
+    font-size: 17px;
+  }
+
+  .month_div > .img_outer_outer > .img_outer {
+    width: 150px;
+    height: 150px;
+    display: inline-block;
+    overflow: hidden;
+    background-size: cover;
+    cursor: pointer
+  }
+
+  .month_div > .img_outer_outer > .img_outer > img {
+    width: 150px;
+    /*height: 150px;*/
+  }
+
+  .month_div > .img_outer_outer:hover {
+    background-color: rgba(221, 221, 221, 0.78);
+  }
+  .blockItemCheckedClass {
+    background-color: rgba(221, 221, 221, 0.78);
+  }
+
+  .blockItemCheckedClass .checkbox {
+    display: block
+  }
+
+  .checkbox {
+    display: none;
+  }
+
+  .img_outer_outer:hover .checkbox {
+    display: block;
+  }
+
+  /*时光轴结束*/
+</style>

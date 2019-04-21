@@ -4,7 +4,7 @@
     <div class="main_right">
       <Headerbar></Headerbar>
       <div class="content" >
-        <router-view/>
+        <router-view v-if="isRouterAlive"/>
       </div>
     </div>
     <Popup></Popup>
@@ -20,13 +20,26 @@
     components:{
       Siderbar: Siderbar,
       Headerbar: Headerbar,
-      Popup: Popup
+      Popup: Popup,
     },
-    // computed:{
-    //   key(){
-    //     return this.$route.name !== undefined? this.$route.name +new Date(): this.$route +new Date()
-    //   }
-    // }
+    data(){
+      return{
+        isRouterAlive:true
+      }
+    },
+    provide() {
+      return {
+        reload: this.reload
+      }
+    },
+    methods:{
+      reload(){
+        this.isRouterAlive = false
+        this.$nextTick(function () {
+          this.isRouterAlive = true
+        })
+      }
+    }
   }
 </script>
 

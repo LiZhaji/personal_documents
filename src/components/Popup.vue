@@ -119,17 +119,6 @@
         </div>
       </div>
     </div>
-    <!-- 自定义归档目录 -->
-    <el-popover placement="top" width="160" popper-class="define_catalog_outer">
-      <p v-show="chooseDefineCatalog" v-for="item in defineFiles" @click="defCatalogOk(item.id)">{{item.name}}</p>
-      <p v-show="createDefCatalog">
-        <svg class="icon" aria-hidden="true"><use xlink:href="#icon-aFile"></use></svg>
-        <input type="text" v-model="defCatName" placeholder="请输入文件名">
-        <span class="iconfont icon-checked_circle" @click="newDefCatOk"></span>
-        <span class="iconfont icon-close" @click="cancelNewDefCat"></span>
-      </p>
-      <span slot="reference"  @click="defineFile">归档于</span>
-    </el-popover>
   </div>
 </template>
 
@@ -184,15 +173,11 @@
         duration: formatTime(),
         current:  formatTime(),
         catalog: [],
-        defaultProps: {children: 'children', label: 'label'},
-        defineFiles:[],
-        chooseDefineCatalog:false,
-        createDefCatalog: false,
-        defCatName:''
+        defaultProps: {children: 'children', label: 'label'}
       }
     },
     computed:{
-      ...mapState(['isUpFile','isNewTask', 'isNewFolder','isAudioPlay', 'isCatalogTree', 'isDefineFile', 'nowCheckedIds']),
+      ...mapState(['isUpFile','isNewTask', 'isNewFolder','isAudioPlay', 'isCatalogTree']),
       isAudioPlay:{
         get(){
           return this.$store.state.isAudioPlay
@@ -208,68 +193,19 @@
         set(val){
           this.$store.state.isCatalogTree = val
         }
-      },
-      isDefineFile:{
-        get(){
-          return this.$store.state.isDefineFile
-        },
-        set(val){
-          this.$store.state.isDefineFile = val
-        }
       }
     },
     mounted() {
       if(localStorage.getItem('tasks') === null) {
         localStorage.setItem('tasks',JSON.stringify(this.$store.state.tasks))
       }
-      this.fetchNode()
+      // this.fetchNode()
       this.createWaveSurfer()
       new Draggable(this.$refs.audiosPlay, {
         handle: this.$refs.handle
       })
     },
     methods:{
-      defCatalogOk(id){
-        // id>=0 表示归档到已有，id<0 表示新建
-        if (id >= 0) {
-          const childUrl = ''
-          let formData = new FormData()
-          formData.append('catalogid', id)
-          formData.append('ids', this.nowCheckedIds)
-          uploadOrUpdate(childUrl, formData).then(data=>{
-            if (data.success) {
-              toggleTip(this, '归档成功')
-            }
-          })
-          this.chooseDefineCatalog = false
-        }else {
-          this.createDefCatalog = true
-        }
-      },
-      newDefCatOk(){
-        const childUrl = ''
-        let formData = new FormData()
-        formData.append('catalogname', this.defCatName)
-        formData.append('ids', this.nowCheckedIds)
-        uploadOrUpdate(childUrl, formData).then(data=>{
-          if (data.success) {
-            toggleTip(this, '归档成功')
-          }
-        })
-        this.createDefCatalog = false
-        this.chooseDefineCatalog = false
-      },
-      cancelNewDefCat(){
-        this.defCatName = ''
-        this.createDefCatalog = false
-      },
-      defineFile(){
-        this.chooseDefineCatalog = true
-        fetchList('/getdefined').then(data=>{
-          this.defineFiles = data
-          this.defineFiles.push({id: -1, name:'新建目录'})
-        })
-      },
       // 文件树形目录
       fetchNode(){
         this.catalog = []
@@ -496,16 +432,6 @@
 </script>
 
 <style scoped>
-  /*自定义归档*/
-  .define_catalog_outer{
-    position: absolute;
-    width: 200px;
-    background-color: orangered;
-    height: 300px;
-    top: 210px;
-    left: 800px;
-    z-index: 999;
-  }
   /*目录树*/
   .catalog_tree{
     position: fixed;
