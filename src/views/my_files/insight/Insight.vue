@@ -1,92 +1,120 @@
 <template>
-  <div class="lately_files">
-    <FileOperation></FileOperation>
-    <div class="file_nav">
-      <span >洞于此见</span>
+  <div class="insight">
+    <div class="bg"></div>
+    <div class="intelligent_orders">
+      <div class="title"><span>智能归档</span></div>
+      <div class="content">
+        <div v-for="(item, index) in allIntelFiles" :key="index" @click="showInsightInfo(item.id, item.name)">
+          <svg class="icon" aria-hidden="true"><use xlink:href="#icon-aFile"></use></svg>
+          <p>{{item.name}}</p>
+        </div>
+      </div>
     </div>
-    <div class="intelligent_orders"></div>
-    <div class="owned_folders"></div>
-    <table>
-      <thead>
-      <tr>
-        <td class="checked"></td>
-        <td class="importance"></td>
-        <td class="name">|文件名称</td>
-        <td class="time">|修改日期</td>
-        <td class="size">|大小</td>
-        <td class="star">|标记</td>
-      </tr>
-      </thead>
-      <tbody>
-      <tr v-for="(item, index) in latelyFiles" :key="index" @click="clickItem(index)" :class="{item_checked:item.itemChecked}">
-        <td ><span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span></td>
-        <td class="file_importance">
-          <svg @click="changeImportance(index)" class="icon" aria-hidden="true"><use :xlink:href="`#icon-importance${item.importance}`"></use></svg>
-        </td>
-        <td><div class="file_name">
-          <svg class="icon aFile" aria-hidden="true"><use :xlink:href=fileIconsOrOthers(index)></use></svg>
-          <span >{{item.name}}</span>
-        </div></td>
-        <td>{{item.time}}</td>
-        <td>{{item.size}}</td>
-        <td class="star"><svg class="icon" aria-hidden="true" @click.stop="toggleCollection(index)">
-          <use v-show="!item.collection" xlink:href="#icon-collection"></use>
-          <use v-show="item.collection" xlink:href="#icon-collection_fill"></use>
-        </svg><svg class="icon" aria-hidden="true" @click.stop="toggleAttention(index)">
-          <use v-show="!item.like" xlink:href="#icon-like"></use>
-          <use v-show="item.like" xlink:href="#icon-like_fill"></use>
-        </svg></td>
-      </tr>
-      </tbody>
-    </table>
+    <div class="owned_folders">
+      <div class="title"><span>自定义归档</span></div>
+      <div class="content">
+        <div v-for="(item, index) in allDefinedFiles" :key="index" @click="showInsightInfo(item.id, item.name)">
+          <svg class="icon" aria-hidden="true"><use xlink:href="#icon-aFile"></use></svg>
+          <p>{{item.name}}</p>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-  import FileOperation from "../../../components/FileOperation"
   import { mapState } from "vuex"
-  import { toggleCollection,toggleAttention,clickItem } from "../../../publics/public"
+  import {toggleCollection, toggleAttention, clickItem, fetchList, getNowDay} from "../../../publics/public"
   export default {
     data() {
       return {
         nowChecked:[],
-        latelyFiles:[]
+        allIntelFiles:[{name:'xxx'},{name:'ded'}],
+        allDefinedFiles:[]
       }
     },
-    computed:{
-      ...mapState(['file_icons'])
-    },
-    components:{
-      FileOperation: FileOperation
+    mounted(){
+      this.fetchIntelList()
+      this.fetchDfnList()
     },
     methods:{
-      fileIconsOrOthers(index){
-        let temp = this.file_icons.indexOf(this.latelyFiles[index].type) < 0 ? 'others' : this.latelyFiles[index].type
-        return "#icon-file_" + temp
+      fetchIntelList(){
+        fetchList('/getinsight').then(data=>{
+          this.allIntelFiles = data
+        })
       },
-      clickItem(index){
-        clickItem(this.latelyFiles, index, this.nowChecked)
+      fetchDfnList(){
+        fetchList('/getdefined').then(data=>{
+          this.allDefinedFiles = data
+        })
       },
-      toggleCollection(index){
-        toggleCollection(this, this.latelyFiles, index)
-      },
-      toggleAttention(index){
-        toggleAttention(this, this.latelyFiles, index)
+      showInsightInfo(id, name){
+        this.$router.push({
+          name: 'InsightInfo',
+          params:{
+            type: 0,
+            id: id,
+            name: name
+          }
+        })
+        this.$store.commit('setIntelFileTime', Date.now())
       }
     }
   }
 </script>
 
 <style scoped>
-  .lately_files{
+  .insight{
     overflow: hidden;
     position: relative;
     padding-left: 50px;
   }
-  .file_nav{
+  .bg{
     width: 100%;
-    margin: 20px 0px;
+    height: 200px;
+    border-radius: 50px;
+    box-shadow: 0px 0px 100px 10px #e3e3e3;
+    position: absolute;
+    top: -200px;
+  }
+/* intelligent_orders and owned_folders*/
+  .intelligent_orders,
+  .owned_folders{
+    display: inline-block;
+    height: 500px;
+    overflow: auto;
+    border: 1px solid lightgray;
+    box-shadow: 0px 0px 4px 0px #b2b0b0;
+    background-color: white;
+    border-radius: 5px;
+    margin: 10px 0px;
+  }
+  .intelligent_orders{
+    width: 800px;
+  }
+  .owned_folders{
+    width: 400px;
+    margin-left: 10px;
+  }
+  .intelligent_orders>.title,
+  .owned_folders>.title{
+    margin: 20px;
     font-size: 14px;
     height: 20px;
+    color: cornflowerblue;
   }
+  .intelligent_orders>.content>div,
+  .owned_folders>.content>div{
+    display: inline-block;
+    margin: 10px;
+    width: 100px;
+    height: 100px;
+    text-align: center;
+    cursor: pointer;
+  }
+  .intelligent_orders>.content>div>svg,
+  .owned_folders>.content>div>svg{
+    font-size: 60px;
+  }
+
 </style>

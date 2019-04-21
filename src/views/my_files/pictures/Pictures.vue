@@ -2,8 +2,8 @@
   <div class="pictures">
     <FileOperation></FileOperation>
     <div class="file_nav">
-      <span >全部图片</span>
-      <span v-show="nowCheckedDefault || nowCheckedTimeLine || nowCheckedIntelOrder">存入文件夹</span>
+      <span v-show="!enterIntelPic">全部图片</span>
+      <span v-show="enterIntelPic" class="file_nav_intel"><span @click="intelOrder">智能归档</span> > {{keyName}}</span>
       <el-popover
         popper-class="order_picker"
         placement="top"
@@ -53,21 +53,27 @@
     <div v-if="isTimeLine" class="time_line">
       <div v-for="(item, key) in timeLinePics" class="month_div">
         <div><svg class="icon" aria-hidden="true"><use xlink:href="#icon-importance1"></use></svg>{{key}}</div>
-        <div v-for="smallItem in item" class="img_outer_outer" :class="smallItem.itemChecked ? 'blockItemCheckedClass' : ''"
-             @mouseover="mouseOvering(smallItem)" @mouseout="mouseDowning(smallItem)">
+        <div v-for="smallItem in item" class="img_outer_outer" :class="smallItem.itemChecked ? 'blockItemCheckedClass' : ''">
           <span class="checkbox iconfont icon-checked_circle" @click.stop="itemCheckedTimeLine(smallItem)"></span>
-          <div class="img_outer" @click="showInfo(smallItem.id)" :style="{'background-image': 'url('+getPicUrl(smallItem.url)+')'}"></div>
+          <div class="img_outer" @click="showInfo(smallItem.id)" :style="{'background-image': 'url('+getPicUrl(smallItem.url)+')'}">
+
+<!--            <img :src="getPicUrl(smallItem.url)" alt="图片预览图">-->
+          </div>
         </div>
       </div>
       <div class="the_time_line"></div>
     </div>
     <div v-if="isIntelligenceOrder" class="intelligence_order">
-      <div v-for="(item, index) in intelligenceOrderPics" :key="'iop'+index" class="month_div">
-        <div class="img_outer_outer" :class="item.itemChecked ? 'blockItemCheckedClass' : ''"
-             @mouseover="mouseOvering(item)" @mouseout="mouseDowning(item)">
-          <span v-show="item.itemChecked" class="iconfont icon-checked_circle" @click.stop="itemCheckedIntelOrder(item)"></span>
-          <div class="img_outer" @click="showInfo(item.id)" :style="{'background-image': 'url('+getPicUrl(item.url)+')'}"></div>
-          <span>{{item.name}}</span>
+      <div v-for="(item, index) in intelligenceOrderPics" :key="'iop'+index" @click.stop="getClassPic(item.id, item.name)">
+        <svg class="icon" aria-hidden="true"><use xlink:href="#icon-aFile"></use></svg>
+        <p>{{item.name}}</p>
+      </div>
+    </div>
+    <div v-if="enterIntelPic" class="pics">
+      <div class="pics_item" v-for="(item, index) in classPics"  :key="index" :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
+        <span class="checkbox iconfont icon-checked_circle" @click.stop="itemCheckedCls(item)"></span>
+        <div class="img_outer" @click="showInfo(item.id)" :style="{'background-image': 'url('+getPicUrl(item.url)+')'}">
+<!--          <img :src="getPicUrl(item.url)" alt="图片预览图">-->
         </div>
       </div>
     </div>
@@ -75,34 +81,47 @@
 </template>
 
 <script>
-  import axios from "axios"
+  import { mapState } from "vuex"
   import FileOperation from "../../../components/FileOperation"
   import { toggleTip,toggleCollection,toggleAttention,unixChange,getFileSize,fetchList } from "../../../publics/public"
   export default {
     data() {
       return {
-        isDefaultOrder:true,
-        allPictures:[],
-        nowCheckedDefault:[],
-        isTimeLine:false,
-        timeLinePics:{},
-        nowCheckedTimeLine:[],
-        isIntelligenceOrder:false,
-        intelligenceOrderPics:[],
-        nowCheckedIntelOrder:[],
-        asHover: true
+        isDefaultOrder: true,
+        allPictures: [],
+        nowCheckedDefault: [],
+        isTimeLine: false,
+        timeLinePics: {},
+        nowCheckedTimeLine: [],
+        isIntelligenceOrder: false,
+        intelligenceOrderPics: [],
+        enterIntelPic: false,
+        classPics: [],
+        nowCheckedClsPic: [],
+        keyName:''
+      }
+    },
+    computed:{
+      ...mapState(['isDefineFile']),
+      isDefineFile:{
+        get(){
+          return this.$store.state.isDefineFile
+        },
+        set(val){
+          this.$store.state.isDefineFile = val
+        }
       }
     },
     components:{
       FileOperation: FileOperation
     },
     mounted(){
-      // 获取所有图片
-      this.fetchList()
+      // 获取所有图片,默认排列
+      this.fetchListDefault()
       window.EE.on('fetchImages',()=>{this.fetchList()})
     },
     methods:{
-      fetchList(){
+      fetchListDefault(){
         fetchList('/imageinfo').then(data=>{
         data.forEach(element => {
             element.itemChecked = false
@@ -116,17 +135,16 @@
         this.isDefaultOrder = true
         this.isTimeLine = false
         this.isIntelligenceOrder = false
+        this.enterIntelPic = false
+        this.fetchListDefault()
       },
       timeLine(){
         this.isTimeLine = true
         this.isDefaultOrder = false
         this.isIntelligenceOrder = false
+        this.enterIntelPic = false
         // 从后台请求数据
-        // fetchList('/sortimage').
-        Promise.resolve({
-          a:[{name:'x'},{name:'c'}],
-          b:[{name:'w'},{name:'cq'}]
-        }).then(data=>{
+        fetchList('/sortimage').then(data=>{
           console.log(data)
           for(let key in data){
             console.log(data[key])
@@ -143,33 +161,62 @@
         this.isIntelligenceOrder = true
         this.isTimeLine = false
         this.isDefaultOrder = false
+        this.enterIntelPic = false
         // 从后台请求数据
-        fetchList('/getimageinsight ').then(data=>{
+        fetchList('/getimageinsight').then(data=>{
           this.intelligenceOrderPics = data
         }).catch( (error) =>{
           toggleTip(this, error)
         })
       },
-      itemCheckedIntelOrder(){
-
-      },
-      mouseOvering(item){
-      },
-      mouseDowning(item){
+      getClassPic(id, name){
+        this.enterIntelPic = true
+        this.isIntelligenceOrder = false
+        this.isTimeLine = false
+        this.isDefaultOrder = false
+        this.keyName = name
+        const childUrl = '/filefiling/' + id
+        fetchList(childUrl).then(data=> {
+            for (let key in data){
+              data[key].forEach(el=> {
+                if (el.info) {
+                  el.info = JSON.parse(el.info)
+                }
+                el.itemChecked = false
+              })
+            }
+          this.classPics = data.IMAGE
+        })
       },
       itemCheckedTimeLine(item){
-        console.log(item)
-        console.log('前：',item.itemChecked)
         item.itemChecked = !item.itemChecked
-        this.asHover = !this.asHover
-        console.log('后:',item.itemChecked)
         if (item.itemChecked && this.nowCheckedDefault.indexOf(item.id)=== -1){
           this.nowCheckedTimeLine.push(item.id)
         }else {
           let index = this.nowCheckedTimeLine.findIndex(el=>{return el.id == item.id})
           this.nowCheckedTimeLine.splice(index, 1)
         }
-        console.log('nowCheckedTimeLine:',this.nowCheckedTimeLine)
+        if (this.nowCheckedTimeLine) {
+          this.isDefineFile = true
+          this.$store.commit('setNowCheckedIds', this.nowCheckedTimeLine)
+        }else{
+          this.isDefineFile = true
+        }
+      },
+      itemCheckedCls(item){
+        item.itemChecked = !item.itemChecked
+        if (item.itemChecked && this.nowCheckedClsPic.indexOf(item.id) === -1){
+          this.nowCheckedClsPic.push(item.id)
+        }else {
+          let index = this.nowCheckedClsPic.findIndex(el=>{ return el.id == item.id})
+          this.nowCheckedClsPic.splice(index, 1)
+        }
+        if (this.nowCheckedClsPic) {
+          this.nowCheckedClsPic = true
+          this.$store.commit('setNowCheckedIds', this.nowCheckedClsPic)
+        }else{
+          this.nowCheckedClsPic = true
+        }
       },
       itemCheckedDefault(item){
         item.itemChecked = !item.itemChecked
@@ -189,7 +236,7 @@
         window.open(routeData.href, '_blank');
       },
       getPicUrl(url){
-        var baseUrl = window.baseUrl +  "/testpreview/"
+        const baseUrl = window.baseUrl +  "/testpreview/"
         return baseUrl + url
       },
       toggleCollection(index){
@@ -204,9 +251,6 @@
       getFileSize(size){
         return getFileSize(size)
       }
-    },
-    watch:{
-
     }
   }
 </script>
@@ -217,6 +261,40 @@
     position: relative;
     padding-left: 50px;
   }
+  .file_nav_intel{
+    color: cornflowerblue;
+  }
+  /*智能分类开始*/
+  .intelligence_order>div{
+    display: inline-block;
+    margin: 10px;
+    width: 100px;
+    height: 100px;
+    text-align: center;
+    cursor: pointer;
+  }
+  .intelligence_order>div>svg{
+    font-size: 60px;
+  }
+  /*pics*/
+  .pics>.pics_item{
+    display: inline-block;
+    padding: 10px;
+    margin: 10px;
+    position: relative;
+  }
+  .pics>.pics_item>.img_outer{
+    width: 150px;
+    height: 150px;
+    display: inline-block;
+    background-size: cover;
+    cursor: pointer;
+  }
+  .pics>.pics_item>.img_outer>img{
+    width: 150px;
+    display: inline-block;
+  }
+  /*智能分类结束*/
   /*时光轴开始*/
   .time_line{
 
@@ -243,10 +321,16 @@
     width: 150px;
     height: 150px;
     display: inline-block;
-    transition: opacity linear .15s;
-    background-position: center center;
-    background-repeat: no-repeat;
-    cursor: pointer;
+    overflow: hidden;
+    background-size: cover;
+    /*transition: opacity linear .15s;*/
+    /*background-position: center center;*/
+    /*background-repeat: no-repeat;*/
+    cursor: pointer
+  }
+  .month_div>.img_outer_outer>.img_outer>img{
+    width: 150px;
+    /*height: 150px;*/
   }
   .month_div>.img_outer_outer:hover{
     background-color: rgba(221, 221, 221, 0.78);
@@ -263,7 +347,6 @@
   .img_outer_outer:hover .checkbox {
     display: block;
   }
-
   /*时光轴结束*/
   .file_preview>svg{
     font-size: 30px;

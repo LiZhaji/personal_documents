@@ -4,9 +4,7 @@
     <div class="main_right">
       <Headerbar></Headerbar>
       <div class="content" >
-        <keep-alive>
-          <router-view/>
-        </keep-alive>
+        <router-view/>
       </div>
     </div>
     <Popup></Popup>
@@ -23,7 +21,12 @@
       Siderbar: Siderbar,
       Headerbar: Headerbar,
       Popup: Popup
-    }
+    },
+    // computed:{
+    //   key(){
+    //     return this.$route.name !== undefined? this.$route.name +new Date(): this.$route +new Date()
+    //   }
+    // }
   }
 </script>
 

@@ -79,10 +79,10 @@
         data.forEach(el=>{
           el.info = JSON.parse(el.info)
           if (el.keyword) {
-            el.keyword = el.keyword.split(',')
+            el.keyword = el.keyword.split(' ')
           }
           if (el.tag) {
-            el.tag = el.tag.split(',')
+            el.tag = el.tag.split(' ')
           }else {
             el.tag = []
           }

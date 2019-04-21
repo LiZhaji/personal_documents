@@ -80,7 +80,7 @@
               el.keyword = el.keyword.split(' ')
             }
             if (el.tag) {
-              el.tag = el.tag.split(',')
+              el.tag = el.tag.split(' ')
             }else {
               el.tag = []
             }

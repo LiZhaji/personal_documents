@@ -89,9 +89,6 @@ export const toggleAttentionNotIndex =(obj, fileItem)=>{
     toggleTip(obj, error)
   })
 }
-export const upFileSucceed =(obj)=>{
-    toggleTip(obj, '上传成功')
-}
 export const clickItem =(list, index, nowChecked)=>{
   list[index].itemChecked = !list[index].itemChecked
   if(list[index].itemChecked) {

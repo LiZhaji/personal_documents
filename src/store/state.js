@@ -6,6 +6,9 @@ export default {
   isNewFolder: false,
   isAudioPlay: false,
   isCatalogTree: false,
+  isDefineFile: false,
   tasks: [],
   nowFile: {},
+  intelFileTime:'',
+  nowCheckedIds:[]
 }

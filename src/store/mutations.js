@@ -17,10 +17,15 @@ export default {
   },
   setNowFile(state,nowFile){
     state.nowFile = nowFile
-    console.log('state.showFileId:',state.nowFile)
   },
   audioPlay(state,nowAudio){
     state.isAudioPlay = true
     state.nowAudio = nowAudio
   },
+  setIntelFileTime(state,intelFileTime){
+    state.intelFileTime = intelFileTime
+  },
+  setNowCheckedIds(state,nowCheckedIds){
+    state.nowCheckedIds = nowCheckedIds
+  }
 }

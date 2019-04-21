@@ -106,7 +106,7 @@
     <div class="catalog_tree" v-if="isCatalogTree">
       <div class="tree_title">选择路径</div>
       <div class="tree_content">
-        <el-tree :data="catalog" :props="defaultProps" @node-click="handleNodeClick" @current-change="nodeChange"></el-tree>
+        <el-tree :data="catalog" :props="defaultProps" :highlight-current="T" @current-change="nodeChange"></el-tree>
         <div v-show="createFoldInUpload">
           <svg class="icon" aria-hidden="true"><use xlink:href="#icon-aFile"></use></svg>
           <input type="text" v-model="newFolderUpload.name" placeholder="请输入文件名">
@@ -119,6 +119,17 @@
         </div>
       </div>
     </div>
+    <!-- 自定义归档目录 -->
+    <el-popover placement="top" width="160" popper-class="define_catalog_outer">
+      <p v-show="chooseDefineCatalog" v-for="item in defineFiles" @click="defCatalogOk(item.id)">{{item.name}}</p>
+      <p v-show="createDefCatalog">
+        <svg class="icon" aria-hidden="true"><use xlink:href="#icon-aFile"></use></svg>
+        <input type="text" v-model="defCatName" placeholder="请输入文件名">
+        <span class="iconfont icon-checked_circle" @click="newDefCatOk"></span>
+        <span class="iconfont icon-close" @click="cancelNewDefCat"></span>
+      </p>
+      <span slot="reference"  @click="defineFile">归档于</span>
+    </el-popover>
   </div>
 </template>
 
@@ -129,17 +140,17 @@
   import {
     inputIsEmpty,
     uploadOrUpdate,
-    upFileSucceed,
     getFileSize,
     toggleTip,
     formatTime,
     getNowDay,
-    fetchList,
+    fetchList
   } from "../publics/public"
   export default {
     name: "Popup",
     data(){
       return{
+        T:true,
         file: '',
         curFile:{name:'点击选择',tag:''},
         curType:'',
@@ -174,11 +185,14 @@
         current:  formatTime(),
         catalog: [],
         defaultProps: {children: 'children', label: 'label'},
-        a:[{label:'x',children:[{label:'xw'},{label:'xxedede'}]}]
+        defineFiles:[],
+        chooseDefineCatalog:false,
+        createDefCatalog: false,
+        defCatName:''
       }
     },
     computed:{
-      ...mapState(['isUpFile','isNewTask', 'isNewFolder','isAudioPlay', 'isCatalogTree']),
+      ...mapState(['isUpFile','isNewTask', 'isNewFolder','isAudioPlay', 'isCatalogTree', 'isDefineFile', 'nowCheckedIds']),
       isAudioPlay:{
         get(){
           return this.$store.state.isAudioPlay
@@ -194,6 +208,14 @@
         set(val){
           this.$store.state.isCatalogTree = val
         }
+      },
+      isDefineFile:{
+        get(){
+          return this.$store.state.isDefineFile
+        },
+        set(val){
+          this.$store.state.isDefineFile = val
+        }
       }
     },
     mounted() {
@@ -206,111 +228,60 @@
         handle: this.$refs.handle
       })
     },
-    methods:{ // what'sx problem. handleNodeClick nodeChange 没有用 what operation i have look. do e
+    methods:{
+      defCatalogOk(id){
+        // id>=0 表示归档到已有，id<0 表示新建
+        if (id >= 0) {
+          const childUrl = ''
+          let formData = new FormData()
+          formData.append('catalogid', id)
+          formData.append('ids', this.nowCheckedIds)
+          uploadOrUpdate(childUrl, formData).then(data=>{
+            if (data.success) {
+              toggleTip(this, '归档成功')
+            }
+          })
+          this.chooseDefineCatalog = false
+        }else {
+          this.createDefCatalog = true
+        }
+      },
+      newDefCatOk(){
+        const childUrl = ''
+        let formData = new FormData()
+        formData.append('catalogname', this.defCatName)
+        formData.append('ids', this.nowCheckedIds)
+        uploadOrUpdate(childUrl, formData).then(data=>{
+          if (data.success) {
+            toggleTip(this, '归档成功')
+          }
+        })
+        this.createDefCatalog = false
+        this.chooseDefineCatalog = false
+      },
+      cancelNewDefCat(){
+        this.defCatName = ''
+        this.createDefCatalog = false
+      },
+      defineFile(){
+        this.chooseDefineCatalog = true
+        fetchList('/getdefined').then(data=>{
+          this.defineFiles = data
+          this.defineFiles.push({id: -1, name:'新建目录'})
+        })
+      },
       // 文件树形目录
       fetchNode(){
-        // fetchList('/catalogtree').
-        Promise.resolve({ // 你继续操作一下下 我看看是啥
-            "id": 1,
-            "userId": 1,
-            "name": "全部文件",
-            "pid": 0,
-            "nodes": [
-              {
-                "id": 2,
-                "userId": 1,
-                "name": "北京市",
-                "pid": 1,
-                "nodes": [
-                  {
-                    "id": 11,
-                    "userId": 1,
-                    "name": "密云县",
-                    "pid": 2,
-                    "nodes": []
-                  }
-                ]
-              },
-              {
-                "id": 3,
-                "userId": 1,
-                "name": "广东省",
-                "pid": 1,
-                "nodes": [
-                  {
-                    "id": 5,
-                    "userId": 1,
-                    "name": "广州市",
-                    "pid": 3,
-                    "nodes": [
-                      {
-                        "id": 7,
-                        "userId": 1,
-                        "name": "海珠区",
-                        "pid": 5,
-                        "nodes": []
-                      },
-                      {
-                        "id": 8,
-                        "userId": 1,
-                        "name": "天河区",
-                        "pid": 5,
-                        "nodes": []
-                      }
-                    ]
-                  },
-                  {
-                    "id": 6,
-                    "userId": 1,
-                    "name": "深圳市",
-                    "pid": 3,
-                    "nodes": [
-                      {
-                        "id": 9,
-                        "userId": 1,
-                        "name": "福田区",
-                        "pid": 6,
-                        "nodes": []
-                      },
-                      {
-                        "id": 10,
-                        "userId": 1,
-                        "name": "南山区",
-                        "pid": 6,
-                        "nodes": []
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "id": 4,
-                "userId": 1,
-                "name": "上海市",
-                "pid": 1,
-                "nodes": [
-                  {
-                    "id": 12,
-                    "userId": 1,
-                    "name": "浦东",
-                    "pid": 4,
-                    "nodes": []
-                  }
-                ]
-              }
-            ]
-          }
-        ).then(data=>{
-          console.log('data:',data)
+        this.catalog = []
+        fetchList('/catalogtree').then(data=>{
           // data表示最外层，全部文件
           this.catalog.push({id: data.id, label: data.name})
           this.getNodes(this.catalog[0],data.nodes)
-          console.log('catalog:',this.catalog)
         })
       },
       getNodes(parent,nodes){
         // parent表示当前nodes的父文件夹
-        if (!parent.children) {
+        if (!parent.children){
           parent.children = []
         }
         nodes.forEach((el, index)=>{
@@ -320,13 +291,7 @@
           }
         })
       },
-      handleNodeClick(parentObj, node, itself){
-        console.log('parentObj:',parentObj)
-        console.log('node:',node)
-        console.log('itself:',itself)
-      },
       nodeChange(data,obj){
-        console.log('data:',data)
         this.fileLocation = data.id
         this.fileLocationShow = data.label
         this.newFolderUpload.pid = data.id
@@ -335,27 +300,37 @@
         this.createFoldInUpload = true
       },
       chooseLocationOk(){
-        this.isCatalogTree = false
-        if (this.newFolderUpload.name){
-          let formData = new FormData()
-          formData.append('pid',this.newFolderUpload.pid)
-          formData.append('name',this.newFolderUpload.name)
-          uploadOrUpdate('/createcatalog').then(data=>{
-            this.fileLocation = data
-          })
-          this.fileLocationShow = this.newFolderUpload.name
+        if (!this.newFolderUpload.name) {
+          this.isCatalogTree = false
+        }else{
+          if (this.createFoldInUpload){
+            inputIsEmpty(this, '请先确认文件名！')
+          } else {
+            let formData = new FormData()
+            formData.append('pid',this.newFolderUpload.pid)
+            formData.append('name',this.newFolderUpload.name)
+            uploadOrUpdate('/createcatalog', formData).then(data=>{
+              this.fileLocation = data
+              this.fileLocationShow = this.newFolderUpload.name
+            })
+            this.isCatalogTree = false
+          }
         }
       },
       newFoldUploadOk(){
+        if (!this.newFolderUpload.name) {
+          inputIsEmpty(this, '文件名不能为空！')
+          return
+        }
         this.createFoldInUpload = false
       },
       cancelNewFoldUpload(){
-        this.newFolderUpload.name = ''
+        this.newFolderUpload ={ pid: 1, name:''}
         this.createFoldInUpload = false
       },
       // 上传或新建
       chooseFileLocation(){
-        console.log('aaaa')
+        this.fetchNode()
         this.isCatalogTree = true
       },
       cancelUpFile(){
@@ -396,7 +371,7 @@
         // 3.提交到后台，成功后显示消息
         uploadOrUpdate('/upload', formData).then(data =>{
           if( data.success) {
-            upFileSucceed(this)
+            toggleTip(this, '上传成功')
             // 执行/发布一个事件用来自动更新列表
             switch (this.curType) {
               case "docu": window.EE.emit('fetchDocuments');break;
@@ -521,6 +496,16 @@
 </script>
 
 <style scoped>
+  /*自定义归档*/
+  .define_catalog_outer{
+    position: absolute;
+    width: 200px;
+    background-color: orangered;
+    height: 300px;
+    top: 210px;
+    left: 800px;
+    z-index: 999;
+  }
   /*目录树*/
   .catalog_tree{
     position: fixed;
@@ -544,6 +529,7 @@
   }
   .el-tree{
     height: 280px;
+    overflow: auto;
   }
   /*新建和上传文件框，以下通用*/
   .up_file_box,.new_task_box,.new_folder_box{

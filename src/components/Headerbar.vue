@@ -2,10 +2,10 @@
   <div class="header clearFix">
     <!--搜索-->
     <div class="search">
-      <input type="text" placeholder="搜索关键字" v-model="searchKey">
+      <input type="text" placeholder="搜索关键字" v-model="searchKey" @keyup.enter="search">
       <el-dropdown trigger="click" placement="top-start" >
         <span class="el-dropdown-link search_way_show" title="点击选择搜索方法">
-          <span class="iconfont icon-filter_border" ></span>
+          <span class="iconfont icon-filter_border"></span>
           <span class="show_word">{{nowSearchWay}}</span>
         </span>
         <el-dropdown-menu slot="dropdown" class="search_way">
@@ -65,7 +65,6 @@
     },
     methods:{
       chooseSearchWay(wayId){
-        console.log('wayId:',wayId)
         switch (wayId) {
           case 1: this.nowSearchWay = '路径';break;
           case 2: this.nowSearchWay = '语义';break;
@@ -75,7 +74,12 @@
         }
       },
       search(){
-
+        this.$router.push({
+          name:'InsightInfo',
+          params:{
+            type: 1
+          }
+        })
       }
     }
   }

@@ -59,29 +59,7 @@
         showSpecificInfo:true,
         validShotLabels:[],
         validSegments:[],
-        labelName:'暂无选择',
-        segments:[
-          {
-            "starttime":18.601916,
-            "endtime":19.060708,
-            "confidence":0.5779658
-          },
-          {
-            "starttime":45.879166,
-            "endtime":47.130416,
-            "confidence":0.6630262
-          },
-          {
-            "starttime":65.273541,
-            "endtime":66.649916,
-            "confidence":0.5163992
-          },
-          {
-            "starttime":236.277708,
-            "endtime":238.029458,
-            "confidence":0.5163992
-          }
-        ]
+        labelName:'暂无选择'
       }
     },
     mounted(){
@@ -90,10 +68,10 @@
       fetchList(childUrl).then(data=>{
         data.info = JSON.parse(data.info)
         if (data.keyword) {
-          data.keyword = data.keyword.split(',')
+          data.keyword = data.keyword.split(' ')
         }
         if (data.tag) {
-          data.tag = data.tag.split(',')
+          data.tag = data.tag.split(' ')
         }else {
           data.tag = []
         }

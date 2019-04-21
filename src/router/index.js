@@ -25,6 +25,7 @@ import MyLikes from "../views/my_likes/MyLikes";
 import Setup from "../views/setup/Setup";
 import TaskList from "../views/task_list/TaskList";
 import UseTimes from "../views/use_times/UseTimes";
+import InsightInfo from "../views/my_files/insight/InsightInfo";
 
 export default new Router({
   routes: [
@@ -57,6 +58,10 @@ export default new Router({
           path: '/main/insight',
           component:Insight
         }, {
+          path: '/main/insightInfo',
+          name: 'InsightInfo',
+          component: InsightInfo
+        },{
           path: '/main/others',
           component:Others
         }, {

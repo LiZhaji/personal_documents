@@ -3,7 +3,7 @@
     <FileOperation></FileOperation>
     <div class="file_nav">
       <span @click="fetchList">全部文件 </span>
-      <span class="catalog_view" v-for="(item, index) in catalog" :key="item.id" @click="openFolder(0, item.id, item.name)">
+      <span class="catalog_view" v-for="(item, index) in catalog" :key="'catalog' + item.id" @click="openFolder(0, item.id, item.name)">
         <span v-show="index === 0">| {{item.name}}</span><span v-show="index > 0"> > {{item.name}}</span> </span>
     </div>
     <table>
@@ -18,7 +18,7 @@
         </tr>
       </thead>
       <tbody>
-      <tr v-for="(item, index) in allFolders" :key="item.id" @click="clickItem(index)" :class="{item_checked:item.itemChecked}">
+      <tr v-for="(item, index) in allFolders" :key="'folder' + item.id" @click="clickItem(index)" :class="{item_checked:item.itemChecked}">
         <td ><span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span></td>
         <td class="file_importance">
           <svg @click="changeImportance(index)" class="icon" aria-hidden="true"><use :xlink:href="`#icon-importance${item.importance}`"></use></svg>
@@ -37,7 +37,7 @@
           <use v-show="item.like" xlink:href="#icon-like_fill"></use>
         </svg></td>
       </tr>
-      <tr v-for="(item, index) in allFiles" :key="item.id" @click="clickItem(index)" :class="{item_checked:item.itemChecked}">
+      <tr v-for="(item, index) in allFiles" :key="'file' + item.id" @click="clickItem(index)" :class="{item_checked:item.itemChecked}">
         <td ><span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span></td>
         <td class="file_importance">
           <svg @click="changeImportance(index)" class="icon" aria-hidden="true"><use :xlink:href="`#icon-importance${item.importance}`"></use></svg>
@@ -232,6 +232,7 @@
     margin: 20px 0px;
     font-size: 14px;
     height: 20px;
+    color: #5c88d8;
   }
   .file_nav>.catalog_view{
     color: cornflowerblue;
