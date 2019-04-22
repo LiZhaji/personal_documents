@@ -2,8 +2,8 @@
   <div class="intelligent_pics">
     <FileOperation></FileOperation>
     <div class="file_nav">
-      <span v-show="!enterFolder" @click="intelOrder">智能分类</span>
-      <span v-show="enterFolder" class="file_nav_intel"> > {{keyName}}</span>
+      <span  @click="intelOrder">智能分类</span>
+      <span class="file_nav_intel" v-show="enterFolder"> > {{keyName}}</span>
       <el-popover
         popper-class="order_picker"
         placement="top"
@@ -15,7 +15,7 @@
         <!--<el-button >删除</el-button>-->
       </el-popover>
     </div>
-    <div  v-if="!enterIntelPic" class="intelligence_order">
+    <div  v-if="!enterFolder" class="intelligence_order">
       <div v-for="(item, index) in intelPics" :key="'iop'+index"
            @click.stop="getClassPic(item.id, item.name)">
         <svg class="icon" aria-hidden="true">
@@ -27,7 +27,7 @@
     <div v-if="enterFolder" class="pics">
       <div class="pics_item" v-for="(item, index) in classPics" :key="index"
            :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
-        <span class="checkbox iconfont icon-checked_circle" @click.stop="itemCheckedCls(item)"></span>
+        <span class="checkbox iconfont icon-checked_circle" @click.stop="itemChecked(item)"></span>
         <div class="img_outer" @click="showInfo(item.id)" :style="{'background-image': 'url('+getPicUrl(item.url)+')'}">
           <!--          <img :src="getPicUrl(item.url)" alt="图片预览图">-->
         </div>
@@ -79,8 +79,12 @@
         isDefineFile:false,
         chooseDefineCatalog:false,
         createDefCatalog: false,
-        defCatName:''
+        defCatName:'',
+        mailFiles:[]
       }
+    },
+    mounted(){
+      this.intelOrder()
     },
     methods:{
       getClassPic(id, name) {
@@ -106,7 +110,7 @@
         this.$router.push('/main/timeLinePics')
       },
       intelOrder() {
-        this.enterIntelPic = false
+        this.enterFolder = false
         // 从后台请求数据
         fetchList('/getimageinsight').then(data => {
           this.intelPics = data
@@ -121,20 +125,23 @@
         });
         window.open(routeData.href, '_blank');
       },
-      itemCheckedTimeLine(item) {
+      itemChecked(item) {
         item.itemChecked = !item.itemChecked
-        if (item.itemChecked && this.checkedIds.indexOf(item.id) === -1) {
+        const index = this.checkedIds.findIndex(el=>{el.id === item.id})
+        if (item.itemChecked && index < 0){
           this.checkedIds.push(item.id)
-          this.checkedIds.push(item.category)
-        } else {
-          let index = this.checkedIds.findIndex(el => {return el.id == item.id})
+          this.checkedCategory.push(item.category)
+          this.mailFiles.push({id: item.id, name: item.name})
+        }else{
           this.checkedIds.splice(index, 1)
           this.checkedCategory.splice(index, 1)
+          this.mailFiles.splice(index, 1)
         }
-        if (this.checkedIds.length != 0) {
+        if (this.checkedIds.length != 0){
           this.isDefineFile = true
-        } else {
-          this.isDefineFile = true
+          this.$store.commit('setMailFiles', this.mailFiles)
+        } else{
+          this.isDefineFile = false
         }
       },
       defCatalogOk(id) {
@@ -186,6 +193,19 @@
           this.defineFiles.push({id: -1, name: '新建目录'})
         })
       },
+      getPicUrl(url) {
+        const baseUrl = window.baseUrl + "/testpreview/"
+        return baseUrl + url
+      },
+    },
+    watch:{
+      checkedIds(){
+        if (this.checkedIds.length != 0) {
+          this.isDefineFile = true
+        } else {
+          this.isDefineFile = false
+        }
+      }
     }
   }
 </script>
@@ -196,11 +216,69 @@
     position: relative;
     padding-left: 50px;
   }
-
   .file_nav_intel {
     color: cornflowerblue;
   }
-
+  .intelligence_order>div{
+    display: inline-block;
+    margin: 10px;
+    width: 100px;
+    height: 100px;
+    text-align: center;
+    cursor: pointer;
+  }
+  .intelligence_order>div>svg{
+    font-size: 60px;
+  }
+  .order_picker>p{
+    padding: 5px;
+  }
+  .order_picker > p:hover {
+    background-color: rgba(211, 211, 211, 0.64);
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  .icon-order {
+    margin-left: 85%;
+  }
+  /*pics*/
+  .pics .icon-checked_circle{
+    cursor: pointer;
+    position: absolute;
+    font-size: 17px;
+  }
+  .pics>.pics_item{
+    display: inline-block;
+    padding: 10px;
+    margin: 10px;
+    position: relative;
+  }
+  .pics>.pics_item>.img_outer{
+    width: 150px;
+    height: 150px;
+    display: inline-block;
+    background-size: cover;
+    cursor: pointer;
+  }
+  .pics>.pics_item>.img_outer>img{
+    width: 150px;
+    display: inline-block;
+  }
+  .pics>.pics_item:hover{
+    background-color: rgba(221, 221, 221, 0.78);
+  }
+  .blockItemCheckedClass{
+    background-color: rgba(221, 221, 221, 0.78);
+  }
+  .blockItemCheckedClass .checkbox {
+    display: block
+  }
+  .checkbox {
+    display: none;
+  }
+  .pics_item:hover .checkbox {
+    display: block;
+  }
   /*自定义归档*/
   .def_catalog {
     padding: 5px;
@@ -214,8 +292,8 @@
 
   .defBtn {
     position: absolute;
-    top: 160px;
-    left: 500px;
+    top: 55px;
+    left: 195px;
     padding: 5px 10px;
     border: 1px solid #efefef;
     border-radius: 5px;
@@ -257,8 +335,8 @@
 
   .defBtn {
     position: absolute;
-    top: 160px;
-    left: 500px;
+    top: 55px;
+    left: 250px;
     padding: 5px 10px;
     border: 1px solid #efefef;
     border-radius: 5px;

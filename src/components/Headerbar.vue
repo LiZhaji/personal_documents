@@ -132,7 +132,12 @@
           this.reload()
           return
         }
-        this.$router.push('/main/insightInfo')
+        this.$router.push({
+          name: 'InsightInfo',
+          params: {
+            searchWay: this.searchWay
+          }
+        })
       }
     }
   }

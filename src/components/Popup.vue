@@ -65,8 +65,8 @@
       </div>
     </transition>
     <!-- 音频播放 -->
-    <div class="audios_play clearFix" v-if=" isAudioPlay" ref="audiosPlay">
-      <div class="header" ref="handle">
+    <div class="audios_play clearFix" v-if="isAudioPlay" ref="audiosPlay">
+      <div class="header" ref="audioHandle">
         <span class="iconfont icon-audios">&nbsp&nbsp&nbsp{{nowAudio.name}}</span>
         <span class="close" @click="closeAudioPlay" title="点击关闭">&times</span>
       </div>
@@ -81,24 +81,36 @@
           <p><span>文件类型</span><span>{{getType(nowAudio.name)}}</span></p>
           <p><span>文件大小</span><span>{{getFileSize(nowAudio.size)}}</span></p>
           <p><span>上传时间</span><span>{{nowAudio.time}}</span></p>
-          <p><span>关键词</span><span class="keyword" v-for="item in nowAudio.keywords">{{item}}</span></p>
+          <p><span>关键词</span><span class="keyword" v-for="item in nowAudio.keyword">{{item}}</span></p>
           <div class="tag_audio"><span>标签</span>
             <span class="tag" v-for="(item,index) in nowAudio.tag" :key="index">
-                {{item}} <img @click="delOneTag(index)" src="../assets/img/close.png" alt="删除" title="点击删除">
-                </span>
+          {{item}} <img @click="delOneTag(nowAudio.id, item, index)" src="../assets/img/close.png" alt="删除" title="点击删除">
+        </span>
             <div class="input_outer">
-              <input class="tag_input" type="text" v-model="newTag" placeholder="自定义标签" v-on:keyup.enter="addTag">
-              <span class="iconfont icon-checked_circle ok_tag_input" @click="addTag"></span>
+              <input class="tag_input" type="text" v-model="newTag" placeholder="自定义标签"
+                     v-on:keyup.enter="addTag(nowAudio.id, index)" :class="nowAudio.tag.length != 0 ? 'have_content': ''">
+              <span class="iconfont icon-checked_circle ok_tag_input" @click="addTag(nowAudio.id, index)"></span>
             </div>
           </div>
-          <div class="remark_audio"><span>用户评价</span>
-            <span v-show="!isModifyRemark" class="remarks">{{nowAudio.remark}}</span>
-            <span v-show="!isModifyRemark" class="iconfont icon-brush" @click="modifyRemark"></span>
-            <div class="input_outer" v-show="isModifyRemark">
-              <input v-model="nowAudio.remark" class="remark_input" type="text" placeholder="评价"  v-on:keyup.enter="completeModifyRemark">
-              <span class="iconfont icon-checked_circle ok_remark_input" @click="completeModifyRemark"></span>
+          <div class="remark_audio"><span>评论</span>
+            <span class="remark" v-for="(item,index) in nowAudio.comments" :key="index">
+          {{item.content}} <img @click="delOneRemark(item.id)" src="../assets/img/close.png" alt="删除" title="点击删除">
+        </span>
+            <div class="input_outer">
+              <input class="remark_input" type="text" v-model="newRemark" placeholder="新增评论"
+                     v-on:keyup.enter="addRemark(nowAudio.id, item.id)"  :class="Object.keys(nowAudio.comments).length != 0 ? 'have_content': ''">
+              <span class="iconfont icon-checked_circle ok_remark_input"
+                    @click="addRemark(nowAudio.id, item.id)"></span>
             </div>
           </div>
+<!--          <div class="remark_audio"><span>用户评价</span>-->
+<!--            <span v-show="!isModifyRemark" class="remarks">{{nowAudio.remark}}</span>-->
+<!--            <span v-show="!isModifyRemark" class="iconfont icon-brush" @click="modifyRemark"></span>-->
+<!--            <div class="input_outer" v-show="isModifyRemark">-->
+<!--              <input v-model="nowAudio.remark" class="remark_input" type="text" placeholder="评价"  v-on:keyup.enter="completeModifyRemark">-->
+<!--              <span class="iconfont icon-checked_circle ok_remark_input" @click="completeModifyRemark"></span>-->
+<!--            </div>-->
+<!--          </div>-->
         </div>
       </div>
     </div>
@@ -119,6 +131,26 @@
         </div>
       </div>
     </div>
+    <!-- 发送邮件-->
+    <div class="mail_box" ref="mailBox" v-if="isMail">
+      <div class="header" ref="mailHandle">
+        <span class="header_title">发送邮件</span>
+        <span class="close" @click="closeMailBox" title="点击关闭">&times</span>
+      </div>
+      <div class="content">
+        <div class="mail_title"><span>标题</span><input type="text" v-model="mailContent.title" placeholder="请输入标题"></div>
+        <div class="mail_contact"><span>发送至</span><input type="text" v-model="mailContent.contact" placeholder="添加联系人"></div>
+        <div class="mail_words"><span>内容</span><div id="editor"></div></div>
+        <div class="checked_files">
+          <span>已选附件</span>
+          <div class="checked_item" v-for="item in mailFiles">
+            <svg class="icon" aria-hidden="true"><use :xlink:href="fileIconsOrOthers(item.name)"></use></svg>
+            <p>{{item.name}}</p>
+          </div>
+        </div>
+        <div><button type="button" @click="sendMail">发送</button></div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -126,6 +158,8 @@
   import { mapState } from "vuex"
   import Draggable from "draggable"
   import WaveSurfer from 'wavesurfer.js'
+  import Editor from 'wangeditor'
+  window.Editor = Editor
   import {
     inputIsEmpty,
     uploadOrUpdate,
@@ -133,7 +167,9 @@
     toggleTip,
     formatTime,
     getNowDay,
-    fetchList
+    fetchList,
+    addTag, delTag,
+    addRemark, delRemark
   } from "../publics/public"
   export default {
     name: "Popup",
@@ -165,19 +201,20 @@
         createFoldInUpload: false,
         // audioUrl: this.getAudioUrl,
         audioUrl: 'https://src.fanmingfei.com/nigel.mp3',
-        // audioUrl:'',
-        nowAudio:{name:'因三月.mp3',size:12933,time:'',keyword:['xx','yy'],tag:['a','b'],remark:'好听....'},
+        nowAudio:{name:'因三月.mp3',size:12933,time:'',keyword:['xx','yy'],tag:['a','b'],comments:{}},
         isOpacity:false,
-        isModifyRemark:false,
         newTag:'',
+        newTag:'',
+        newRemark:'',
         duration: formatTime(),
         current:  formatTime(),
         catalog: [],
-        defaultProps: {children: 'children', label: 'label'}
+        defaultProps: {children: 'children', label: 'label'},
+        mailContent:{title:'', contact:'', content:''}
       }
     },
     computed:{
-      ...mapState(['isUpFile','isNewTask', 'isNewFolder','isAudioPlay', 'isCatalogTree']),
+      ...mapState(['isUpFile','isNewTask', 'isNewFolder','isAudioPlay', 'isCatalogTree','isMail', 'mailFiles', 'file_icons']),
       isAudioPlay:{
         get(){
           return this.$store.state.isAudioPlay
@@ -199,13 +236,106 @@
       if(localStorage.getItem('tasks') === null) {
         localStorage.setItem('tasks',JSON.stringify(this.$store.state.tasks))
       }
-      // this.fetchNode()
-      this.createWaveSurfer()
-      new Draggable(this.$refs.audiosPlay, {
-        handle: this.$refs.handle
-      })
+      window.aaa = this
     },
     methods:{
+      sendMail(){
+        let ids = []
+        this.mailFiles.forEach(el=>{ids.push(el.id)})
+        let formData = new FormData()
+        formData.append('title', this.mailContent.title)
+        formData.append('rec', this.mailContent.contact)
+        formData.append('content',this.mailContent.content)
+        formData.append('ids', ids)
+        uploadOrUpdate('/sendmail', formData).then(data=>{
+          if (data.success){
+            toggleTip(this, '发送成功')
+            this.$store.commit('closeMail')
+            this.$store.commit('setMailFilesFull')
+
+          } else{
+            toggleTip(this, '发送失败，请检查')
+            this.$store.commit('closeMail')
+            this.$store.commit('setMailFilesFull')
+          }
+        }).catch(error=>{
+          toggleTip(this, error)
+        })
+      },
+      createEditor(){
+        this.editor = new Editor("#editor")
+        this.editor.customConfig.menus = [
+          'head',  // 标题
+          'bold',  // 粗体
+          'fontSize',  // 字号
+          'fontName',  // 字体
+          'italic',  // 斜体
+          'underline',  // 下划线
+          'strikeThrough',  // 删除线
+          'foreColor',  // 文字颜色
+          'link',  // 插入链接
+          'list',  // 列表
+          'justify',  // 对齐方式
+          'table',  // 表格
+          'undo',  // 撤销
+          'redo'  // 重复
+        ]
+        this.editor.create()
+      },
+      closeMailBox(){
+        this.$store.commit('closeMail')
+      },
+      delOneTag(id, name, index) {
+        delTag(id, name).then(data => {
+          if (data.success) {
+            this.nowAudio.tag.splice(index, 1)
+          }
+        }).catch(error=>{
+          toggleTip(this, error)
+        })
+      },
+      delOneRemark(cid) {
+        const index = this.nowAudio.comments.findIndex(el => {return el.id == cid})
+        delRemark(cid).then(data => {
+          if (data.success) {
+            this.nowAudio.comments.splice(index, 1)
+          }
+        }).catch(error=>{
+          toggleTip(this, error)
+        })
+      },
+      addTag(pid, index) {
+        // 1.本地验证
+        if (!this.newTag) {
+          inputIsEmpty(this, '不能添加空标签')
+          return
+        }
+        addTag(pid, this.newTag).then(data => {
+          if(data.success){
+            this.nowAudio.tag.splice(index, 1)
+            this.newTag = ''
+          }
+
+        }).catch(error=>{
+          toggleTip(this, error)
+        })
+      },
+      addRemark(pid, id) {
+        const index = this.nowAudio.comment.findIndex(el=>{el.id == id})
+        // 1.本地验证
+        if (!this.newRemark) {
+          inputIsEmpty(this, '不能添加空评论')
+          return
+        }
+        addRemark(pid, this.newRemark).then(data => {
+          if (data.success){
+            this.nowAudio.comment.splice(index, 1)
+            this.newRemark = ''
+          }
+        }).catch(error=>{
+          toggleTip(this, error)
+        })
+      },
       // 文件树形目录
       fetchNode(){
         this.catalog = []
@@ -394,31 +524,7 @@
       closeAudioPlay(){
         // 1.停止播放 2.弹窗关闭
         this.wavesurfer.pause()
-        this. isAudioPlay = false
-      },
-      delOneTag(index) {
-        // 1. 通知后台删除此标签
-        // 2. 本地删除
-        this.nowAudio.tag.splice(index, 1)
-      },
-      addTag() {
-        // 1.本地验证
-        if (!this.newTag) {
-          inputIsEmpty(this, '不能添加空标签')
-          return
-        }
-        // 2.通知后台添加标签
-        // 3.本地显示添加
-        this.nowAudio.tag.push(this.newTag)
-        this.newTag = ''
-      },
-      modifyRemark() {
-        this.isModifyRemark = true
-      },
-      completeModifyRemark() {
-        // 1.通知后台该音频评论修改
-        // 2.本地显示修改后的评论
-        this.isModifyRemark = false
+        this.isAudioPlay = false
       },
       getType(name) {
         const type = name.split('.').pop()
@@ -427,11 +533,111 @@
       getFileSize(size) {
         return getFileSize(size)
       },
+      fileIconsOrOthers(name) {
+        const ext = name.split('.').pop()
+        return "#icon-file_" + (this.file_icons.indexOf(ext) < 0 ? 'others' : ext)
+      },
+    },
+    watch:{
+      isAudioPlay() {
+        if (this.isAudioPlay) {
+          this.$nextTick(() => {
+            this.createWaveSurfer()
+            new Draggable(this.$refs.audiosPlay, {
+              handle: this.$refs.audioHandle
+            })
+          })
+        }
+      },
+      isMail() {
+        if (this.isMail) {
+          this.$nextTick(() => {
+            this.createEditor()
+            new Draggable(this.$refs.mailBox, {
+              handle: this.$refs.mailHandle
+            })
+          })
+        }
+      }
     }
   }
 </script>
 
 <style scoped>
+  /*发送邮件开始*/
+  .mail_box{
+    position: absolute;
+    width: 600px;
+    top: 50%;
+    left: 50%;
+    margin-left: -300px;
+    margin-top: -150px;
+    border-radius:5px;
+    box-shadow: 0 0 5px 1px #a4a2a2;
+    background-color: #fff;
+  }
+  .mail_box>.header{
+    height: 20px;
+    background-color: rgba(1, 103, 241, 0.17);
+    padding: 3px 8px;
+    color: cornflowerblue;
+  }
+  .mail_box>.header>.header_title{
+    font-size: 14px;
+    margin-left: 10px;
+  }
+  .mail_box>.header>.close{
+    float: right;
+    cursor: pointer;
+  }
+  .mail_box>.content{
+    padding: 15px;
+  }
+  .mail_box>.content>div{
+    margin: 5px;
+  }
+  .mail_box>.content>.mail_title>span,
+  .mail_box>.content>.mail_contact>span,
+  .mail_box>.content>.mail_words>span,
+  .mail_box>.content>.checked_files>span {
+    color: cornflowerblue;
+    display: inline-block;
+    padding: 10px;
+    width: 70px;
+  }
+  .content button{
+    padding: 5px 20px;
+    outline: none;
+    border: 1px solid gray;
+    border-radius: 5px;
+    border: 1px solid cornflowerblue;
+    background-color: cornflowerblue;
+    color: white;
+    cursor: pointer;
+  }
+  .checked_files>span{
+    float: left;
+  }
+  .mail_box>.content input{
+    outline: none;
+    width: 400px;
+    border: 1px solid #a9a9a9;
+    border-radius: 5px;
+    padding: 5px;
+  }
+  .mail_box>.content .checked_item{
+    display: inline-block;
+    width: 100px;
+    height: 100px;
+    text-align: center;
+  }
+  .mail_box>.content .checked_item>svg{
+    font-size: 45px;
+  }
+  .mail_box>.content .checked_item>p{
+    font-size: 14px;
+  }
+  /*发送邮件结束*/
   /*目录树*/
   .catalog_tree{
     position: fixed;
@@ -643,7 +849,9 @@
     width: 56px;
     margin: 5px 35px;
     color: cornflowerblue;
+    font-size: 14px;
   }
+  .audios_play .tag_audio,
   .audios_play .remark_audio{
     font-size: 0;
   }
@@ -651,17 +859,9 @@
   .audios_play .tag_audio span{
     font-size: 14px;
   }
-  .audios_play .tag_audio .tag{
+  .audios_play .tag_audio .tag,
+  .audios_play .remark_audio .remark{
     font-size: 11px;
-  }
-  .audios_play .remark_audio .remarks{
-    font-size: 13px;
-    margin-right: 10px;
-  }
-  .audios_play .remark_audio .icon-brush{
-    font-size: 13px;
-    color: cornflowerblue;
-    cursor: pointer;
   }
   .audios_play .input_outer{
     position: relative;
@@ -677,7 +877,7 @@
     padding: 2px 17px 2px 4px;
     font-size: 12px;
   }
-  .audios_play .tag_input{
+  .have_content{
     margin-left: 126px;
   }
   .audios_play .ok_tag_input,

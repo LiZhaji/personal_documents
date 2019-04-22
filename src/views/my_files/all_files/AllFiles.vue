@@ -18,7 +18,7 @@
         </tr>
       </thead>
       <tbody>
-      <tr v-for="(item, index) in allFolders" :key="'folder' + item.id" @click="clickItem(index)" :class="{item_checked:item.itemChecked}">
+      <tr v-for="(item, index) in allFolders" :key="'folder' + item.id" :class="{item_checked:item.itemChecked}">
         <td ><span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span></td>
         <td class="file_importance">
           <svg @click="changeImportance(index)" class="icon" aria-hidden="true"><use :xlink:href="`#icon-importance${item.importance}`"></use></svg>
@@ -37,7 +37,7 @@
           <use v-show="item.like" xlink:href="#icon-like_fill"></use>
         </svg></td>
       </tr>
-      <tr v-for="(item, index) in allFiles" :key="'file' + item.id" @click="clickItem(index)" :class="{item_checked:item.itemChecked}">
+      <tr v-for="(item, index) in allFiles" :key="'file' + item.id" @click="clickItemFile(item)" :class="{item_checked:item.itemChecked}">
         <td ><span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span></td>
         <td class="file_importance">
           <svg @click="changeImportance(index)" class="icon" aria-hidden="true"><use :xlink:href="`#icon-importance${item.importance}`"></use></svg>
@@ -77,11 +77,11 @@
   export default {
     data() {
       return {
-        nowChecked:[],
         allFolders:[],
         allFiles:[],
+        checkedFiles:[],
         isChild:false,
-        catalog:[]
+        catalog:[],
       }
     },
     computed:{
@@ -140,22 +140,6 @@
           }
         })
       },
-      // getFileType(curFile){
-      //   console.log('curFile.name:',curFile.name)
-      //   let curType = curFile.name.split('.').pop()
-      //   if(['doc','docx','pdf','xls','txt'].indexOf(curType) >= 0){
-      //     curType = 'docu'
-      //   }else if (['jpg','png','gif'].indexOf(curType) >= 0){
-      //     curType = 'image'
-      //   }else if (['movie','mp4','avi'].indexOf(curType) >= 0){
-      //     curType = 'video'
-      //   }else if (['mp3','wav'].indexOf(curType) >= 0) {
-      //     curType = 'audio'
-      //   }else {
-      //     curType = 'others'
-      //   }
-      //   return curType
-      // },
       openFile(fileItem){
         switch (fileItem.category) {
           // document
@@ -195,8 +179,17 @@
         const ext = file.name.split('.').pop()
         return "#icon-file_" + (this.file_icons.indexOf(ext) < 0 ? 'others' : ext)
       },
-      clickItem(index){
-        clickItem(this.allFiles, index, this.nowChecked)
+      clickItemFile(item){
+        item.itemChecked = !item.itemChecked
+        const index = this.checkedFiles.findIndex(el=>{el.id === item.id})
+        if (item.itemChecked && index < 0){
+          this.checkedFiles.push({id: item.id, name: item.name})
+        }else{
+          this.checkedFiles.splice(index, 1)
+        }
+        if (this.checkedFiles.length != 0){
+          this.$store.commit('setMailFiles', this.checkedFiles)
+        }
       },
       toggleCollection(index){
         toggleCollection(this, this.allFiles, index)

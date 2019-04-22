@@ -16,7 +16,7 @@
       </tr>
       </thead>
       <tbody>
-      <tr v-for="(item, index) in allVideos" :key="index" @click="clickItem(index)" :class="{item_checked:item.itemChecked}" >
+      <tr v-for="(item, index) in allVideos" :key="index" @click="clickItem(item)" :class="{item_checked:item.itemChecked}" >
         <td ><span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span></td>
         <td class="file_importance">
           <svg class="icon" aria-hidden="true"><use :xlink:href="`#icon-importance${item.importance}`"></use></svg>
@@ -54,9 +54,8 @@
   export default {
     data() {
       return {
-        allVideos:[{
-          name:'xxxxxxxx'
-        }]
+        allVideos:[],
+        checkedVideos:[]
       }
     },
     components:{
@@ -96,9 +95,19 @@
         let baseUrl = ''
         return baseUrl + url
       },
-      clickItem(index){
-        clickItem(this.allAudios, index, this.nowChecked)
-      },
+      clickItem(item){
+        item.itemChecked = !item.itemChecked
+        const index = this.checkedVideos.findIndex(el=>{el.id === item.id})
+        if (item.itemChecked && index < 0){
+          this.checkedVideos.push({id: item.id, name: item.name})
+        }else{
+          this.checkedCategory.splice(index, 1)
+          this.checkedVideos.splice(index, 1)
+        }
+        if (this.checkedVideos.length != 0){
+          this.$store.commit('setMailFiles', this.checkedVideos)
+        }
+    },
       toggleCollection(index){
         console.log(this.allAudios[index].collection)
         toggleCollection(this, this.allAudios, index)

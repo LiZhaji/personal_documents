@@ -44,30 +44,22 @@
           {{item}} <img @click="delOneTag(nowPicture.id, item, index)" src="../assets/img/close.png" alt="删除" title="点击删除">
         </span>
         <div class="input_outer">
-          <input class="tag_input" type="text" v-model="newTag" placeholder="自定义标签"
-                 v-on:keyup.enter="addTag(nowPicture.id)">
-          <span class="iconfont icon-checked_circle ok_tag_input" @click="addTag(nowPicture.id)"></span>
-        </div>
-      </div>
+      <input class="tag_input" type="text" v-model="newTag" placeholder="自定义标签"
+             v-on:keyup.enter="addTag(nowPicture.id, index)" :class="nowPicture.tag.length != 0 ? 'have_content': ''">
+      <span class="iconfont icon-checked_circle ok_tag_input" @click="addTag(nowPicture.id, index)"></span>
+    </div>
+    </div>
       <div class="remark_pic_info"><span>评论</span>
         <span class="remark" v-for="(item,index) in nowPicture.comments" :key="index">
           {{item.content}} <img @click="delOneRemark(item.id)" src="../assets/img/close.png" alt="删除" title="点击删除">
         </span>
         <div class="input_outer">
           <input class="remark_input" type="text" v-model="newRemark" placeholder="新增评论"
-                 v-on:keyup.enter="addRemark(nowPicture.id, nowPicture.url)">
-          <span class="iconfont icon-checked_circle remark_tag_input"
-                @click="addRemark(nowPicture.id, nowPicture.url)"></span>
+                 v-on:keyup.enter="addRemark(nowPicture.id, item.id)" :class="Object.keys(nowPicture.comments).length != 0 ? 'have_content': ''">
+          <span class="iconfont icon-checked_circle ok_remark_input"
+                @click="addRemark(nowPicture.id, item.id)"></span>
         </div>
       </div>
-      <!--      <div class="remark_pic_info"><span>用户评价</span>-->
-      <!--        <span v-show="!isModifyRemark" class="remarks">{{nowPicture.remark}}</span>-->
-      <!--        <span v-show="!isModifyRemark" class="iconfont icon-brush" @click="modifyRemark"></span>-->
-      <!--        <div class="input_outer" v-show="isModifyRemark">-->
-      <!--          <input v-model="nowPicture.remark" class="remark_input" type="text" placeholder="评价"  v-on:keyup.enter="completeModifyRemark">-->
-      <!--          <span class="iconfont icon-checked_circle ok_remark_input" @click="completeModifyRemark"></span>-->
-      <!--        </div>-->
-      <!--      </div>-->
     </div>
   </div>
 </template>
@@ -92,12 +84,9 @@
         markup: '',
         allPictures: [],
         showSpecificInfo: true,
-        nowPicture: {
-          info: {}
-        },
+        nowPicture: {info: {}},
         initIndex: 0,
         isEntering: true,
-        isModifyRemark: false,
         newTag: '',
         newRemark: '',
         nowId: 0
@@ -144,14 +133,13 @@
         let w = (Math.round(item.score * Math.pow(10, 2 + 2)) / Math.pow(10, 2)).toFixed(2) + '%'
         return bgc + ("width: " + w)
       },
-      modifyRemark() {
-        this.isModifyRemark = true
-      },
       delOneTag(id, name, index) {
         delTag(id, name).then(data => {
           if (data.success) {
             this.nowPicture.tag.splice(index, 1)
           }
+        }).catch(error=>{
+          toggleTip(this, error)
         })
       },
       delOneRemark(cid) {
@@ -160,28 +148,40 @@
           if (data.success) {
             this.nowPicture.comments.splice(index, 1)
           }
+        }).catch(error=>{
+          toggleTip(this, error)
         })
       },
-      addTag(id) {
+      addTag(pid, index) {
         // 1.本地验证
         if (!this.newTag) {
           inputIsEmpty(this, '不能添加空标签')
           return
         }
-        addTag(id, this.newTag).then(data => {
-          this.nowPicture = data
-          this.newTag = ''
+        addTag(pid, this.newTag).then(data => {
+          if(data.success){
+            this.nowPicture.tag.splice(index, 0, this.newTag)
+            this.newTag = ''
+          }
+
+        }).catch(error=>{
+          toggleTip(this, error)
         })
       },
-      addRemark(id) {
+      addRemark(pid, id) {
+        const index = this.nowPicture.comments.findIndex(el=>{el.id == id})
         // 1.本地验证
         if (!this.newRemark) {
           inputIsEmpty(this, '不能添加空评论')
           return
         }
-        addRemark(id, this.newRemark).then(data => {
-          this.nowPicture = data
-          this.newRemark = ''
+        addRemark(pid, this.newRemark).then(data => {
+          if (data.success){
+            this.nowPicture.comments.splice(index, 0, {content: this.newRemark})
+            this.newRemark = ''
+          }
+        }).catch(error=>{
+          toggleTip(this, error)
         })
       },
       getFileSize(size) {
@@ -199,18 +199,17 @@
       printPic() {
 
       },
-      addMarkup() {
-
-      },
       changes(index, oldIndex) {
         this.nowPicture = this.allPictures[index]
-        console.log(this.nowPicture)
       }
     }
   }
 </script>
 
 <style scoped>
+  .have_content{
+    margin-left: 85px;
+  }
   .nav {
     position: absolute;
     top: 10px;
@@ -328,7 +327,7 @@
   }
 
   .specificInfo .ok_tag_input,
-  .specificInfo .remark_tag_input {
+  .specificInfo .ok_remark_input {
     position: absolute;
     right: 5px;
     top: 5px;

@@ -14,29 +14,32 @@
         <use v-show="!nowFile.attention" xlink:href="#icon-like"></use>
         <use v-show="nowFile.attention" xlink:href="#icon-like_fill"></use>
       </svg>
-      <p><span>文件名</span>{{nowFile.name}}</p>
+      <p><span>文件名</span><span v-html="nowFile.name"></span></p>
       <p><span>文件类型</span>{{type}}</p>
       <p><span>文件大小</span>{{size}}</p>
       <p><span>创建时间</span>{{lastTime}}</p>
       <div><span>关键词</span><span class="keyword" v-for="(item,index) in nowFile.keyword" :key="index">{{item}}</span>
         <p><img class="wordCloud" :src="nowFile.info.wordCloudUrl" alt="词云"></p>
       </div>
-      <div class="tag_file_info"><span>标签</span>
+      <div class="tag_pic_info"><span>标签</span>
         <span class="tag" v-for="(item,index) in nowFile.tag" :key="index">
-            {{item}} <img @click="delOneTag(index)" src="../../assets/img/close.png" alt="删除" title="点击删除">
-            </span>
+          {{item}} <img @click="delOneTag(nowFile.id, item, index)" src="../../assets/img/close.png" alt="删除" title="点击删除">
+        </span>
         <div class="input_outer">
-          <input class="tag_input" type="text" v-model="newTag" placeholder="自定义标签" v-on:keyup.enter="addTag">
-          <span class="iconfont icon-checked_circle ok_tag_input" @click="addTag"></span>
+          <input class="tag_input" type="text" v-model="newTag" placeholder="自定义标签"
+                 v-on:keyup.enter="addTag(nowFile.id, index)">
+          <span class="iconfont icon-checked_circle ok_tag_input" @click="addTag(nowFile.id, index)"></span>
         </div>
       </div>
-      <div class="remark_file_info"><span>用户评价</span>
-        <span v-show="!isModifyRemark" class="remarks">{{nowFile.remark}}</span>
-        <span v-show="!isModifyRemark" class="iconfont icon-brush" @click="modifyRemark"></span>
-        <div class="input_outer" v-show="isModifyRemark">
-          <input v-model="nowFile.remark" class="remark_input" type="text" placeholder="评价"
-                 v-on:keyup.enter="completeModifyRemark">
-          <span class="iconfont icon-checked_circle ok_remark_input" @click="completeModifyRemark"></span>
+      <div class="remark_pic_info"><span>评论</span>
+        <span class="remark" v-for="(item,index) in nowFile.comments" :key="index">
+          {{item.content}} <img @click="delOneRemark(item.id)" src="../../assets/img/close.png" alt="删除" title="点击删除">
+        </span>
+        <div class="input_outer">
+          <input class="remark_input" type="text" v-model="newRemark" placeholder="新增评论"
+                 v-on:keyup.enter="addRemark(nowFile.id, item.id)">
+          <span class="iconfont icon-checked_circle ok_remark_input"
+                @click="addRemark(nowFile.id, item.id)"></span>
         </div>
       </div>
     </div>
@@ -52,7 +55,9 @@
     inputIsEmpty,
     toggleCollectionNotIndex,
     toggleAttentionNotIndex,
-    fetchList, toggleTip
+    toggleTip,
+    addTag, delTag,
+    addRemark, delRemark
   } from "../../publics/public";
 
   export default {
@@ -60,8 +65,8 @@
     data() {
       return {
         markup: '',
-        isModifyRemark: false,
         newTag: '',
+        newRemark:'',
         hackReset: true,
         fromSearch: false
       }
@@ -113,38 +118,69 @@
       toggleAttentionNotIndex() {
         toggleAttentionNotIndex(this, this.nowFile)
       },
-      modifyRemark() {
-        this.isModifyRemark = true
+      delOneTag(id, name, index) {
+        delTag(id, name).then(data => {
+          if (data.success) {
+            this.nowVideo.tag.splice(index, 1)
+          }
+        }).catch(error => {
+          toggleTip(this, error)
+        })
       },
-      completeModifyRemark() {
-        // 1.通知后台该文档评论修改
-        // 2.本地显示修改后的评论
-        this.isModifyRemark = false
+      delOneRemark(cid) {
+        const index = this.nowVideo.comments.findIndex(el => {
+          return el.id == cid
+        })
+        delRemark(cid).then(data => {
+          if (data.success) {
+            this.nowVideo.comments.splice(index, 1)
+          }
+        }).catch(error => {
+          toggleTip(this, error)
+        })
       },
-      delOneTag(index) {
-        // 1. 通知后台删除此标签
-        // 2. 本地删除
-        this.nowFile.tag.splice(index, 1)
-      },
-      addTag() {
+      addTag(pid, index) {
         // 1.本地验证
         if (!this.newTag) {
           inputIsEmpty(this, '不能添加空标签')
           return
         }
-        // 2.通知后台添加标签
-        // 3.本地显示添加
-        this.nowFile.tag.push(this.newTag)
-        this.newTag = ''
+        addTag(pid, this.newTag).then(data => {
+          if (data.success) {
+            this.nowVideo.tag.splice(index, 1)
+            this.newTag = ''
+          }
+
+        }).catch(error => {
+          toggleTip(this, error)
+        })
       },
-    },
-    Save() {
-      document.getElementById("PageOfficeCtrl1").WebSave();
-    },
-    AddSeal() {
-      try{
-        document.getElementById("PageOfficeCtrl1").ZoomSeal.AddSeal();
-      }catch (e){ };
+      addRemark(pid, id) {
+        const index = this.nowVideo.comment.findIndex(el => {
+          el.id == id
+        })
+        // 1.本地验证
+        if (!this.newRemark) {
+          inputIsEmpty(this, '不能添加空评论')
+          return
+        }
+        addRemark(pid, this.newRemark).then(data => {
+          if (data.success) {
+            this.nowVideo.comment.splice(index, 1)
+            this.newRemark = ''
+          }
+        }).catch(error => {
+          toggleTip(this, error)
+        })
+      },
+      Save() {
+        document.getElementById("PageOfficeCtrl1").WebSave();
+      },
+      AddSeal() {
+        try{
+          document.getElementById("PageOfficeCtrl1").ZoomSeal.AddSeal();
+        }catch (e){ };
+      }
     }
   }
 </script>
@@ -168,6 +204,7 @@
   }
   .file_nav > span {
     cursor: pointer;
+    margin-right: 20px;
   }
 
   .show_file iframe {

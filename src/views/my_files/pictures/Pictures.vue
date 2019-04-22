@@ -2,8 +2,7 @@
   <div class="pictures">
     <FileOperation></FileOperation>
     <div class="file_nav">
-      <span v-show="!enterIntelPic">全部图片</span>
-      <span v-show="enterIntelPic" class="file_nav_intel"><span @click="intelOrder">智能归档</span> > {{keyName}}</span>
+      <span >全部图片</span>
       <el-popover
         popper-class="order_picker"
         placement="top"
@@ -15,7 +14,7 @@
         <!--<el-button >删除</el-button>-->
       </el-popover>
     </div>
-    <table v-if="isDefaultOrder">
+    <table >
       <thead>
       <tr>
         <td class="checked"></td>
@@ -57,24 +56,24 @@
       </tbody>
     </table>
     <!-- 自定义归档目录 -->
-    <el-popover placement="top" width="160" popper-class="define_catalog_outer">
-      <p class="def_catalog" v-show="chooseDefineCatalog" v-for="item in defineFiles" @click="defCatalogOk(item.id)">
-        <svg v-show="item.id >= 0" class="icon" aria-hidden="true">
-          <use xlink:href="#icon-aFile"></use>
-        </svg>
-        {{item.name}}
-      </p>
-      <span slot="reference" v-show="isDefineFile" class="defBtn" @click="defineFile">归档于</span>
-    </el-popover>
-    <!-- 新建自定义归档-->
-    <div v-show="createDefCatalog" class="newDef">
-      <svg class="icon" aria-hidden="true">
-        <use xlink:href="#icon-aFile"></use>
-      </svg>
-      <input type="text" v-model="defCatName" placeholder="请输入文件名">
-      <span class="iconfont icon-checked_circle" @click="newDefCatOk"></span>
-      <span class="iconfont icon-close" @click="cancelNewDefCat"></span>
-    </div>
+<!--    <el-popover placement="top" width="160" popper-class="define_catalog_outer">-->
+<!--      <p class="def_catalog" v-show="chooseDefineCatalog" v-for="item in defineFiles" @click="defCatalogOk(item.id)">-->
+<!--        <svg v-show="item.id >= 0" class="icon" aria-hidden="true">-->
+<!--          <use xlink:href="#icon-aFile"></use>-->
+<!--        </svg>-->
+<!--        {{item.name}}-->
+<!--      </p>-->
+<!--      <span slot="reference" v-show="isDefineFile" class="defBtn" @click="defineFile">归档于</span>-->
+<!--    </el-popover>-->
+<!--    &lt;!&ndash; 新建自定义归档&ndash;&gt;-->
+<!--    <div v-show="createDefCatalog" class="newDef">-->
+<!--      <svg class="icon" aria-hidden="true">-->
+<!--        <use xlink:href="#icon-aFile"></use>-->
+<!--      </svg>-->
+<!--      <input type="text" v-model="defCatName" placeholder="请输入文件名">-->
+<!--      <span class="iconfont icon-checked_circle" @click="newDefCatOk"></span>-->
+<!--      <span class="iconfont icon-close" @click="cancelNewDefCat"></span>-->
+<!--    </div>-->
   </div>
 </template>
 
@@ -88,7 +87,8 @@
     unixChange,
     getFileSize,
     fetchList,
-    uploadOrUpdate
+    uploadOrUpdate,
+    inputIsEmpty
   } from "../../../publics/public"
 
   export default {
@@ -96,15 +96,11 @@
       return {
         allPictures: [],
         nowCheckedDefault: [],
-
-        intelligenceOrderPics: [],
-        classPics: [],
-        nowCheckedClsPicIds: [],
-        nowCheckedClsPicCategory: [],
-        keyName: '',
         chooseDefineCatalog:false,
         createDefCatalog: false,
-        defCatName:''
+        defCatName:'',
+        defineFiles:[],
+        mailFiles:[]
       }
     },
     computed: {
@@ -129,6 +125,18 @@
       })
     },
     methods: {
+      itemCheckedDefault(item){
+        item.itemChecked = !item.itemChecked
+        const index = this.mailFiles.findIndex(el=>{el.id === item.id})
+        if (item.itemChecked && index < 0) {
+          this.mailFiles.push({id: item.id, name: item.name})
+        }else{
+          this.mailFiles.splice(index, 1)
+        }
+        if (this.mailFiles.length != 0){
+          this.$store.commit('setMailFiles', this.mailFiles)
+        }
+      },
       defCatalogOk(id) {
         // id>=0 表示归档到已有，id<0 表示新建
         if (id >= 0) {
@@ -189,58 +197,13 @@
         })
       },
       defaultOrder() {
-        this.isDefaultOrder = true
-        this.isTimeLine = false
-        this.isIntelligenceOrder = false
-        this.enterIntelPic = false
         this.fetchListDefault()
       },
       timeLine() {
-        this.isTimeLine = true
-        this.isDefaultOrder = false
-        this.isIntelligenceOrder = false
-        this.enterIntelPic = false
+        this.$router.push('/main/timeLinePics')
       },
       intelOrder() {
-        this.enterIntelPic = false
-        // 从后台请求数据
-        fetchList('/getimageinsight').then(data => {
-          this.intelligenceOrderPics = data
-        }).catch((error) => {
-          toggleTip(this, error)
-        })
-      },
-      itemCheckedCls(item) {
-        item.itemChecked = !item.itemChecked
-        if (item.itemChecked && this.nowCheckedClsPicIds.indexOf(item.id) === -1) {
-          this.nowCheckedClsPicIds.push(item.id)
-          this.nowCheckedClsPicCategory.push(item.category)
-        } else {
-          let index = this.nowCheckedClsPicIds.findIndex(el => {
-            return el.id == item.id
-          })
-          this.nowCheckedClsPicIds.splice(index, 1)
-          this.nowCheckedClsPicCategory.splice(index, 1)
-        }
-        if (this.nowCheckedClsPicIds) {
-          this.isDefineFile = true
-          this.$store.commit('setNowCheckedIds', this.nowCheckedClsPicIds)
-          this.$store.commit('setNowCheckedCategories', this.nowCheckedClsPicCategory)
-        } else {
-          this.isDefineFile = true
-        }
-      },
-      itemCheckedDefault(item) {
-        item.itemChecked = !item.itemChecked
-        if (item.itemChecked && this.nowCheckedDefault.indexOf(item.id) === -1) {
-          this.nowCheckedDefault.push(item.id)
-        } else {
-          let index = this.nowCheckedDefault.findIndex(el => {
-            return el.id == item.id
-          })
-          this.nowCheckedDefault.splice(index, 1)
-        }
-        console.log('nowCheckedDefault:', this.nowCheckedDefault)
+        this.$router.push('/main/intelligentPics')
       },
       showInfo(id) {
         let routeData = this.$router.resolve({
@@ -363,6 +326,6 @@
   }
 
   .icon-order {
-    margin-left: 80%;
+    margin-left: 85%;
   }
 </style>

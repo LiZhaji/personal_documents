@@ -23,7 +23,7 @@
         </td>
         <td><div class="file_name" >
           <svg class="icon aFile" aria-hidden="true"><use :xlink:href=fileIconsOrOthers(item.id)></use></svg>
-          <span @click.stop="showFile(item.id)" title="点击查看详情">{{item.name}}</span>
+          <span @click.stop="showFile(item.id)" title="点击查看详情" v-html="item.name"></span>
         </div></td>
         <td>{{unixChange(item.serverTime)}}</td>
         <td>{{getFileSize(item.size)}}</td>

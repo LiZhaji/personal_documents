@@ -6,7 +6,7 @@
       <span @click="backupResult">全部搜索结果 </span>
       <span class="catalog_view" v-for="(item, index) in catalog" :key="'catalog' + item.id"
             @click="openFolder(0, item.id, item.name)">
-        <span v-show="index === 0">| {{item.name}}</span><span v-show="index > 0"> > {{item.name}}</span> </span>
+        <span v-show="index === 0" v-html="'|' + item.name"> </span><span v-show="index > 0" v-html="'>' + item.name"></span> </span>
     </div>
     <div class="folder_outer" v-show="searchResult">
       <div v-for="(item, index) in allFolderResult" :key="index" @click.stop="openFolder(1, item.id, item.name)">

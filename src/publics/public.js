@@ -172,24 +172,9 @@ export const addTag = (id, newTag)=>{
   formData.append('id', id)
   formData.append('name', newTag)
   const postUrl = window.baseUrl + '/addtag'
-  const getUrl = window.baseUrl + '/fileinfo/' + id
   return axios.post(postUrl,formData).then(response=>{
-    if (response.status === 200 && response.data.success){
-      return  axios.get(getUrl).then(response=>{
-        if (response.status === 200) {
-          response.data.info = JSON.parse(response.data.info)
-          if (response.data.keyword) {
-            response.data.keyword = response.data.keyword.split(' ')
-          }
-          if (response.data.tag) {
-            response.data.tag = response.data.tag.split(' ')
-          } else {
-            response.data.tag = []
-          }
-          return response.data
-        }
-
-      })
+    if (response.status === 200 ){
+      return response.data
     }
   })
 }
@@ -198,15 +183,9 @@ export const delTag = (id ,name)=>{
   formData.append('id', id)
   formData.append('name', name)
   const postUrl = window.baseUrl + '/deltag'
-  // const getUrl = window.baseUrl + '/fileinfo/' + id
   return axios.post(postUrl,formData).then(response=>{
     if (response.status === 200 && response.data.success){
-     // return axios.get(getUrl).then(response=>{
-     //    if (response.status === 200) {
-     //      console.log('response.data',response.data)
-          return response.data
-        // }
-      // })
+      return response.data
     }
   })
 }
@@ -216,24 +195,9 @@ export const addRemark = (id, newRemark)=>{
   formData.append('id', id)
   formData.append('content', newRemark)
   const postUrl = window.baseUrl + '/addcomment'
-  const getUrl = window.baseUrl + '/fileinfo/' + id
   return axios.post(postUrl,formData).then(response=>{
-    if (response.status === 200 && response.data.success){
-      return  axios.get(getUrl).then(response=>{
-        if (response.status === 200) {
-          response.data.info = JSON.parse(response.data.info)
-          if (response.data.keyword) {
-            response.data.keyword = response.data.keyword.split(' ')
-          }
-          if (response.data.tag) {
-            response.data.tag = response.data.tag.split(' ')
-          } else {
-            response.data.tag = []
-          }
-          return response.data
-        }
-
-      })
+    if (response.status === 200 ){
+      return response.data
     }
   })
 }
@@ -241,15 +205,9 @@ export const delRemark = (cid)=>{
   let formData = new FormData()
   formData.append('cid', cid)
   const postUrl = window.baseUrl + '/delcomment'
-  // const getUrl = window.baseUrl + '/fileinfo/' + id
   return axios.post(postUrl,formData).then(response=>{
     if (response.status === 200 && response.data.success){
-      // return axios.get(getUrl).then(response=>{
-      //    if (response.status === 200) {
-      //      console.log('response.data',response.data)
       return response.data
-      // }
-      // })
     }
   })
 }

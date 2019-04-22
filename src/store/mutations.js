@@ -25,13 +25,16 @@ export default {
   setIntelFileTime(state,intelFileTime){
     state.intelFileTime = intelFileTime
   },
-  setNowCheckedIds(state,nowCheckedIds){
-    state.nowCheckedIds = nowCheckedIds
-    if (state.nowCheckedIds.length == 0){
-      state.isDefineFile = false
-    }
+  openMail(state){
+    state.isMail = true
   },
-  setNowCheckedCategories(state,nowCheckedCategories){
-    state.nowCheckedCategories = nowCheckedCategories
-  }
+  closeMail(state){
+    state.isMail = false
+  },
+  setMailFiles(state,mailFiles){
+    state.mailFiles = mailFiles
+  },
+  setMailFilesFull(state){
+    state.mailFiles = []
+  },
 }

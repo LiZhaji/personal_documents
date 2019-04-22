@@ -13,7 +13,7 @@
         <span slot="reference" class="iconfont icon-order"></span>
       </el-popover>
     </div>
-    <div v-if="isTimeLine" class="time_line">
+    <div class="time_line">
       <div v-for="(item, key) in timeLinePics" class="month_div">
         <div>
           <svg class="icon" aria-hidden="true">
@@ -26,8 +26,6 @@
           <span class="checkbox iconfont icon-checked_circle" @click.stop="itemCheckedTimeLine(smallItem)"></span>
           <div class="img_outer" @click="showInfo(smallItem.id)"
                :style="{'background-image': 'url('+getPicUrl(smallItem.url)+')'}">
-
-            <!--            <img :src="getPicUrl(smallItem.url)" alt="图片预览图">-->
           </div>
         </div>
       </div>
@@ -76,7 +74,8 @@
         defineFiles:[],
         chooseDefineCatalog:false,
         createDefCatalog: false,
-        defCatName:''
+        defCatName:'',
+        mailFiles:[]
       }
     },
     mounted(){
@@ -105,18 +104,21 @@
       },
       itemCheckedTimeLine(item) {
         item.itemChecked = !item.itemChecked
-        if (item.itemChecked && this.checkedIds.indexOf(item.id) === -1) {
+        const index = this.checkedIds.findIndex(el=>{el.id === item.id})
+        if (item.itemChecked && index < 0){
           this.checkedIds.push(item.id)
-          this.checkedIds.push(item.category)
-        } else {
-          let index = this.checkedIds.findIndex(el => {return el.id == item.id})
+          this.checkedCategory.push(item.category)
+          this.mailFiles.push({id: item.id, name: item.name})
+        }else{
           this.checkedIds.splice(index, 1)
           this.checkedCategory.splice(index, 1)
+          this.mailFiles.splice(index, 1)
         }
-        if (this.checkedIds.length != 0) {
+        if (this.checkedIds.length != 0){
           this.isDefineFile = true
-        } else {
-          this.isDefineFile = true
+          this.$store.commit('setMailFiles', this.mailFiles)
+        } else{
+          this.isDefineFile = false
         }
       },
       showInfo(id) {
@@ -175,6 +177,20 @@
           this.defineFiles.push({id: -1, name: '新建目录'})
         })
       },
+      getPicUrl(url) {
+        const baseUrl = window.baseUrl + "/testpreview/"
+        return baseUrl + url
+      },
+    },
+    watch:{
+      checkedIds(){
+        if (this.checkedIds.length != 0) {
+          this.isDefineFile = true
+        } else {
+          this.isDefineFile = false
+
+        }
+      }
     }
   }
 </script>
@@ -189,7 +205,14 @@
   .file_nav>span {
     color: cornflowerblue;
   }
-
+  .order_picker>p{
+    padding: 5px;
+  }
+  .order_picker > p:hover {
+    background-color: rgba(211, 211, 211, 0.64);
+    border-radius: 5px;
+    cursor: pointer;
+  }
   /*自定义归档*/
   .def_catalog {
     padding: 5px;
@@ -203,8 +226,8 @@
 
   .defBtn {
     position: absolute;
-    top: 160px;
-    left: 500px;
+    top: 55px;
+    left: 195px;
     padding: 5px 10px;
     border: 1px solid #efefef;
     border-radius: 5px;
@@ -216,7 +239,7 @@
   .newDef {
     position: fixed;
     top: 160px;
-    left: 600px;
+    left: 550px;
     padding: 5px 10px;
     color: cornflowerblue;
   }
@@ -232,7 +255,9 @@
     border-radius: 5px;
     outline: none;
   }
-
+  .icon-order {
+    margin-left: 85%;
+  }
   /*时光轴开始*/
   .month_div {
     padding: 10px 0;
