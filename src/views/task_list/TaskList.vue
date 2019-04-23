@@ -87,7 +87,6 @@
       tasks: {
         deep: true,
         handler() {
-          console.log(123123)
           localStorage.setItem('tasks', JSON.stringify(this.tasks))
         }
       }

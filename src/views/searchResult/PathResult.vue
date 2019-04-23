@@ -1,5 +1,5 @@
 <template>
-  <div class="folder_result">
+  <div class="path_result">
     <div class="bg"></div>
     <div v-show="noResult" class="result_null">暂无搜索结果</div>
     <div class="file_nav" v-show="!searchResult">
@@ -11,7 +11,7 @@
     <div class="folder_outer" v-show="searchResult">
       <div v-for="(item, index) in allFolderResult" :key="index" @click.stop="openFolder(1, item.id, item.name)">
         <svg class="icon" aria-hidden="true"><use xlink:href="#icon-aFile"></use></svg>
-        <p>{{item.name}}</p>
+        <p v-html="item.name"></p>
       </div>
     </div>
     <table v-show="!searchResult">
@@ -100,7 +100,7 @@
     unixChange,
     getFileSize,
     uploadOrUpdate
-  } from "../../../publics/public"
+  } from "../../publics/public"
 
   export default {
     name: "FolderResult",
@@ -127,7 +127,7 @@
         formData.append('way',this.searchWay)
         formData.append('text',this.searchKey)
         uploadOrUpdate(childUrl, formData).then(data=>{
-          this.allFolderResult = data.CATALOG
+          this.fives.folders =[...data.CATALOG,...data.INSIGHT]
           if (this.allFolderResult.length == 0){
             this.noResult = true
           }
@@ -140,10 +140,10 @@
           data.files.forEach(el => {
             el.itemChecked = false
             if (el.keyword) {
-              el.keyword = el.keyword.split(',')
+              el.keyword = el.keyword.split('|')
             }
             if (el.tag) {
-              el.tag = el.tag.split(',')
+              el.tag = el.tag.split('|')
             } else {
               el.tag = []
             }
@@ -163,37 +163,43 @@
           }
         })
       },
-      openFile(fileItem){
+      openFile(fileItem) {
         switch (fileItem.category) {
           // document
           case 1:
             this.$store.commit('setNowFile', fileItem)
-            this.$router.push('/main/showFile')
+            this.$router.push({
+              name: 'ShowFile',
+              params: {
+                fromSearch: 1
+              }
+            })
             break;
           // image
           case 2:
             let routeData = this.$router.resolve({
-              path:'/picturesInfo',
-              query:{ id: fileItem.id }
+              path: '/picturesInfo',
+              query: {id: fileItem.id}
             });
             window.open(routeData.href, '_blank');
             break;
           // audio
           case 3:
-            this.$store.commit('audioPlay',nowAudio);
+            this.$store.commit('audioPlay', nowAudio);
             break;
           // video
           case 4:
             let routerData = this.$router.resolve({
-              path:'/videoInfo',
-              query:{
+              path: '/videoInfo',
+              query: {
                 id: fileItem.id
               }
             })
             window.open(routerData.href, '_blank');
             break;
           // others
-          case 5: break;
+          case 5:
+            break;
         }
       },
       backupResult(){
@@ -227,7 +233,7 @@
 </script>
 
 <style scoped>
-  .folder_result {
+  .path_result {
     overflow: hidden;
     position: relative;
     padding-left: 50px;

@@ -10,7 +10,7 @@
         </span>
         <el-dropdown-menu slot="dropdown" class="search_way">
           <el-dropdown-item @click.native="chooseSearchWay(1)">路径搜索</el-dropdown-item>
-          <el-dropdown-item @click.native="chooseSearchWay(2)">语义检索</el-dropdown-item>
+          <el-dropdown-item @click.native="chooseSearchWay(2)">内容检索</el-dropdown-item>
           <el-dropdown-item @click.native="chooseSearchWay(3)">关键词标签搜索</el-dropdown-item>
           <el-dropdown-item @click.native="chooseSearchWay(4)">评论搜索</el-dropdown-item>
           <el-dropdown-item @click.native="chooseSearchWay(5)">文件名搜索</el-dropdown-item>
@@ -22,7 +22,7 @@
     <!--通知和历史操作-->
     <div class="two_icon">
       <span class="iconfont icon-remind" title="点击查看通知"></span>
-      <span class="iconfont icon-history" title="查看历史操作"></span>
+      <span class="iconfont icon-history" title="查看历史操作" @click="historyOpts"></span>
     </div>
     <!--个人信息-->
     <div class="person_info">
@@ -94,7 +94,7 @@
             this.searchWay = 1;
             break;
           case 2:
-            this.nowSearchWay = '语义';
+            this.nowSearchWay = '内容';
             this.searchWay = 2;
             break;
           case 3:
@@ -120,24 +120,53 @@
           inputIsEmpty(this,'输入不能为空')
           return
         }
-        if (this.searchWay === 1) {
-          if (this.$route.path === '/main/folderResult') {
-            this.reload()
-            return
-          }
-          this.$router.push('/main/folderResult')
-          return
+        switch (this.searchWay) {
+          case 1: // 路径
+            if (this.$route.path === '/main/folderResult') {
+              this.reload()
+              return
+            }
+            this.$router.push('/main/folderResult');
+            break;
+          case 2: // 内容
+            if (this.$route.path === '/main/contentResult') {
+              this.reload()
+              return
+            }
+            this.$router.push('/main/contentResult');
+            break;
+          case 3: // 关键词标签
+            if (this.$route.path === '/main/keywordTagResult') {
+              this.reload()
+              return
+            }
+            this.$router.push('/main/keywordTagResult');
+            break;
+          case 4: // 评论
+            if (this.$route.path === '/main/remarkSearch') {
+              this.reload()
+              return
+            }
+            this.$router.push('/main/remarkSearch');
+            break;
+          case 5: // 文件名
+            if (this.$route.path === '/main/nameResult') {
+              this.reload()
+              return
+            }
+            this.$router.push('/main/nameResult');
+            break;
+          case 6: // 全部
+            if (this.$route.path === '/main/totalResult') {
+              this.reload()
+              return
+            }
+            this.$router.push('/main/totalResult');
+            break;
         }
-        if (this.$route.path === '/main/insightInfo'){
-          this.reload()
-          return
-        }
-        this.$router.push({
-          name: 'InsightInfo',
-          params: {
-            searchWay: this.searchWay
-          }
-        })
+      },
+      historyOpts(){
+        this.$router.push('/main/historyOperations')
       }
     }
   }

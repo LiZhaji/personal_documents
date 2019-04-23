@@ -27,8 +27,15 @@ import MyLikes from "../views/my_likes/MyLikes";
 import Setup from "../views/setup/Setup";
 import TaskList from "../views/task_list/TaskList";
 import UseTimes from "../views/use_times/UseTimes";
+
 import InsightInfo from "../views/my_files/insight/InsightInfo";
-import FolderResult from "../views/my_files/insight/FolderResult"
+import FolderResult from "../views/searchResult/PathResult";
+import TotalResult from "../views/searchResult/TotalResult";
+import RemarkSearch  from "../views/searchResult/RemarkSearch";
+import KeywordTagResult from "../views/searchResult/KeywordTagResult";
+import NameResult from "../views/searchResult/NameResult";
+import ContentResult from "../views/searchResult/ContentResult";
+import HistoryOperations from "../views/history_operations/HistoryOperations";
 
 export default new Router({
   routes: [
@@ -103,12 +110,35 @@ export default new Router({
           name:'FolderResult',
           component:FolderResult
         },{
+          path: '/main/remarkSearch',
+          name:'RemarkSearch',
+          component:RemarkSearch
+        },{
+          path: '/main/keywordTagResult',
+          name:'KeywordTagResult',
+          component:KeywordTagResult
+        },{
+          path: '/main/totalResult',
+          name:'TotalResult',
+          component:TotalResult
+        },{
+          path: '/main/nameResult',
+          name:'NameResult',
+          component:NameResult
+        },{
+          path: '/main/contentResult',
+          name:'ContentResult',
+          component:ContentResult
+        },{
           path: '/main/timeLinePics',
           component:TimeLinePics
         },{
           path: '/main/intelligentPics',
           component:IntelligentPics
-        },
+        },{
+          path: '/main/historyOperations',
+          component:HistoryOperations
+        }
       ]
     },{
       path: '/picturesInfo',

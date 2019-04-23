@@ -1,20 +1,22 @@
 <template>
-  <div class="insight_info">
+  <div class="remark_search">
     <div class="bg"></div>
     <div class="file_nav">
       <span v-show="forNav"><span @click="backupToInsight">智能归档</span> > {{keyName}}</span>
     </div>
     <div class="six_info_outer">
-      <div class="left" v-if="fives.pics || fives.videos">
+      <div class="left"  v-if="fives.pics|| fives.videos">
         <div class="pics_outer">
           <div class="title">图片 <span class="no_result" v-show="!fives.pics">暂无图片搜索结果</span></div>
           <div class="pics">
             <div class="pics_item" v-for="(item, index) in fives.pics"
                  :key="index" :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
               <span class="checkbox iconfont icon-checked_circle" @click.stop="itemCheck(item)"></span>
-              <div class="img_outer" @click="openFile(item)"
+              <div class="img_outer" @click="showInfo(item.id)"
                    :style="{'background-image': 'url('+getPicUrl(item.url) +')'}">
-<!--                <img :src="getPicUrl(item.url)" alt="图片预览图">-->
+              </div>
+              <div class="highlight_info highlight_box" >
+                <span class="remarks">评论</span><span v-for="smallItem in item.comments" v-html="' ' + smallItem.content"></span>
               </div>
             </div>
           </div>
@@ -24,10 +26,13 @@
           <div class="videos">
             <div class="videos_item" v-for="(item, index) in fives.videos"  :key="index" :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
               <span class="checkbox iconfont icon-checked_circle" @click.stop="itemCheck(item)"></span>
-              <div class="img_outer" @click="openFile(item)">
+              <div class="img_outer" @click="videoPlay(item.id)">
                 <img :src="getPicUrl(item.info.thumbUrl)" alt="视频预览图">
               </div>
               <p v-html="item.name"></p>
+              <div class="highlight_info highlightbox" >
+                <span class="remarks">评论</span><span v-for="smallItem in item.comments" v-html="' ' + smallItem.content"></span>
+              </div>
             </div>
           </div>
         </div>
@@ -38,24 +43,36 @@
         </div>
         <div class="docs_outer">
           <div class="title">文档 <span class="no_result" v-show="!fives.docs">暂无文档搜索结果</span></div>
-          <p v-for="item in fives.docs" @click.stop="itemCheck(item)" :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
+          <div class="docs_item" v-for="item in fives.docs" @click.stop="itemCheck(item)" :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
             <span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span>
             <svg class="icon" aria-hidden="true"><use :xlink:href=fileIconsOrOthers(item.id)></use></svg>
-            <span @click="openFile(item)" v-html="item.name"></span></p>
+            <span @click="showFile(item.id)" v-html="item.name"></span>
+            <div class="highlight_info highlightbox" >
+              <span class="remarks">评论</span><span v-for="smallItem in item.comments" v-html="' ' + smallItem.content"></span>
+            </div>
+          </div>
         </div>
         <div class="audios_outer">
           <div class="title">音频 <span class="no_result" v-show="!fives.audios">暂无音频搜索结果</span></div>
-          <p v-for="item in fives.audios" @click.stop="itemCheck(item)" :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
+          <div v-for="item in fives.audios" @click.stop="itemCheck(item)" :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
             <span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span>
             <svg class="icon" aria-hidden="true"><use xlink:href="#icon-mp3"></use></svg>
-            <span v-html="item.name" @click="openFile(item)"></span></p>
+            <span v-html="item.name"></span>
+            <div class="highlight_info highlightbox" >
+              <span class="remarks">评论</span><span v-for="smallItem in item.comments" v-html="' ' + smallItem.content"></span>
+            </div>
+          </div>
         </div>
         <div class="others">
           <div class="title">其他 <span class="no_result" v-show="!fives.others">暂无其他</span></div>
-          <p v-for="item in fives.others" @click.stop="itemCheck(item)" :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
+          <div v-for="item in fives.others" @click.stop="itemCheck(item)" :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
             <span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span>
-            <svg class="icon" aria-hidden="true"><use xlink:href="#icon-others"></use></svg>
-            <span v-html="item.name" @click="openFile(item)"></span></p>
+          <svg class="icon" aria-hidden="true"><use xlink:href="#icon-others"></use></svg>
+          <span v-html="item.name"></span>
+          <div class="highlight_info highlightbox" >
+            <span class="remarks">评论</span><span v-for="smallItem in item.comments" v-html="' ' + smallItem.content"></span>
+          </div>
+        </div>
         </div>
       </div>
       <div class="left" v-if="!fives.pics && !fives.videos">
@@ -65,9 +82,12 @@
             <div class="pics_item" v-for="(item, index) in fives.pics"
                  :key="index" :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
               <span class="checkbox iconfont icon-checked_circle" @click.stop="itemCheck(item)"></span>
-              <div class="img_outer" @click="openFile(item)"
+              <div class="img_outer" @click="showInfo(item.id)"
                    :style="{'background-image': 'url('+getPicUrl(item.url) +')'}">
                 <!--                <img :src="getPicUrl(item.url)" alt="图片预览图">-->
+              </div>
+              <div class="highlight_info highlightbox" >
+                <span class="remarks">评论</span><span v-for="smallItem in item.comments" v-html="' ' + smallItem.content"></span>
               </div>
             </div>
           </div>
@@ -77,10 +97,13 @@
           <div class="videos">
             <div class="videos_item" v-for="(item, index) in fives.videos"  :key="index" :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
               <span class="checkbox iconfont icon-checked_circle" @click.stop="itemCheck(item)"></span>
-              <div class="img_outer" @click="openFile(item)">
+              <div class="img_outer" @click="videoPlay(item.id)">
                 <img :src="getPicUrl(item.info.thumbUrl)" alt="视频预览图">
               </div>
               <p v-html="item.name"></p>
+              <div class="highlight_info highlightbox" >
+                <span class="remarks">评论</span><span v-for="smallItem in item.comments" v-html="' ' + smallItem.content"></span>
+              </div>
             </div>
           </div>
         </div>
@@ -109,8 +132,8 @@
 </template>
 
 <script>
-  import { mapState } from  "vuex";
-  import { fetchList, uploadOrUpdate, toggleTip, inputIsEmpty } from "../../../publics/public";
+  import { mapState } from "vuex";
+  import { fetchList, uploadOrUpdate, toggleTip, inputIsEmpty } from "../../publics/public";
 
   export default {
     name: "InsightInfo",
@@ -120,7 +143,6 @@
         fives:{docs:[], pics: [], videos:[], audios: [], others: []},
         checkedIds:[],
         checkedCategory:[],
-        fromInsight: false,
         forNav:false,
         defineFiles:[],
         chooseDefineCatalog:false,
@@ -131,7 +153,7 @@
       }
     },
     computed:{
-      ...mapState(['file_icons','intelFileTime'])
+      ...mapState(['file_icons', 'searchKey', 'searchWay']),
     },
     mounted(){
       this.fetchNowTelFile()
@@ -141,16 +163,11 @@
         this.$router.push('/main/insight')
       },
       fetchNowTelFile(){
-        this.keyName = this.$route.params.name
-        const id = this.$route.params.id
-        const isTime = this.$route.params.isTime
-        let childUrl
-        if (isTime) {
-          childUrl = '/gettimefile?id=' + id
-        }else{
-          childUrl = '/filefiling/' + id
-        }
-        fetchList(childUrl).then(data=>{
+        const childUrl = '/search'
+        let formData = new FormData()
+        formData.append('way',this.searchWay)
+        formData.append('text',this.searchKey)
+        uploadOrUpdate(childUrl, formData).then(data=>{
           for (let key in data){
             data[key].forEach(el=> {
               el.itemChecked = false
@@ -158,10 +175,10 @@
                 el.info = JSON.parse(el.info)
               }
               if (el.keyword) {
-                el.keyword = el.keyword.split(' ')
+                el.keyword = el.keyword.split('|')
               }
               if (el.tag) {
-                el.tag = el.tag.split(' ')
+                el.tag = el.tag.split('|')
               } else {
                 el.tag = []
               }
@@ -173,45 +190,6 @@
           this.fives.audios = data.AUDIO
           this.fives.others = data.OTHER
         })
-      },
-      openFile(fileItem) {
-        switch (fileItem.category) {
-          // document
-          case 1:
-            this.$store.commit('setNowFile', fileItem)
-            this.$router.push({
-              name: 'ShowFile',
-              params: {
-                fromSearch: 5
-              }
-            })
-            break;
-          // image
-          case 2:
-            let routeData = this.$router.resolve({
-              path: '/picturesInfo',
-              query: {id: fileItem.id}
-            });
-            window.open(routeData.href, '_blank');
-            break;
-          // audio
-          case 3:
-            this.$store.commit('audioPlay', nowAudio);
-            break;
-          // video
-          case 4:
-            let routerData = this.$router.resolve({
-              path: '/videoInfo',
-              query: {
-                id: fileItem.id
-              }
-            })
-            window.open(routerData.href, '_blank');
-            break;
-          // others
-          case 5:
-            break;
-        }
       },
       getPicUrl(url){
         var baseUrl = window.baseUrl +  "/testpreview/"
@@ -236,10 +214,36 @@
           this.isDefineFile = false
         }
       },
+      showInfo(id){
+        let routeData = this.$router.resolve({
+          name:'PicturesInfo',
+          query:{
+            id: id,
+          }
+        });
+        window.open(routeData.href, '_blank');
+      },
+      videoPlay(id){
+        let routerData = this.$router.resolve({
+          path: '/videoInfo',
+          query: {id: id}
+        })
+        window.open(routerData.href, '_blank')
+      },
       fileIconsOrOthers(id){
         const nowFile = this.fives.docs.find(el=>{ return el.id == id})
         const ext = nowFile.name.split('.').pop()
         return "#icon-file_" + (this.file_icons.indexOf(ext) < 0 ? 'others' : ext)
+      },
+      showFile(id){
+        const nowFile = this.fives.docs.find(el=>{return el.id == id})
+        this.$store.commit('setNowFile', nowFile)
+        this.$router.push({
+          name:'ShowFile',
+          params:{
+            fromSearch: true
+          }
+        })
       },
       defCatalogOk(id) {
         // id>=0 表示归档到已有，id<0 表示新建
@@ -290,17 +294,12 @@
           this.defineFiles.push({id: -1, name: '新建目录'})
         })
       },
-    },
-    watch: {
-      intelFileTime() {
-          this.fetchNowTelFile()
-      }
     }
   }
 </script>
 
 <style scoped>
-  .insight_info{
+  .remark_search{
     overflow: hidden;
     position: relative;
     padding-left: 50px;
@@ -330,13 +329,13 @@
 
   .defBtn {
     position: absolute;
-    top: 12px;
-    left: 250px;
+    top: 30px;
+    left: 50px;
     padding: 5px 10px;
     border: 1px solid #efefef;
     border-radius: 5px;
     color: cornflowerblue;
-    background-color: #dddddd;
+    background-color: #efefef;
     cursor: pointer;
   }
 
@@ -368,6 +367,7 @@
     background-color: white;
     border-radius: 5px;
     margin: 10px 0px;
+    position: relative;
   }
   .six_info_outer .no_result{
     color: gray;
@@ -376,6 +376,9 @@
   .six_info_outer .left{
     display: inline-block;
     width: 800px;
+  }
+  .docs_outer .docs_item{
+    padding: 5px 10px;
   }
   .six_info_outer .right{
     display: inline-block;
@@ -393,10 +396,10 @@
   }
   /*pics*/
   .six_info_outer .pics>.pics_item{
-     display: inline-block;
-     padding: 10px;
-     margin: 10px;
-     position: relative;
+    display: inline-block;
+    padding: 10px;
+    margin: 10px;
+    position: relative;
   }
   .six_info_outer .pics>.pics_item>.img_outer{
     width: 150px;
@@ -430,19 +433,21 @@
   .six_info_outer .pics>.pics_item:hover{
     background-color: rgba(221, 221, 221, 0.78);
   }
-  .blockItemCheckedClass{
-    background-color: rgba(221, 221, 221, 0.78);
-  }
+
   .blockItemCheckedClass .checkbox {
     display: block
   }
   .checkbox {
     display: none;
   }
-  .pics_item:hover .checkbox {
+  .highlight_box{
+    display: none;
+  }
+  .pics_item:hover .checkbox,
+  .pics_item:hover .highlight_box {
     display: block;
   }
-/* right*/
+  /* right*/
   .six_info_outer>.right p{
     padding:5px 0px 5px 20px;
     cursor: pointer;

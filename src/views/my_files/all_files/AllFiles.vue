@@ -29,13 +29,7 @@
         </div></td>
         <td>\</td>
         <td>\</td>
-        <td class="star"><svg class="icon" aria-hidden="true" @click="toggleCollection(index)">
-          <use v-show="!item.collection" xlink:href="#icon-collection"></use>
-          <use v-show="item.collection" xlink:href="#icon-collection_fill"></use>
-        </svg><svg class="icon" aria-hidden="true" @click="toggleAttention(index)">
-          <use v-show="!item.like" xlink:href="#icon-like"></use>
-          <use v-show="item.like" xlink:href="#icon-like_fill"></use>
-        </svg></td>
+        <td>\</td>
       </tr>
       <tr v-for="(item, index) in allFiles" :key="'file' + item.id" @click="clickItemFile(item)" :class="{item_checked:item.itemChecked}">
         <td ><span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span></td>
@@ -49,12 +43,12 @@
         <td v-show="item.info.createTime">{{unixChange(item.info.createTime)}}</td>
         <td v-show="!item.info.createTime">{{unixChange(item.uploadTime)}}</td>
         <td>{{getFileSize(item.size)}}</td>
-        <td class="star"><svg class="icon" aria-hidden="true" @click="toggleCollection(index)">
+        <td class="star"><svg class="icon" aria-hidden="true" @click.stop="toggleCollection(index)">
           <use v-show="!item.collection" xlink:href="#icon-collection"></use>
           <use v-show="item.collection" xlink:href="#icon-collection_fill"></use>
-        </svg><svg class="icon" aria-hidden="true" @click="toggleAttention(index)">
-          <use v-show="!item.like" xlink:href="#icon-like"></use>
-          <use v-show="item.like" xlink:href="#icon-like_fill"></use>
+        </svg><svg class="icon" aria-hidden="true" @click.stop="toggleAttention(index)">
+          <use v-show="!item.attention" xlink:href="#icon-like"></use>
+          <use v-show="item.attention" xlink:href="#icon-like_fill"></use>
         </svg></td>
       </tr>
       </tbody>
@@ -100,10 +94,10 @@
           data.files.forEach(el=>{
             el.itemChecked = false
             if (el.keyword) {
-              el.keyword = el.keyword.split(',')
+              el.keyword = el.keyword.split('|')
             }
             if (el.tag) {
-              el.tag = el.tag.split(',')
+              el.tag = el.tag.split('|')
             }else {
               el.tag = []
             }

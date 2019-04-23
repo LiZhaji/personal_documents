@@ -1,7 +1,7 @@
 //定义公共方法
 import axios from "axios"
 export const toggleTip = (obj, msg) =>{
-  obj.$notify({
+  obj.$notify.info({
     title: '',
     message: msg,
     position: 'top-right',
@@ -35,7 +35,7 @@ export const toggleAttention =(obj, list, index)=>{
   let formData=new FormData()
   formData.append("id",id)
   formData.append("attention",attention);
-  var url = window.baseUrl + "/collect"
+  var url = window.baseUrl + "/attention"
   axios.post(url, formData).then( (response) => {
     if (response.data.success) {
       list[index].attention = !list[index].attention
@@ -71,11 +71,11 @@ export const toggleCollectionNotIndex =(obj, fileItem)=>{
 }
 export const toggleAttentionNotIndex =(obj, fileItem)=>{
   let id = fileItem.id
-  let collect = fileItem.attention ? 1 : 0
+  let attention = fileItem.attention ? 1 : 0
   let formData=new FormData()
   formData.append("id",id)
-  formData.append("collect",collect);
-  var url = window.baseUrl + "/collect"
+  formData.append("attention",attention);
+  var url = window.baseUrl + "/attention"
   axios.post(url, formData).then( (response) => {
     if (response.data.success) {
       fileItem.attention = !fileItem.attention

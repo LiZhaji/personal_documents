@@ -13,6 +13,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "draggable": "^4.2.0",
+    "echarts": "^4.2.1",
     "element-ui": "^2.7.2",
     "event-emitter": "^0.3.5",
     "vue": "^2.5.2",

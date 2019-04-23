@@ -3,8 +3,8 @@
     <div class="bg"></div>
     <div class="file_nav">
       <span class="iconfont theirIcon" v-html="navContent.icon"></span>
-      {{navContent.text}}d
-      <span class="iconfont icon-order"></span>
+      {{navContent.text}}
+<!--      <span class="iconfont icon-order"></span>-->
     </div>
   </div>
 </template>

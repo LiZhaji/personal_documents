@@ -35,8 +35,7 @@
 </template>
 
 <script>
-  import { mapState } from "vuex"
-  import {toggleCollection, toggleAttention, clickItem, fetchList, getNowDay} from "../../../publics/public"
+  import { fetchList } from "../../../publics/public"
   export default {
     data() {
       return {

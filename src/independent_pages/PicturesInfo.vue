@@ -45,8 +45,8 @@
         </span>
         <div class="input_outer">
       <input class="tag_input" type="text" v-model="newTag" placeholder="自定义标签"
-             v-on:keyup.enter="addTag(nowPicture.id, index)" :class="nowPicture.tag.length != 0 ? 'have_content': ''">
-      <span class="iconfont icon-checked_circle ok_tag_input" @click="addTag(nowPicture.id, index)"></span>
+             v-on:keyup.enter="addTag(nowPicture.id)" :class="nowPicture.tag.length != 0 ? 'have_content': ''">
+      <span class="iconfont icon-checked_circle ok_tag_input" @click="addTag(nowPicture.id)"></span>
     </div>
     </div>
       <div class="remark_pic_info"><span>评论</span>
@@ -55,9 +55,9 @@
         </span>
         <div class="input_outer">
           <input class="remark_input" type="text" v-model="newRemark" placeholder="新增评论"
-                 v-on:keyup.enter="addRemark(nowPicture.id, item.id)" :class="Object.keys(nowPicture.comments).length != 0 ? 'have_content': ''">
+                 v-on:keyup.enter="addRemark(nowPicture.id)" :class="Object.keys(nowPicture.comments).length != 0 ? 'have_content': ''">
           <span class="iconfont icon-checked_circle ok_remark_input"
-                @click="addRemark(nowPicture.id, item.id)"></span>
+                @click="addRemark(nowPicture.id)"></span>
         </div>
       </div>
     </div>
@@ -100,10 +100,10 @@
           el.info = JSON.parse(el.info)
           // el.comments = JSON.parse(el.comments)
           if (el.keyword) {
-            el.keyword = el.keyword.split(' ')
+            el.keyword = el.keyword.split('|')
           }
           if (el.tag) {
-            el.tag = el.tag.split(' ')
+            el.tag = el.tag.split('|')
           } else {
             el.tag = []
           }
@@ -152,7 +152,7 @@
           toggleTip(this, error)
         })
       },
-      addTag(pid, index) {
+      addTag(pid) {
         // 1.本地验证
         if (!this.newTag) {
           inputIsEmpty(this, '不能添加空标签')
@@ -160,7 +160,7 @@
         }
         addTag(pid, this.newTag).then(data => {
           if(data.success){
-            this.nowPicture.tag.splice(index, 0, this.newTag)
+            this.nowPicture.tag.push(this.newTag)
             this.newTag = ''
           }
 
@@ -168,8 +168,7 @@
           toggleTip(this, error)
         })
       },
-      addRemark(pid, id) {
-        const index = this.nowPicture.comments.findIndex(el=>{el.id == id})
+      addRemark(pid) {
         // 1.本地验证
         if (!this.newRemark) {
           inputIsEmpty(this, '不能添加空评论')
@@ -177,7 +176,7 @@
         }
         addRemark(pid, this.newRemark).then(data => {
           if (data.success){
-            this.nowPicture.comments.splice(index, 0, {content: this.newRemark})
+            this.nowPicture.comments.push({content: this.newRemark})
             this.newRemark = ''
           }
         }).catch(error=>{

@@ -137,3 +137,65 @@ table tbody tr:hover{
   border-radius:5px;
   color: #616161 !important;
 }
+/*卡片显示*/
+.six_info_outer .docs_item>svg{
+  font-size: 20px;
+  margin-left: 10px;
+}
+
+.highlight_info {
+  position: absolute;
+  left: 175px;
+  top: 0px;
+  background-color: white;
+  width: 150px;
+  height: auto;
+  border: 1px solid lightgray;
+  border-radius: 5px;
+  box-shadow: 0px 0px 10px 1px #acacac;
+  padding: 10px;
+  z-index: 9999;
+}
+.highlight_info .keyword_pic,
+.highlight_info .tag_pic,
+.highlight_box .remarks{
+  display: inline-block;
+  width: 50px;
+  color: gray;
+}
+.six_info_outer .pics>.pics_item:hover,
+.six_info_outer .videos>.videos_item:hover,
+.six_info_outer .docs_item:hover,
+.six_info_outer .audios_item:hover,
+.six_info_outer .others_item:hover {
+  background-color: rgba(221, 221, 221, 0.78);
+  border-radius: 5px;
+}
+.pics_item:hover .highlight_box,
+.videos_item:hover .highlight_box,
+.docs_item:hover .highlight_box,
+.audios_item:hover .highlight_box,
+.others_item:hover .highlight_box{
+  display: block;
+}
+.six_info_outer .pics>.pics_item,
+.six_info_outer .videos>.videos_item,
+.six_info_outer .docs_item,
+.six_info_outer .audios_item,
+.six_info_outer .others_item{
+  position: relative;
+}
+.six_info_outer .icon-checked_circle{
+  left: 0px;
+}
+.blockItemCheckedClass{
+  background-color: rgba(221, 221, 221, 0.78);
+  border-radius: 5px;
+}
+.float_left{
+  float: left;
+}
+.float_right{
+  float: right;
+  margin-right: 20px;
+}

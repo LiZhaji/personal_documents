@@ -2,8 +2,9 @@
   <div>
     <!-- 上传文件  -->
     <transition name="alertTip">
-      <div class="up_file_box" v-show="isUpFile">
-        <p class="box_title">上传文件</p>
+      <div class="up_file_box" v-if="isUpFile" ref="upFile">
+        <p class="box_title" ref="upFileHandle">上传文件</p>
+        <div class="box_content">
         <p><span class="location_file">上传至</span><span @click="chooseFileLocation" class="location_file_input" type="text">{{fileLocationShow}}</span></p>
         <p><span class="choose_file">选择文件</span><span class="choose_file_input" placeholder="点击选择"><span>{{curFile.name}}</span><input type="file" @change="getFile" title="点击选择文件"></span></p>
         <p><span class="tag_file">标签</span><input class="tag_file_input" type="text" v-model="newTag" placeholder="以空格分隔"></p>
@@ -17,11 +18,13 @@
           <button type="button" class="cancel" @click="cancelUpFile">取消</button>
         </div>
       </div>
+      </div>
     </transition>
     <!-- 新建任务-->
     <transition name="alertTip">
-      <div class="new_task_box" v-show="isNewTask">
-        <p class="box_title">新建任务</p>
+      <div class="new_task_box" v-if="isNewTask" ref="newTask">
+        <p class="box_title" ref="newTaskHandle">新建任务</p>
+        <div class="box_content">
         <p class="new_task_content">内容 <textarea v-model="newTask.content"></textarea></p>
         <p><span class="time">创建日期</span>{{getNowDay()}}</p>
         <div class="block ">
@@ -46,21 +49,25 @@
           <button type="button " class="cancel" @click="cancelNewTask">取消</button>
         </div>
       </div>
+      </div>
     </transition>
     <!-- 新建文件夹-->
     <transition name="alertTip">
-      <div class="new_folder_box" v-show="isNewFolder">
-        <p class="box_title">新建文件夹</p>
-        <p><span class="name_folder">名称</span><input class="name_folder_input" v-model="newFolder.name" type="text"></p>
-        <p><span class="time_folder">创建日期</span>{{getNowDay()}}</p>
-        <div class="importance_folder"><span class="importance_title">标记</span>
-          <input id="importance-1" class="importance-1" name="importance" type="radio" value=-1 @click="getFolderImportance"><label for="importance-1">重要</label>
-          <input id="importance1" class="importance1" name="importance" type="radio" value=1 @click="getFolderImportance"><label for="importance1">重要吗</label>
-          <input id="importance0" class="importance0" name="importance" type="radio" value=0 @click="getFolderImportance" checked="checked"><label for="importance0">一般</label>
-        </div>
-        <div class="buttons">
-          <button type="button " class="yes" @click="createNewFolder">确定</button>
-          <button type="button " class="cancel" @click="cancelNewFolder">取消</button>
+      <div class="new_folder_box" v-if="isNewFolder" ref="newFolder">
+        <div class="box_content">
+          <p class="box_title" ref="newFolderHandle">新建文件夹</p>
+          <p><span class="location_file">上传至</span><span @click="chooseFileLocation" class="location_file_input" type="text">{{fileLocationShow}}</span></p>
+          <p><span class="name_folder">名称</span><input class="name_folder_input" v-model="newFolderUpload.name" type="text"></p>
+          <p><span class="time_folder">创建日期</span>{{getNowDay()}}</p>
+          <div class="importance_folder"><span class="importance_title">标记</span>
+            <input id="importance-1" class="importance-1" name="importance" type="radio" value=-1 @click="getFolderImportance"><label for="importance-1">重要</label>
+            <input id="importance1" class="importance1" name="importance" type="radio" value=1 @click="getFolderImportance"><label for="importance1">重要吗</label>
+            <input id="importance0" class="importance0" name="importance" type="radio" value=0 @click="getFolderImportance" checked="checked"><label for="importance0">一般</label>
+          </div>
+          <div class="buttons">
+            <button type="button " class="yes" @click="createNewFolder">确定</button>
+            <button type="button " class="cancel" @click="cancelNewFolder">取消</button>
+          </div>
         </div>
       </div>
     </transition>
@@ -119,14 +126,14 @@
       <div class="tree_title">选择路径</div>
       <div class="tree_content">
         <el-tree :data="catalog" :props="defaultProps" :highlight-current="T" @current-change="nodeChange"></el-tree>
-        <div v-show="createFoldInUpload">
+        <div v-show="createFoldInUpload" class="new_folder_in_up">
           <svg class="icon" aria-hidden="true"><use xlink:href="#icon-aFile"></use></svg>
           <input type="text" v-model="newFolderUpload.name" placeholder="请输入文件名">
           <span class="iconfont icon-checked_circle" @click="newFoldUploadOk"></span>
           <span class="iconfont icon-close" @click="cancelNewFoldUpload"></span>
         </div>
-        <div class="buttons">
-          <button type="button" class="cancel" @click="newFolderInUpload">新建</button>
+        <div class="buttons" >
+          <button v-show="inUpFile" type="button" class="cancel" @click="newFolderInUpload">新建</button>
           <button type="button"class="yes" @click="chooseLocationOk">确定</button>
         </div>
       </div>
@@ -143,6 +150,7 @@
         <div class="mail_words"><span>内容</span><div id="editor"></div></div>
         <div class="checked_files">
           <span>已选附件</span>
+          <span id="no_mail_files" v-if="mailFiles.length === 0">暂无附件</span>
           <div class="checked_item" v-for="item in mailFiles">
             <svg class="icon" aria-hidden="true"><use :xlink:href="fileIconsOrOthers(item.name)"></use></svg>
             <p>{{item.name}}</p>
@@ -175,6 +183,7 @@
     name: "Popup",
     data(){
       return{
+        inUpFile: false,
         T:true,
         file: '',
         curFile:{name:'点击选择',tag:''},
@@ -194,16 +203,14 @@
         }],
         newTask:{content: '', createTime: '', tag: '',tipTime:'', remark:'',state:''},
         newTag:'',
-        newFolder:{name:'',importance:0},
         fileLocationShow:'/全部文件',
         fileLocation: 1,
-        newFolderUpload:{pid: 1, name:''},
+        newFolderUpload:{pid: 1, name:'',importance:-1},
         createFoldInUpload: false,
         // audioUrl: this.getAudioUrl,
         audioUrl: 'https://src.fanmingfei.com/nigel.mp3',
         nowAudio:{name:'因三月.mp3',size:12933,time:'',keyword:['xx','yy'],tag:['a','b'],comments:{}},
         isOpacity:false,
-        newTag:'',
         newTag:'',
         newRemark:'',
         duration: formatTime(),
@@ -236,12 +243,12 @@
       if(localStorage.getItem('tasks') === null) {
         localStorage.setItem('tasks',JSON.stringify(this.$store.state.tasks))
       }
-      window.aaa = this
     },
     methods:{
       sendMail(){
         let ids = []
         this.mailFiles.forEach(el=>{ids.push(el.id)})
+        this.getEditorHtml()
         let formData = new FormData()
         formData.append('title', this.mailContent.title)
         formData.append('rec', this.mailContent.contact)
@@ -252,7 +259,7 @@
             toggleTip(this, '发送成功')
             this.$store.commit('closeMail')
             this.$store.commit('setMailFilesFull')
-
+            this.mailContent = {title:'', contact:'', content:''}
           } else{
             toggleTip(this, '发送失败，请检查')
             this.$store.commit('closeMail')
@@ -281,6 +288,10 @@
           'redo'  // 重复
         ]
         this.editor.create()
+      },
+      getEditorHtml(){
+        this.mailContent.content = this.editor.txt.html()
+        console.log(this.mailContent.content,'aaaaaaaaas')
       },
       closeMailBox(){
         this.$store.commit('closeMail')
@@ -321,7 +332,7 @@
         })
       },
       addRemark(pid, id) {
-        const index = this.nowAudio.comment.findIndex(el=>{el.id == id})
+        const index = this.nowAudio.comments.findIndex(el=>{el.id == id})
         // 1.本地验证
         if (!this.newRemark) {
           inputIsEmpty(this, '不能添加空评论')
@@ -329,7 +340,7 @@
         }
         addRemark(pid, this.newRemark).then(data => {
           if (data.success){
-            this.nowAudio.comment.splice(index, 1)
+            this.nowAudio.comments.splice(index, 1)
             this.newRemark = ''
           }
         }).catch(error=>{
@@ -366,7 +377,13 @@
         this.createFoldInUpload = true
       },
       chooseLocationOk(){
-        if (!this.newFolderUpload.name) {
+        // 如果在新建文件夹中，关闭目录树后直接返回
+        if (!this.inUpFile) {
+          this.isCatalogTree = false
+          return
+        }
+        // 判断有没有在里面新建文件夹
+        if(!this.newFolderUpload.name) {
           this.isCatalogTree = false
         }else{
           if (this.createFoldInUpload){
@@ -376,7 +393,7 @@
             formData.append('pid',this.newFolderUpload.pid)
             formData.append('name',this.newFolderUpload.name)
             uploadOrUpdate('/createcatalog', formData).then(data=>{
-              this.fileLocation = data
+              this.fileLocation = data.id
               this.fileLocationShow = this.newFolderUpload.name
             })
             this.isCatalogTree = false
@@ -391,7 +408,7 @@
         this.createFoldInUpload = false
       },
       cancelNewFoldUpload(){
-        this.newFolderUpload ={ pid: 1, name:''}
+        this.newFolderUpload = {pid: 1, name:'',importance:-1}
         this.createFoldInUpload = false
       },
       // 上传或新建
@@ -468,21 +485,23 @@
         this.$store.commit('toggleNewTask')
       },
       getFolderImportance(){
-        this.newFolder.importance = event.target.value
+        this.newFolderUpload.importance = event.target.value
       },
       cancelNewFolder(){
+        this.newFolderUpload = {pid: 1, name:'',importance:-1}
         this.$store.commit('toggleNewFolder')
       },
       createNewFolder(){
-        console.log(this.newFolder)
-        // 1.传到后台
-        var url = ''
-        // axios.post(url,JSON.stringify(this.isUpFile)).then(function () {
-        //
-        // }).catch(function () {
-        //
-        // })
-        this.$store.commit('toggleNewFolder')
+        if (!this.newFolderUpload.name){
+          inputIsEmpty(this, '请输入文件名！')
+        } else {
+          let formData = new FormData()
+          formData.append('pid',this.newFolderUpload.pid)
+          formData.append('name',this.newFolderUpload.name)
+          uploadOrUpdate('/createcatalog', formData).then(data=>{
+            this.$store.commit('toggleNewFolder')
+          })
+        }
       },
       getNowDay(){
         return getNowDay()
@@ -558,7 +577,36 @@
             })
           })
         }
-      }
+      },
+      isUpFile(){
+        if (this.isUpFile) {
+          this.$nextTick(() => {
+            this.inUpFile = true
+            new Draggable(this.$refs.upFile, {
+              handle: this.$refs.upFileHandle
+            })
+          })
+        }
+      },
+      isNewTask() {
+        if (this.isNewTask) {
+          this.$nextTick(() => {
+            new Draggable(this.$refs.newTask, {
+              handle: this.$refs.newTaskHandle
+            })
+          })
+        }
+      },
+      isNewFolder() {
+        this.inUpFile = false
+        if (this.isNewFolder) {
+          this.$nextTick(() => {
+            new Draggable(this.$refs.newFolder, {
+              handle: this.$refs.newFolderHandle
+            })
+          })
+        }
+    }
     }
   }
 </script>
@@ -608,15 +656,18 @@
   .content button{
     padding: 5px 20px;
     outline: none;
-    border: 1px solid gray;
     border-radius: 5px;
     border: 1px solid cornflowerblue;
     background-color: cornflowerblue;
     color: white;
     cursor: pointer;
+    margin-left: 450px;
   }
   .checked_files>span{
-    float: left;
+    vertical-align: top;
+  }
+  .checked_files>span#no_mail_files{
+    color: gray;
   }
   .mail_box>.content input{
     outline: none;
@@ -630,6 +681,7 @@
     width: 100px;
     height: 100px;
     text-align: center;
+    vertical-align: top;
   }
   .mail_box>.content .checked_item>svg{
     font-size: 45px;
@@ -659,25 +711,37 @@
   .catalog_tree>.tree_content{
     padding: 10px;
   }
+  .catalog_tree>.tree_content>.new_folder_in_up{
+    text-align: center;
+  }
+  .catalog_tree>.tree_content>.new_folder_in_up>input{
+    outline: none;
+    border: 1px solid lightgray;
+    padding: 5px;
+    font-size: 13px;
+    border-radius: 5px;
+  }
   .el-tree{
     height: 280px;
     overflow: auto;
   }
   /*新建和上传文件框，以下通用*/
   .up_file_box,.new_task_box,.new_folder_box{
-    width: 460px;
-    /*height: 140px;*/
+    width: 500px;
+    height: auto !important;
     position: fixed;
     left: 50%;
     top: 50%;
     margin-left: -200px;
     margin-top: -180px;
-    border: 1px solid rgba(112, 112, 112, 0.63);
+    box-shadow: 0 0 5px 1px #a4a2a2 !important;
     border-radius:5px;
     background-color: #fff;
-    padding:20px 15px;
     z-index: 999;
     color: gray;
+  }
+  .box_content{
+    padding: 20px 15px;
   }
   .new_task_box p,.new_task_box .block,
   .up_file_box p,.up_file_box .importance_file,
@@ -717,7 +781,8 @@
   .up_file_box .location_file_input,
   .up_file_box .tag_file_input,
   .up_file_box .choose_file_input,
-  .new_folder_box .name_folder_input {
+  .new_folder_box .name_folder_input,
+  .new_folder_box .location_file_input{
     width: 325px;
     height: 25px;
     border-radius: 5px;
@@ -746,7 +811,7 @@
     vertical-align: top;
     resize: none;
     width: 315px;
-    height: 80px;
+    height: auto !important;
     padding: 5px;
     outline: none;
     border: 1px solid rgba(112, 112, 112, 0.73);
@@ -761,6 +826,7 @@
   }
   .box_title{
     text-align: center;
+    padding: 10px;
   }
   /*以下新建文件夹*/
   .importance_folder>input,

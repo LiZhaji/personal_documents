@@ -18,28 +18,28 @@
       <p><span>文件类型</span>{{type}}</p>
       <p><span>文件大小</span>{{size}}</p>
       <p><span>创建时间</span>{{lastTime}}</p>
-      <div><span>关键词</span><span class="keyword" v-for="(item,index) in nowFile.keyword" :key="index">{{item}}</span>
+      <div><span>关键词</span><span class="keyword" v-for="(item,index) in nowFile.keyword" :key="index" v-html="item"></span>
         <p><img class="wordCloud" :src="nowFile.info.wordCloudUrl" alt="词云"></p>
       </div>
       <div class="tag_pic_info"><span>标签</span>
-        <span class="tag" v-for="(item,index) in nowFile.tag" :key="index">
-          {{item}} <img @click="delOneTag(nowFile.id, item, index)" src="../../assets/img/close.png" alt="删除" title="点击删除">
+        <span class="tag" v-for="(item,index) in nowFile.tag" :key="index" v-html="item" >
+          <img @click="delOneTag(nowFile.id, item, index)" src="../../assets/img/close.png" alt="删除" title="点击删除">
         </span>
         <div class="input_outer">
-          <input class="tag_input" type="text" v-model="newTag" placeholder="自定义标签"
-                 v-on:keyup.enter="addTag(nowFile.id, index)">
-          <span class="iconfont icon-checked_circle ok_tag_input" @click="addTag(nowFile.id, index)"></span>
+          <input class="tag_input" type="text" v-model="newTag" placeholder="自定义标签" :class="nowFile.tag.length != 0 ? 'have_content': ''"
+                 v-on:keyup.enter="addTag(nowFile.id)">
+          <span class="iconfont icon-checked_circle ok_tag_input" @click="addTag(nowFile.id)"></span>
         </div>
       </div>
       <div class="remark_pic_info"><span>评论</span>
-        <span class="remark" v-for="(item,index) in nowFile.comments" :key="index">
-          {{item.content}} <img @click="delOneRemark(item.id)" src="../../assets/img/close.png" alt="删除" title="点击删除">
+        <span class="remark" v-for="(item,index) in nowFile.comments" :key="index" v-html="item.content">
+          <img @click="delOneRemark(item.id)" src="../../assets/img/close.png" alt="删除" title="点击删除">
         </span>
         <div class="input_outer">
-          <input class="remark_input" type="text" v-model="newRemark" placeholder="新增评论"
-                 v-on:keyup.enter="addRemark(nowFile.id, item.id)">
+          <input class="remark_input" type="text" v-model="newRemark" placeholder="新增评论" :class="Object.keys(nowFile.comments).length != 0 ? 'have_content': ''"
+                 v-on:keyup.enter="addRemark(nowFile.id)">
           <span class="iconfont icon-checked_circle ok_remark_input"
-                @click="addRemark(nowFile.id, item.id)"></span>
+                @click="addRemark(nowFile.id)"></span>
         </div>
       </div>
     </div>
@@ -73,9 +73,23 @@
     },
     mounted(){
       this.fromSearch = this.$route.params.fromSearch
+      if (!this.nowFile.comments) {
+        this.nowFile.comments = {}
+      }
     },
     computed: {
       ...mapState(['nowFile']),
+      nowFile:{
+        get(){
+          return this.$store.state.nowFile
+        },
+        set(val){
+          deep: true
+          handles:{
+            this.$store.state.nowFile = val
+          }
+        }
+      },
       editName(){
         return 'edit/' + this.nowFile.id
       },
@@ -121,25 +135,25 @@
       delOneTag(id, name, index) {
         delTag(id, name).then(data => {
           if (data.success) {
-            this.nowVideo.tag.splice(index, 1)
+            this.nowFile.tag.splice(index, 1)
           }
         }).catch(error => {
           toggleTip(this, error)
         })
       },
       delOneRemark(cid) {
-        const index = this.nowVideo.comments.findIndex(el => {
+        const index = this.nowFile.comments.findIndex(el => {
           return el.id == cid
         })
         delRemark(cid).then(data => {
           if (data.success) {
-            this.nowVideo.comments.splice(index, 1)
+            this.nowFile.comments.splice(index, 1)
           }
         }).catch(error => {
           toggleTip(this, error)
         })
       },
-      addTag(pid, index) {
+      addTag(pid) {
         // 1.本地验证
         if (!this.newTag) {
           inputIsEmpty(this, '不能添加空标签')
@@ -147,18 +161,14 @@
         }
         addTag(pid, this.newTag).then(data => {
           if (data.success) {
-            this.nowVideo.tag.splice(index, 1)
+            this.nowFile.tag.push(this.newTag)
             this.newTag = ''
           }
-
         }).catch(error => {
           toggleTip(this, error)
         })
       },
-      addRemark(pid, id) {
-        const index = this.nowVideo.comment.findIndex(el => {
-          el.id == id
-        })
+      addRemark(pid) {
         // 1.本地验证
         if (!this.newRemark) {
           inputIsEmpty(this, '不能添加空评论')
@@ -166,7 +176,7 @@
         }
         addRemark(pid, this.newRemark).then(data => {
           if (data.success) {
-            this.nowVideo.comment.splice(index, 1)
+            this.nowFile.comments.push({content: this.newRemark})
             this.newRemark = ''
           }
         }).catch(error => {
@@ -206,7 +216,9 @@
     cursor: pointer;
     margin-right: 20px;
   }
-
+  .have_content{
+    margin-left: 85px;
+  }
   .show_file iframe {
     width: 75%;
     height: 780px;
