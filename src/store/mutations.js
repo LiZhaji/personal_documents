@@ -31,10 +31,10 @@ export default {
   closeMail(state){
     state.isMail = false
   },
-  setMailFiles(state,mailFiles){
-    state.mailFiles = mailFiles
+  setCheckedFiles(state,checkedFiles){
+    state.checkedFiles = checkedFiles
   },
-  setMailFilesFull(state){
-    state.mailFiles = []
+  setCheckedFilesFull(state){
+    state.checkedFiles = []
   },
 }

@@ -127,7 +127,7 @@
         formData.append('way',this.searchWay)
         formData.append('text',this.searchKey)
         uploadOrUpdate(childUrl, formData).then(data=>{
-          this.fives.folders =[...data.CATALOG,...data.INSIGHT]
+          this.allFolderResult =[...data.CATALOG,...data.INSIGHT]
           if (this.allFolderResult.length == 0){
             this.noResult = true
           }
@@ -251,13 +251,13 @@
     margin: 20px;
     color: gray;
   }
-  .folder_result > .file_nav span{
+  .path_result > .file_nav span{
     color: cornflowerblue;
   }
-  .folder_result > .folder_outer{
+  .path_result > .folder_outer{
     margin-top: 60px;
   }
-  .folder_result > .folder_outer >div {
+  .path_result > .folder_outer >div {
     display: inline-block;
     margin: 10px;
     width: 100px;
@@ -266,7 +266,7 @@
     cursor: pointer;
   }
 
-  .folder_result > .folder_outer >div> svg {
+  .path_result > .folder_outer >div> svg {
     font-size: 60px;
   }
 </style>

@@ -100,7 +100,7 @@
         createDefCatalog: false,
         defCatName:'',
         defineFiles:[],
-        mailFiles:[]
+        checkedFiles:[]
       }
     },
     computed: {
@@ -127,14 +127,14 @@
     methods: {
       itemCheckedDefault(item){
         item.itemChecked = !item.itemChecked
-        const index = this.mailFiles.findIndex(el=>{el.id === item.id})
-        if (item.itemChecked && index < 0) {
-          this.mailFiles.push({id: item.id, name: item.name})
+        const index = this.checkedFiles.findIndex(el=>{return el.id === item.id})
+        if (item.itemChecked && index < 0){
+          this.checkedFiles.push({id: item.id, name: item.name, url:item.url})
         }else{
-          this.mailFiles.splice(index, 1)
+          this.checkedFiles.splice(index, 1)
         }
-        if (this.mailFiles.length != 0){
-          this.$store.commit('setMailFiles', this.mailFiles)
+        if (this.checkedFiles.length != 0){
+          this.$store.commit('setCheckedFiles', this.checkedFiles)
         }
       },
       defCatalogOk(id) {

@@ -34,7 +34,7 @@
       </div>
       <div class="smaller" :class="(fives.pics || fives.videos) ? 'float_right' : 'float_left'">
         <div class="count_show">
-
+          <div ref="fiveCount" class="count_box"></div>
         </div>
         <div class="docs_outer">
           <div class="title">文档 <span class="no_result" v-show="!fives.docs">暂无文档搜索结果</span></div>
@@ -87,6 +87,7 @@
 <script>
   import { mapState } from "vuex";
   import { fetchList, uploadOrUpdate, toggleTip, inputIsEmpty } from "../../publics/public";
+  import echarts from "echarts"
 
   export default {
     name: "InsightInfo",
@@ -109,9 +110,35 @@
       ...mapState(['file_icons', 'searchKey', 'searchWay'])
     },
     mounted(){
+      this.createEcharts()
       this.fetchNowTelFile()
     },
     methods:{
+      createEcharts(){
+        this.echarts = echarts.init(this.$refs.fiveCount)
+        this.echarts.setOption({
+          grid:{show:false},
+          title: {
+            text: ''
+          },
+          tooltip: {},
+          backgroundColor: 'white',
+          barWidth: 15,
+          splitLine:{show: false},
+          xAxis:{
+            axisLine: {show: false},
+            data:["文档","图片","视频","音频", '其他']
+          },
+          yAxis: {show:false},
+          series: [{
+            name: '统计',
+            type: 'bar',
+            itemStyle:{ normal: {color: 'cornflowerblue',label:{show: true,position:'top'}}},
+            barGap: 30,
+            barMaxHeight: 40
+          }]
+        })
+      },
       backupToInsight(){
         this.$router.push('/main/insight')
       },
@@ -142,6 +169,17 @@
           this.fives.videos = data.VIDEO
           this.fives.audios = data.AUDIO
           this.fives.others = data.OTHER
+          const dataCount = []
+          for (let key in this.fives){
+            const len = this.fives[key] ? this.fives[key].length : 0
+            dataCount.push(len)
+          }
+          this.echarts.setOption({
+            series:{
+              name: '统计',
+              data: dataCount
+            }
+          })
         })
       },
       openFile(fileItem) {

@@ -148,20 +148,25 @@ table tbody tr:hover{
   left: 175px;
   top: 0px;
   background-color: white;
-  width: 150px;
+  width: 170px;
   height: auto;
   border: 1px solid lightgray;
   border-radius: 5px;
   box-shadow: 0px 0px 10px 1px #acacac;
   padding: 10px;
+  word-break: break-word;
   z-index: 9999;
+  color: #171717;
+  font-size: 14px;
 }
+.highlight_info .name_hl,
 .highlight_info .keyword_pic,
 .highlight_info .tag_pic,
 .highlight_box .remarks{
   display: inline-block;
   width: 50px;
-  color: gray;
+  color: #6c6c6c;
+  font-size: 16px;
 }
 .six_info_outer .pics>.pics_item:hover,
 .six_info_outer .videos>.videos_item:hover,
@@ -197,5 +202,14 @@ table tbody tr:hover{
 }
 .float_right{
   float: right;
-  margin-right: 20px;
+  margin-right: 10px;
+}
+.six_info_outer .bigger{
+  width: 800px;
+}
+.six_info_outer .smaller{
+  width: 400px;
+}
+.six_info_outer .count_box{
+  height: 100px;
 }

@@ -22,8 +22,8 @@
         <p><img class="wordCloud" :src="nowFile.info.wordCloudUrl" alt="词云"></p>
       </div>
       <div class="tag_pic_info"><span>标签</span>
-        <span class="tag" v-for="(item,index) in nowFile.tag" :key="index" v-html="item" >
-          <img @click="delOneTag(nowFile.id, item, index)" src="../../assets/img/close.png" alt="删除" title="点击删除">
+        <span class="tag" v-for="(item,index) in nowFile.tag" :key="index" v-html="item ">
+          <img @click="delOneRemark(item.id)" src="../../assets/img/close.png" alt="删除" title="点击删除">
         </span>
         <div class="input_outer">
           <input class="tag_input" type="text" v-model="newTag" placeholder="自定义标签" :class="nowFile.tag.length != 0 ? 'have_content': ''"
@@ -68,7 +68,7 @@
         newTag: '',
         newRemark:'',
         hackReset: true,
-        fromSearch: false
+        fromSearch: false,
       }
     },
     mounted(){

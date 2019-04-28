@@ -16,7 +16,7 @@
       </tr>
       </thead>
       <tbody>
-      <tr v-for="(item, index) in allDocuments" :key="index" @click="clickItem(index)" :class="{item_checked:item.itemChecked}">
+      <tr v-for="(item, index) in allDocuments" :key="index" @click="clickItem(item)" :class="{item_checked:item.itemChecked}">
         <td ><span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span></td>
         <td class="file_importance">
           <svg @click.stop="changeImportance(index)" class="icon" aria-hidden="true"><use :xlink:href="`#icon-importance${item.importance}`"></use></svg>
@@ -47,7 +47,6 @@
     toggleTip,
     toggleCollection,
     toggleAttention,
-    clickItem,
     unixChange,
     getFileSize,
     fetchList
@@ -61,7 +60,7 @@
     },
     data() {
       return {
-        nowChecked:[],
+        checkedFiles:[],
         allDocuments:[]
       }
     },
@@ -106,8 +105,17 @@
         const ext = nowFile.name.split('.').pop()
         return "#icon-file_" + (this.file_icons.indexOf(ext) < 0 ? 'others' : ext)
       },
-      clickItem(index){
-        clickItem(this.allDocuments, index, this.nowChecked)
+      clickItem(item){
+        item.itemChecked = !item.itemChecked
+        const index = this.checkedFiles.findIndex(el=>{return el.id === item.id})
+        if (item.itemChecked && index < 0){
+          this.checkedFiles.push({id: item.id, name: item.name, url:item.url})
+        }else{
+          this.checkedFiles.splice(index, 1)
+        }
+        if (this.checkedFiles.length != 0){
+          this.$store.commit('setCheckedFiles', this.checkedFiles)
+        }
       },
       toggleCollection(index){
         toggleCollection(this, this.allDocuments, index)

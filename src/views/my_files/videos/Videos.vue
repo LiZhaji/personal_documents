@@ -55,7 +55,7 @@
     data() {
       return {
         allVideos:[],
-        checkedVideos:[]
+        checkedFiles:[]
       }
     },
     components:{
@@ -97,15 +97,15 @@
       },
       clickItem(item){
         item.itemChecked = !item.itemChecked
-        const index = this.checkedVideos.findIndex(el=>{el.id === item.id})
+        const index = this.checkedFiles.findIndex(el=>{return el.id === item.id})
         if (item.itemChecked && index < 0){
-          this.checkedVideos.push({id: item.id, name: item.name})
+          this.checkedFiles.push({id: item.id, name: item.name,url})
         }else{
           this.checkedCategory.splice(index, 1)
-          this.checkedVideos.splice(index, 1)
+          this.checkedFiles.splice(index, 1)
         }
-        if (this.checkedVideos.length != 0){
-          this.$store.commit('setMailFiles', this.checkedVideos)
+        if (this.checkedFiles.length != 0){
+          this.$store.commit('setCheckedFiles', this.checkedFiles)
         }
     },
       toggleCollection(index){

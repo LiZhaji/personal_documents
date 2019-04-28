@@ -161,6 +161,7 @@ export const fetchList = (childUrl)=>{
 }
 export const uploadOrUpdate = (childUrl, formData)=>{
   const url = window.baseUrl + childUrl
+  axios.defaults.withCredentials=true;
   return axios.post(url, formData).then(response => {
     if (response.status === 200){
       return response.data

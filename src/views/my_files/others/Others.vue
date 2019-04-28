@@ -16,7 +16,7 @@
       </tr>
       </thead>
       <tbody>
-      <tr v-for="(item, index) in others" :key="index" @click="clickItem(index)" :class="{item_checked:item.itemChecked}">
+      <tr v-for="(item, index) in others" :key="index" @click="clickItem(item)" :class="{item_checked:item.itemChecked}">
         <td ><span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span></td>
         <td class="file_importance">
           <svg @click="changeImportance(index)" class="icon" aria-hidden="true"><use :xlink:href="`#icon-importance${item.importance}`"></use></svg>
@@ -43,7 +43,7 @@
 <script>
   import axios from "axios"
   import FileOperation from "../../../components/FileOperation"
-  import { toggleTip,toggleCollection,toggleAttention,clickItem,fetchList } from "../../../publics/public"
+  import { toggleTip,toggleCollection,toggleAttention,fetchList } from "../../../publics/public"
   export default {
     components:{
       FileOperation: FileOperation
@@ -51,7 +51,7 @@
     data() {
       return {
         file_icons:['doc','exe','zip','txt','pdf','ppt','xls','css','mp3','avi','mp4','movie','jpg','png','gif'],
-        nowChecked:[],
+        checkedFiles:[],
         others:[
           {
             importance:0,// -1,0,1
@@ -91,8 +91,17 @@
         return "#icon-file_" + temp
         // return "#icon-file_" + this.file_icons.indexOf(this.others[index].type) < 0 ? 'others' : this.others[index].type
       },
-      clickItem(index){
-        clickItem(this.others, index, this.nowChecked)
+      clickItem(item){
+        item.itemChecked = !item.itemChecked
+        const index = this.checkedFiles.findIndex(el=>{return el.id === item.id})
+        if (item.itemChecked && index < 0){
+          this.checkedFiles.push({id: item.id, name: item.name, url:item.url})
+        }else{
+          this.checkedFiles.splice(index, 1)
+        }
+        if (this.checkedFiles.length != 0){
+          this.$store.commit('setCheckedFiles', this.checkedFiles)
+        }
       },
       toggleCollection(index){
         toggleCollection(this, this.others, index)

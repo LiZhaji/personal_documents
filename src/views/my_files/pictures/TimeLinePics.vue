@@ -75,7 +75,7 @@
         chooseDefineCatalog:false,
         createDefCatalog: false,
         defCatName:'',
-        mailFiles:[]
+        checkedFiles:[]
       }
     },
     mounted(){
@@ -104,19 +104,19 @@
       },
       itemCheckedTimeLine(item) {
         item.itemChecked = !item.itemChecked
-        const index = this.checkedIds.findIndex(el=>{el.id === item.id})
+        const index = this.checkedIds.findIndex(el=>{return el.id === item.id})
         if (item.itemChecked && index < 0){
           this.checkedIds.push(item.id)
           this.checkedCategory.push(item.category)
-          this.mailFiles.push({id: item.id, name: item.name})
+          this.checkedFiles.push({id: item.id, name: item.name, url:item.url})
         }else{
           this.checkedIds.splice(index, 1)
           this.checkedCategory.splice(index, 1)
-          this.mailFiles.splice(index, 1)
+          this.checkedFiles.splice(index, 1)
         }
         if (this.checkedIds.length != 0){
           this.isDefineFile = true
-          this.$store.commit('setMailFiles', this.mailFiles)
+          this.$store.commit('setCheckedFiles', this.checkedFiles)
         } else{
           this.isDefineFile = false
         }

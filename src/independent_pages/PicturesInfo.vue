@@ -40,8 +40,8 @@
         </div>
       </div>
       <div class="tag_pic_info"><span>标签</span>
-        <span class="tag" v-for="(item,index) in nowPicture.tag" :key="index">
-          {{item}} <img @click="delOneTag(nowPicture.id, item, index)" src="../assets/img/close.png" alt="删除" title="点击删除">
+        <span class="tag" v-for="(item,index) in nowPicture.tag" :key="index"  >
+           {{item}}<img @click="delOneTag(nowPicture.id, item, index)" src="../assets/img/close.png" alt="删除" title="点击删除">
         </span>
         <div class="input_outer">
       <input class="tag_input" type="text" v-model="newTag" placeholder="自定义标签"

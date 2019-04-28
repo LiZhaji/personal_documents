@@ -5,7 +5,7 @@
       <span v-show="forNav"><span @click="backupToInsight">智能归档</span> > {{keyName}}</span>
     </div>
     <div class="six_info_outer">
-      <div class="left"  v-if="fives.pics || fives.videos">
+      <div class="bigger" :class="(fives.pics || fives.videos) ? 'float_left' : 'float_right'">
         <div class="pics_outer">
           <div class="title">图片 <span class="no_result" v-show="!fives.pics">暂无图片搜索结果</span></div>
           <div class="pics">
@@ -39,9 +39,9 @@
           </div>
         </div>
       </div>
-      <div class="right">
+      <div class="smaller" :class="(fives.pics || fives.videos) ? 'float_right' : 'float_left'">
         <div class="count_show">
-
+          <div ref="fiveCount" class="count_box"></div>
         </div>
         <div class="docs_outer">
           <div class="title">文档 <span class="no_result" v-show="!fives.docs">暂无文档搜索结果</span></div>
@@ -80,41 +80,6 @@
           </div>
         </div>
       </div>
-      <div class="left" v-if="!fives.pics && !fives.videos">
-        <div class="pics_outer">
-          <div class="title">图片 <span class="no_result" v-show="!fives.pics">暂无图片搜索结果</span></div>
-          <div class="pics">
-            <div class="pics_item" v-for="(item, index) in fives.pics"
-                 :key="index" :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
-              <span class="checkbox iconfont icon-checked_circle" @click.stop="itemCheck(item)"></span>
-              <div class="img_outer" @click="openFile(item)"
-                   :style="{'background-image': 'url('+getPicUrl(item.url) +')'}">
-                <!--                <img :src="getPicUrl(item.url)" alt="图片预览图">-->
-              </div>
-              <div class="highlight_info highlightbox" >
-                <span class="keyword_pic">关键字</span><span v-for="smallItem in item.keyword" v-html="' ' + smallItem"></span>
-                <br><span class="tag_pic">标签</span><span v-for="smallItem in item.tag" v-html="' ' + smallItem"></span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="videos_outer">
-          <div class="title">视频 <span class="no_result" v-show="!fives.videos || !fives.videos.length">暂无视频搜索结果</span></div>
-          <div class="videos">
-            <div class="videos_item" v-for="(item, index) in fives.videos"  :key="index" :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
-              <span class="checkbox iconfont icon-checked_circle" @click.stop="itemCheck(item)"></span>
-              <div class="img_outer" @click="openFile(item)">
-                <img :src="getPicUrl(item.info.thumbUrl)" alt="视频预览图">
-              </div>
-              <p v-html="item.name"></p>
-              <div class="highlight_info highlight_box" >
-                <span class="keyword_pic">关键字</span><span v-for="smallItem in item.keyword" v-html="' ' + smallItem"></span>
-                <br><span class="tag_pic">标签</span><span v-for="smallItem in item.tag" v-html="' ' + smallItem"></span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
     <!-- 自定义归档目录 -->
     <el-popover placement="top" width="160" popper-class="define_catalog_outer">
@@ -141,6 +106,7 @@
 <script>
   import { mapState } from "vuex";
   import { fetchList, uploadOrUpdate, toggleTip, inputIsEmpty } from "../../publics/public";
+  import echarts from "echarts"
 
   export default {
     name: "InsightInfo",
@@ -163,9 +129,35 @@
       ...mapState(['file_icons', 'searchKey', 'searchWay'])
     },
     mounted(){
+      this.createEcharts()
       this.fetchNowTelFile()
     },
     methods:{
+      createEcharts(){
+        this.echarts = echarts.init(this.$refs.fiveCount)
+        this.echarts.setOption({
+          grid:{show:false},
+          title: {
+            text: ''
+          },
+          tooltip: {},
+          backgroundColor: 'white',
+          barWidth: 15,
+          splitLine:{show: false},
+          xAxis:{
+            axisLine: {show: false},
+            data:["文档","图片","视频","音频", '其他']
+          },
+          yAxis: {show:false},
+          series: [{
+            name: '统计',
+            type: 'bar',
+            itemStyle:{ normal: {color: 'cornflowerblue',label:{show: true,position:'top'}}},
+            barGap: 30,
+            barMaxHeight: 40
+          }]
+        })
+      },
       backupToInsight(){
         this.$router.push('/main/insight')
       },
@@ -196,8 +188,17 @@
           this.fives.videos = data.VIDEO
           this.fives.audios = data.AUDIO
           this.fives.others = data.OTHER
-          console.log(this.fives.pics,33333)
-
+          const dataCount = []
+          for (let key in this.fives){
+            const len = this.fives[key] ? this.fives[key].length : 0
+            dataCount.push(len)
+          }
+          this.echarts.setOption({
+            series:{
+              name: '统计',
+              data: dataCount
+            }
+          })
         })
       },
       openFile(fileItem) {

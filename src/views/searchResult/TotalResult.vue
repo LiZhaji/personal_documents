@@ -9,7 +9,7 @@
     </div>
     <!-- 搜索结果 -->
     <div class="six_info_outer" v-show="searchResult">
-      <div class="left" v-if="fives.pics || fives.videos || fives.folders">
+      <div class="bigger":class="(fives.pics || fives.videos) ? 'float_left' : 'float_right'">
         <div class="folders_outer">
           <div class="title">文件夹 <span class="no_result" v-show="fives.folders.length === 0">暂无文件夹搜索结果</span></div>
           <div class="folder_item" v-for="(item, index) in fives.folders" :key="index"
@@ -29,7 +29,8 @@
               <div class="img_outer" @click="openFile(item)"
                    :style="{'background-image': 'url('+getPicUrl(item.url) +')'}"></div>
               <div class="highlight_info highlight_box">
-                <span class="keyword_pic">关键字</span><span v-for="smallItem in item.keyword" v-html="' ' + smallItem"></span>
+                <span class="name_hl">文件名</span><span v-html="' ' + item.name"></span>
+                <br><span class="keyword_pic">关键字</span><span v-for="smallItem in item.keyword" v-html="' ' + smallItem"></span>
                 <br><span class="tag_pic">标签</span><span v-for="smallItem in item.tag" v-html="' ' + smallItem"></span>
                 <br><span class="remarks">评论</span><span v-for="smallItem in item.comments" v-html="' ' + smallItem.content"></span>
               </div>
@@ -58,7 +59,7 @@
           </div>
         </div>
       </div>
-      <div class="right">
+      <div class="smaller":class="(fives.pics || fives.videos) ? 'float_right' : 'float_left'">
         <div class="count_show">
           <div ref="fiveCount" class="count_box"></div>
         </div>
@@ -105,56 +106,6 @@
               <use xlink:href="#icon-others"></use>
             </svg>
             <span v-html="item.name"></span></p>
-        </div>
-      </div>
-      <div class="left" v-if="!fives.pics && !fives.videos && !fives.folders">
-        <div class="folders_outer">
-          <div v-for="(item, index) in fives.folders" :key="index" @click.stop="openFolder(1, item.id, item.name)">
-            <svg class="icon" aria-hidden="true">
-              <use xlink:href="#icon-aFile"></use>
-            </svg>
-            <p v-html="item.name"></p>
-          </div>
-        </div>
-        <div class="pics_outer">
-          <div class="title">图片 <span class="no_result" v-show="!fives.pics">暂无图片搜索结果</span></div>
-          <div class="pics">
-            <div class="pics_item" v-for="(item, index) in fives.pics"
-                 :key="index" :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
-              <span class="checkbox iconfont icon-checked_circle" @click.stop="itemCheck(item)"></span>
-              <div class="img_outer" @click="openFile(item)"
-                   :style="{'background-image': 'url('+getPicUrl(item.url) +')'}">
-              </div>
-              <div class="highlight_info highlight_box">
-                <span class="keyword_pic">关键字</span><span v-for="smallItem in item.keyword"
-                                                          v-html="' ' + smallItem"></span>
-                <br><span class="tag_pic">标签</span><span v-for="smallItem in item.tag" v-html="' ' + smallItem"></span>
-                <br><span class="remarks">评论</span><span v-for="smallItem in item.comments"
-                                                         v-html="' ' + smallItem.content"></span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="videos_outer">
-          <div class="title">视频 <span class="no_result" v-show="!fives.videos || !fives.videos.length">暂无视频搜索结果</span>
-          </div>
-          <div class="videos">
-            <div class="videos_item" v-for="(item, index) in fives.videos" :key="index"
-                 :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
-              <span class="checkbox iconfont icon-checked_circle" @click.stop="itemCheck(item)"></span>
-              <div class="img_outer" @click="openFile(item)">
-                <img :src="getPicUrl(item.info.thumbUrl)" alt="视频预览图">
-              </div>
-              <p v-html="item.name"></p>
-              <div class="highlight_info highlight_box">
-                <span class="keyword_pic">关键字</span><span v-for="smallItem in item.keyword"
-                                                          v-html="' ' + smallItem"></span>
-                <br><span class="tag_pic">标签</span><span v-for="smallItem in item.tag" v-html="' ' + smallItem"></span>
-                <br><span class="remarks">评论</span><span v-for="smallItem in item.comments"
-                                                         v-html="' ' + smallItem.content"></span>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -258,7 +209,6 @@
   import {mapState} from "vuex";
   import {fetchList, uploadOrUpdate, toggleTip, inputIsEmpty, unixChange, getFileSize} from "../../publics/public";
   import echarts from "echarts"
-  // window.echarts = echarts
   export default {
     name: "InsightInfo",
     data() {
@@ -292,21 +242,25 @@
       createEcharts(){
         this.echarts = echarts.init(this.$refs.fiveCount)
         this.echarts.setOption({
+          grid:{show:false},
           title: {
             text: ''
           },
           tooltip: {},
-          legend: {
-            data:['']
-          },
+          backgroundColor: 'white',
+          barWidth: 15,
+          splitLine:{show: false},
           xAxis:{
+            axisLine: {show: false},
             data:["文件夹", "文档","图片","视频","音频", '其他']
           },
-          yAxis: {},
+          yAxis: {show:false},
           series: [{
             name: '统计',
             type: 'bar',
-            data: [1,2,3,4,5]
+            itemStyle:{ normal: {color: 'cornflowerblue',label:{show: true,position:'top'}}},
+            barGap: 30,
+            barMaxHeight: 40
           }]
         })
       },
@@ -418,12 +372,12 @@
             const len = this.fives[key] ? this.fives[key].length : 0
             dataCount.push(len)
           }
-          // this.echarts.setOption({
-          //   series:{
-          //     type: 'bar',
-          //     data: dataCount
-          //   }
-          // })
+          this.echarts.setOption({
+            series:{
+              name: '统计',
+              data: dataCount
+            }
+          })
         })
       },
       getPicUrl(url) {
@@ -591,9 +545,6 @@
     border-radius: 5px;
     margin: 10px 0px;
     position: relative;
-  }
-  .count_box{
-    height: 100px;
   }
   .docs_outer .docs_item{
     padding: 5px 10px;

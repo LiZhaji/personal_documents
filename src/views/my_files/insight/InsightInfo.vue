@@ -2,10 +2,10 @@
   <div class="insight_info">
     <div class="bg"></div>
     <div class="file_nav">
-      <span v-show="forNav"><span @click="backupToInsight">智能归档</span> > {{keyName}}</span>
+      <span ><span @click="backupToInsight">智能归档</span> > {{keyName}}</span>
     </div>
     <div class="six_info_outer">
-      <div class="left" v-if="fives.pics || fives.videos">
+      <div  class="bigger" :class="(fives.pics || fives.videos) ? 'float_left' : 'float_right'">
         <div class="pics_outer">
           <div class="title">图片 <span class="no_result" v-show="!fives.pics">暂无图片搜索结果</span></div>
           <div class="pics">
@@ -32,57 +32,30 @@
           </div>
         </div>
       </div>
-      <div class="right">
+      <div class="smaller" :class="(fives.pics || fives.videos) ? 'float_right' : 'float_left'">
         <div class="count_show">
-
+          <div ref="fiveCount" class="count_box"></div>
         </div>
         <div class="docs_outer">
           <div class="title">文档 <span class="no_result" v-show="!fives.docs">暂无文档搜索结果</span></div>
-          <p v-for="item in fives.docs" @click.stop="itemCheck(item)" :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
+          <p class="docs_item" v-for="item in fives.docs" @click.stop="itemCheck(item)" :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
             <span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span>
             <svg class="icon" aria-hidden="true"><use :xlink:href=fileIconsOrOthers(item.id)></use></svg>
             <span @click="openFile(item)" v-html="item.name"></span></p>
         </div>
         <div class="audios_outer">
           <div class="title">音频 <span class="no_result" v-show="!fives.audios">暂无音频搜索结果</span></div>
-          <p v-for="item in fives.audios" @click.stop="itemCheck(item)" :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
+          <p class="audios_item" v-for="item in fives.audios" @click.stop="itemCheck(item)" :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
             <span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span>
             <svg class="icon" aria-hidden="true"><use xlink:href="#icon-mp3"></use></svg>
             <span v-html="item.name" @click="openFile(item)"></span></p>
         </div>
         <div class="others">
           <div class="title">其他 <span class="no_result" v-show="!fives.others">暂无其他</span></div>
-          <p v-for="item in fives.others" @click.stop="itemCheck(item)" :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
+          <p class="others_item" v-for="item in fives.others" @click.stop="itemCheck(item)" :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
             <span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span>
             <svg class="icon" aria-hidden="true"><use xlink:href="#icon-others"></use></svg>
             <span v-html="item.name" @click="openFile(item)"></span></p>
-        </div>
-      </div>
-      <div class="left" v-if="!fives.pics && !fives.videos">
-        <div class="pics_outer">
-          <div class="title">图片 <span class="no_result" v-show="!fives.pics">暂无图片搜索结果</span></div>
-          <div class="pics">
-            <div class="pics_item" v-for="(item, index) in fives.pics"
-                 :key="index" :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
-              <span class="checkbox iconfont icon-checked_circle" @click.stop="itemCheck(item)"></span>
-              <div class="img_outer" @click="openFile(item)"
-                   :style="{'background-image': 'url('+getPicUrl(item.url) +')'}">
-                <!--                <img :src="getPicUrl(item.url)" alt="图片预览图">-->
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="videos_outer">
-          <div class="title">视频 <span class="no_result" v-show="!fives.videos || !fives.videos.length">暂无视频搜索结果</span></div>
-          <div class="videos">
-            <div class="videos_item" v-for="(item, index) in fives.videos"  :key="index" :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
-              <span class="checkbox iconfont icon-checked_circle" @click.stop="itemCheck(item)"></span>
-              <div class="img_outer" @click="openFile(item)">
-                <img :src="getPicUrl(item.info.thumbUrl)" alt="视频预览图">
-              </div>
-              <p v-html="item.name"></p>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -111,6 +84,7 @@
 <script>
   import { mapState } from  "vuex";
   import { fetchList, uploadOrUpdate, toggleTip, inputIsEmpty } from "../../../publics/public";
+  import echarts from "echarts"
 
   export default {
     name: "InsightInfo",
@@ -121,12 +95,11 @@
         checkedIds:[],
         checkedCategory:[],
         fromInsight: false,
-        forNav:false,
         defineFiles:[],
         chooseDefineCatalog:false,
         createDefCatalog: false,
         defCatName:'',
-        mailFiles:[],
+        checkedFiles:[],
         isDefineFile:false
       }
     },
@@ -134,9 +107,35 @@
       ...mapState(['file_icons','intelFileTime'])
     },
     mounted(){
+      this.createEcharts()
       this.fetchNowTelFile()
     },
     methods:{
+      createEcharts(){
+        this.echarts = echarts.init(this.$refs.fiveCount)
+        this.echarts.setOption({
+          grid:{show:false},
+          title: {
+            text: ''
+          },
+          tooltip: {},
+          backgroundColor: 'white',
+          barWidth: 15,
+          splitLine:{show: false},
+          xAxis:{
+            axisLine: {show: false},
+            data:["文档","图片","视频","音频", '其他']
+          },
+          yAxis: {show:false},
+          series: [{
+            name: '统计',
+            type: 'bar',
+            itemStyle:{ normal: {color: 'cornflowerblue',label:{show: true,position:'top'}}},
+            barGap: 30,
+            barMaxHeight: 40
+          }]
+        })
+      },
       backupToInsight(){
         this.$router.push('/main/insight')
       },
@@ -172,6 +171,17 @@
           this.fives.videos = data.VIDEO
           this.fives.audios = data.AUDIO
           this.fives.others = data.OTHER
+          const dataCount = []
+          for (let key in this.fives){
+            const len = this.fives[key] ? this.fives[key].length : 0
+            dataCount.push(len)
+          }
+          this.echarts.setOption({
+            series:{
+              name: '统计',
+              data: dataCount
+            }
+          })
         })
       },
       openFile(fileItem) {
@@ -219,19 +229,19 @@
       },
       itemCheck(item){
         item.itemChecked = !item.itemChecked
-        const index = this.checkedIds.findIndex(el=>{el.id === item.id})
+        const index = this.checkedIds.findIndex(el=>{return el.id === item.id})
         if (item.itemChecked && index < 0){
           this.checkedIds.push(item.id)
           this.checkedCategory.push(item.category)
-          this.mailFiles.push({id: item.id, name: item.name})
+          this.checkedFiles.push({id: item.id, name: item.name, url: item.url})
         }else{
           this.checkedIds.splice(index, 1)
           this.checkedCategory.splice(index, 1)
-          this.mailFiles.splice(index, 1)
+          this.checkedFiles.splice(index, 1)
         }
         if (this.checkedIds.length != 0){
           this.isDefineFile = true
-          this.$store.commit('setMailFiles', this.mailFiles)
+          this.$store.commit('setCheckedFiles', this.checkedFiles)
         } else{
           this.isDefineFile = false
         }
@@ -439,7 +449,8 @@
   .checkbox {
     display: none;
   }
-  .pics_item:hover .checkbox {
+  .pics_item:hover .checkbox,
+  .videos_item:hover .checkbox{
     display: block;
   }
 /* right*/

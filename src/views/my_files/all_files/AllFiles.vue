@@ -104,8 +104,6 @@
           })
           this.allFolders = data.catalogs
           this.allFiles = data.files
-          console.log('allFolders:',this.allFolders)
-          console.log('allFiles:',this.allFiles)
         })
         this.catalog = []
       },
@@ -175,14 +173,16 @@
       },
       clickItemFile(item){
         item.itemChecked = !item.itemChecked
-        const index = this.checkedFiles.findIndex(el=>{el.id === item.id})
+        const index = this.checkedFiles.findIndex(el=>{return el.id == item.id})
+        console.log(index,',index')
         if (item.itemChecked && index < 0){
-          this.checkedFiles.push({id: item.id, name: item.name})
+          this.checkedFiles.push({id: item.id, name: item.name, url:item.url})
         }else{
           this.checkedFiles.splice(index, 1)
         }
+        console.log(this.checkedFiles,2222)
         if (this.checkedFiles.length != 0){
-          this.$store.commit('setMailFiles', this.checkedFiles)
+          this.$store.commit('setCheckedFiles', this.checkedFiles)
         }
       },
       toggleCollection(index){

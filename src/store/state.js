@@ -12,6 +12,5 @@ export default {
   searchWay: 6,
   searchKey:'',
   isMail: false,
-  mailFiles:[]
-
+  checkedFiles:[],
 }

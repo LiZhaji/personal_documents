@@ -1,32 +1,32 @@
 <template>
     <div class="modify_documents">
-      <h1 inline="text">Hello.v.2</h1>
-      <div style="width:1000px;height:700px;" id="modify_outer"></div>
+      <div class="a"></div>
+      <div class="b">aaaaaaaa</div>
     </div>
 </template>
 
 <script>
 
   export default {
-    name: "ModifyDocuments",
-    mounted(){
-      var body = this.$router.query.body
-      var modifyOuter = document.getElementById("modify_outer")
-      modifyOuter.innerHTML = body
-    },
-    methods:{
-      Save() {
-        document.getElementById("PageOfficeCtrl1").WebSave();
-      },
-      AddSeal() {
-        try{
-          document.getElementById("PageOfficeCtrl1").ZoomSeal.AddSeal();
-        }catch (e){ };
-      }
-    }
+    name: "ModifyDocuments"
   }
 </script>
 
 <style scoped>
-
+.modify_documents{
+  width: 400px;
+  height: auto;
+  background: #a0a0a0;
+}
+  .a{
+    height: 300px;
+    width: 200px;
+    height: 200px;
+    background: #825b45;
+    display: inline-block;
+  }
+.b{
+  background: #825b45;
+  display: inline-block;
+}
 </style>

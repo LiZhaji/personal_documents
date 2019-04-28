@@ -2,8 +2,11 @@
   <div>
     <div class="bg"></div>
     <div class="file_operation">
-<!--      <a href="../../../assets/img/head_photo.jpg" download="img"></a>-->
-      <span class="iconfont icon-download"><span class="font">下载</span></span>
+<!--      v-show="!isSingleFile"-->
+      <span class="iconfont icon-download" @click="downloadFile" ><span class="font">下载</span></span>
+<!--      <a :href="singleUrl" download=""  v-show="isSingleFile" >-->
+<!--        <span class="iconfont icon-download"><span class="font">下载</span></span>-->
+<!--      </a>-->
       <span class="iconfont icon-share-nocircle"><span class="font">分享</span></span>
       <span class="iconfont icon-delete"><span class="font">删除</span></span>
       <span class="iconfont icon-moveto"><span class="font">移动到</span></span>
@@ -16,14 +19,74 @@
 </template>
 
 <script>
-
+  import { mapState } from "vuex"
+  import JSZIP from "jszip"
+  import axios from "axios"
+  import FileSaver from "file-saver"
   export default {
     data() {
-      return {}
+      return {
+        singleUrl:'',
+        fileName:'',
+        isSingleFile: true
+      }
+    },
+    computed:{
+      ...mapState(['checkedFiles'])
+    },
+    watch:{
+      // checkedFiles(){
+      //   deep:true
+      //   handles:{
+      //     if (this.checkedFiles.length == 1){
+      //       console.log(this.checkedFiles, '000')
+      //       this.singleUrl = window.baseUrl + "/testpreview/" + this.checkedFiles[0].url;
+      //       this.fileName = this.checkedFiles[0].name;
+      //       console.log(this.singleUrl, '111')
+      //       console.log(this.fileName, '22')
+      //       return
+      //     }
+      //     this.isSingleFile = false
+      //   }
+      // }
     },
     methods:{
       mail(){
         this.$store.commit('openMail')
+      },
+      downloadFile(){
+        let urls = []
+        // const baseUrl = window.baseUrl + "/testpreview/"
+        this.checkedFiles.forEach(el=>{
+          urls.push('/api/testpreview/' + el.url)
+        })
+        let zip = new JSZIP()
+        let cache = {}
+        let promises = []
+        urls.forEach(el=>{
+          const promise = this.getArrayBuffers(el).then(data=>{
+            console.log(el,1111111)
+            const arr_name = el.split("/")
+            const file_name = arr_name[arr_name.length - 1] // 获取文件名
+            zip.file(file_name, data, { binary: true }) // 逐个添加文件
+            cache[file_name] = data
+          })
+          promises.push(promise)
+        })
+        Promise.all(promises).then(()=>{
+          zip.generateAsync({type:"blob"}).then(content =>{
+            FileSaver.saveAs(content, "打包下载.zip")
+            this.$store.commit('setCheckedFilesFull')
+          })
+        })
+      },
+      getArrayBuffers(url){
+        console.log('sssssssssss')
+        return axios.get(url,{responseType:'arraybuffer'}).then(response=>{
+          if (response.status == 200){
+            return response.data
+          }
+        })
       }
     }
   }
@@ -41,7 +104,8 @@
   .file_operation{
     margin-top: 20px;
   }
-  .file_operation>span{
+  .file_operation>span,
+  .file_operation>a{
     margin-right: 30px;
     cursor: pointer;
     font-size: 16px;
