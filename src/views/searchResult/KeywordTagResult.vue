@@ -91,6 +91,7 @@
       </p>
       <span slot="reference" v-show="isDefineFile" class="defBtn" @click="defineFile">归档于</span>
     </el-popover>
+    <span v-show="isMerge" class="defBtn" @click="mergeImages">合并图片</span>
     <!-- 新建自定义归档-->
     <div v-show="createDefCatalog" class="newDef">
       <svg class="icon" aria-hidden="true">
@@ -122,7 +123,8 @@
         createDefCatalog: false,
         defCatName:'',
         mailFiles:[],
-        isDefineFile:false
+        isDefineFile:false,
+        isMerge:false
       }
     },
     computed:{
@@ -160,6 +162,22 @@
       },
       backupToInsight(){
         this.$router.push('/main/insight')
+      },
+      mergeImages(){
+        let ids = []
+        this.checkedCategory.forEach((el, index)=>{
+          if (el == 2) {
+            const id = this.checkedIds.slice(index, index + 1)
+            ids.push(id)
+          }
+        })
+        let formData = new FormData()
+        formData.append('ids', ids)
+        uploadOrUpdate(window.mergeUrl, formData).then(data=>{
+          if (data.success){
+            toggleTip(this, '合并成功，已保存至“处理”文件夹中')
+          }
+        })
       },
       fetchNowTelFile(){
         const childUrl = '/search'
@@ -317,6 +335,18 @@
           this.defineFiles.push({id: -1, name: '新建目录'})
         })
       },
+    },
+    watch:{
+      checkedIds(){
+        if (this.checkedIds.length != 0) {
+          this.isDefineFile = true
+          this.isMerge = true
+          this.$store.commit('setCheckedFiles', this.checkedFiles)
+        } else {
+          this.isDefineFile = false
+          this.isMerge = false
+        }
+      }
     }
   }
 </script>

@@ -9,6 +9,13 @@
       <div class="video_play_outer">
         <video id="media" :src="getVideoUrl()" controls></video>
       </div>
+      <div class="shot_cut">
+        <div class="general_view" id="general_view"><span :style="{width: (cutTime.width + 'px'),left: (cutTime.left + 'px')}"></span></div>
+        <span @click="getCutTime(event)">{{formatTime(nowVideo.info.duration)}}</span>
+        <span>开始时间{{cutTime.startTime}}</span>
+        <span>~结束时间{{cutTime.endTime}}</span>
+        <button @click="upCutTime">裁剪</button>
+      </div>
       <div class="shot_labels_show_outer"><span>{{labelName}}</span>
         <div class="shot_labels_show" id="shot_labels_show">
           <span @click="timeLocation(item.startTime)" v-for="(item, index) in validSegments" :key="index"
@@ -76,7 +83,7 @@
     addTag,
     delTag,
     addRemark,
-    delRemark
+    delRemark, uploadOrUpdate
   } from "../publics/public"
 
   export default {
@@ -89,28 +96,42 @@
         newRemark:'',
         validShotLabels: [],
         validSegments: [],
-        labelName: '暂无选择'
+        labelName: '暂无选择',
+        cutTime:{startTime:formatTime(), endTime:formatTime(), width:'', left:''}
       }
     },
     mounted() {
-      const id = this.$route.query.id
-      const childUrl = '/fileinfo/' + id
-      fetchList(childUrl).then(data => {
-        data.info = JSON.parse(data.info)
-        if (data.keyword) {
-          data.keyword = data.keyword.split(' ')
-        }
-        if (data.tag) {
-          data.tag = data.tag.split(' ')
-        } else {
-          data.tag = []
-        }
-        this.nowVideo = data
-        console.log(this.nowVideo,'aaaaaa')
-        this.getShotLabels()
-      })
+      this.getVideo()
     },
     methods: {
+      getCutTime(event){
+        const duration = parseInt(this.nowVideo.info.duration)
+        const parentW = parseInt(document.getElementById("general_view").offsetWidth)
+        const parentLeft = parseInt(document.getElementById("general_view").offsetLeft)
+        const left = event.clientX - parentLeft
+        const clickTime = formatTime(left / parentW * duration)
+        this.cutTime.left = left
+        if (!this.cutTime.startTime) {
+          this.cutTime.startTime = clickTime
+        }else if (clickTime > this.cutTime.startTime) {
+          this.cutTime.endTime = clickTime
+        }else {
+          this.cutTime.startTime = clickTime
+        }
+        console.log(this.cutTime,2222)
+      },
+      upCutTime(){
+        let formData = new FormData()
+        formData.append('st', this.cutTime.startTime)
+        formData.append('et', this.cutTime.endTime)
+        formData.append('url', this.nowVideo.url)
+        uploadOrUpdate('/').then(data=>{
+          if (data.success){
+            this.cutTime = {startTime:formatTime(),endTime:formatTime()}
+            toggleTip(this, '裁剪成功，已保存至“处理”文件夹')
+          }
+        })
+      },
       showSegment(shotLabelsItem) {
         this.validSegments = []
         this.labelName = shotLabelsItem.shotlabel
@@ -118,7 +139,6 @@
         let parentW = parseInt(document.getElementById("shot_labels_show").offsetWidth)
         // let parentW = 1100
         // let duration = 309
-        console.log(duration)
         shotLabelsItem.segments.forEach(el => {
           let w = (el.endtime - el.starttime) / duration * parentW
           let st = el.starttime / duration * parentW
@@ -130,9 +150,25 @@
         var media = document.getElementById("media")
         media.currentTime = time
       },
+      getVideo(){
+        const id = this.$route.query.id
+        const childUrl = '/fileinfo/' + id
+        fetchList(childUrl).then(data => {
+          data.info = JSON.parse(data.info)
+          if (data.keyword) {
+            data.keyword = data.keyword.split('|')
+          }
+          if (data.tag) {
+            data.tag = data.tag.split('|')
+          } else {
+            data.tag = []
+          }
+          this.nowVideo = data
+          this.getShotLabels()
+        })
+      },
       getVideoUrl() {
         var baseUrl = window.baseUrl + '/testpreview/'
-        console.log(baseUrl + this.nowVideo.url)
         return baseUrl + this.nowVideo.url
       },
       getShotLabels() {
@@ -223,6 +259,37 @@
   .have_content{
     margin-left: 126px;
   }
+  /*裁剪开始*/
+  .shot_cut{
+    background-color: #cfcfcf;
+    border-radius: 5px;
+    height: 30px;
+  }
+  .general_view{
+    display: inline-block;
+    width: 90%;
+    background-color: #eeeeee;
+    border-radius: 5px;
+    height: 10px;
+    line-height: 30px;
+    cursor: pointer;
+    position: relative;
+  }
+  .general_view>span{
+    background-color: #ff3a66;
+    height: 20px;
+    position: absolute;
+  }
+  .shot_cut>span{
+    margin: 5px;
+  }
+  .shot_cut>button{
+    padding: 5px 10px;
+    background-color: #825b45;
+    outline: none;
+    border: 1px solid lightgray;
+  }
+  /*裁剪结束*/
   .shot_labels {
     padding: 10px;
     width: 180px;
@@ -291,7 +358,7 @@
     display: inline-block;
     width: 90%;
     height: 30px;
-    background-color: ##f0f0f0;
+    background-color: #dfdfdf;
     border-radius: 5px;
     margin: 10px 0;
     box-sizing: border-box;

@@ -193,6 +193,8 @@
       </p>
       <span slot="reference" v-show="isDefineFile" class="defBtn" @click="defineFile">归档于</span>
     </el-popover>
+    <span v-show="isMerge" class="defBtn" @click="mergeImages">合并图片</span>
+    <span v-show="isAlbum" class="defBtn" @click="albumImages">合成影集</span>
     <!-- 新建自定义归档-->
     <div v-show="createDefCatalog" class="newDef">
       <svg class="icon" aria-hidden="true">
@@ -222,12 +224,14 @@
         chooseDefineCatalog: false,
         createDefCatalog: false,
         defCatName: '',
-        mailFiles: [],
+        checkedFiles: [],
         searchResult: true,
         catalog: [],
         folders: [],
         files: [],
-        isDefineFile:false
+        isDefineFile:false,
+        isMerge:false,
+        isAlbum:false
       }
     },
     computed: {
@@ -262,6 +266,38 @@
             barGap: 30,
             barMaxHeight: 40
           }]
+        })
+      },
+      mergeImages(){
+        let urls = []
+        this.checkedCategory.forEach((el, index)=>{
+          if (el == 2) {
+            const sitem = this.checkedFiles.slice(index, index + 1)
+            urls.push(sitem.url)
+          }
+        })
+        let formData = new FormData()
+        formData.append('urls', urls)
+        uploadOrUpdate(window.mergeUrl, formData).then(data=>{
+          if (data.success){
+            toggleTip(this, '合并成功，已保存至“处理”文件夹中')
+          }
+        })
+      },
+      albumImages(){
+        let urls = []
+        this.checkedCategory.forEach((el, index)=>{
+          if (el == 2) {
+            const sitem = this.checkedFiles.slice(index, index + 1)
+            urls.push(sitem.url)
+          }
+        })
+        let formData = new FormData()
+        formData.append('urls', urls)
+        uploadOrUpdate(window.mergeUrl, formData).then(data=>{
+          if (data.success){
+            toggleTip(this, '合并成功，已保存至“处理”文件夹中')
+          }
         })
       },
       openFolder(flag, id, name) {
@@ -392,17 +428,11 @@
         if (item.itemChecked && index < 0) {
           this.checkedIds.push(item.id)
           this.checkedCategory.push(item.category)
-          this.mailFiles.push({id: item.id, name: item.name})
+          this.checkedFiles.push({id: item.id, name: item.name,url: item.url})
         } else {
           this.checkedIds.splice(index, 1)
           this.checkedCategory.splice(index, 1)
-          this.mailFiles.splice(index, 1)
-        }
-        if (this.checkedIds.length != 0) {
-          this.isDefineFile = true
-          this.$store.commit('setMailFiles', this.mailFiles)
-        } else {
-          this.isDefineFile = false
+          this.checkedFiles.splice(index, 1)
         }
       },
       fileIconsOrOthers(item) {
@@ -464,6 +494,18 @@
           this.defineFiles.push({id: -1, name: '新建目录'})
         })
       },
+    },
+    watch:{
+      checkedIds(){
+        if (this.checkedIds.length != 0) {
+          this.isDefineFile = true
+          this.isMerge = true
+          this.$store.commit('setCheckedFiles', this.checkedFiles)
+        } else {
+          this.isDefineFile = false
+          this.isMerge = false
+        }
+      }
     }
   }
 </script>

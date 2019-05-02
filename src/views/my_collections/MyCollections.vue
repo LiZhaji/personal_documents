@@ -43,28 +43,28 @@
 
 <script>
   import FileOperation from "../../components/FileOperation"
-  import { toggleCollection,toggleAttention,clickItem } from "../../publics/public"
+  import {toggleCollection, toggleAttention, clickItem, fetchList} from "../../publics/public"
   export default {
     components:{
       FileOperation: FileOperation,
     },
     data() {
       return {
-        myCollections:[
-          {
-            importance:0,// -1,0,1
-            name:'数据库设计.doc',
-            time:new Date(),
-            type:'doc',
-            size:'22k',
-            collection:true,
-            like:false,
-            itemChecked:false
-          }
-        ]
+        myCollections:[]
       }
     },
+    mounted(){
+      this.getCollections()
+    },
     methods:{
+      getCollections(){
+        fetchList('/getcollections').then(data=>{
+          data.forEach(el=>{
+            el.itemChecked = false
+          })
+          this.myCollections = data
+        })
+      },
       clickItem(index){
         clickItem(this.myCollections, index, this.nowChecked)
       },

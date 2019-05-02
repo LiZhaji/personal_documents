@@ -90,7 +90,13 @@
     },
     methods:{
       fetchList(){
-        fetchList('/catalogcontent?id=1').then(data=>{
+        const root = sessionStorage.getItem('root')
+        if (!root) {
+          this.$router.replace('/login')
+          return
+        }
+        const childUrl = '/catalogcontent?id=' + root
+        fetchList(childUrl).then(data=>{
           data.files.forEach(el=>{
             el.itemChecked = false
             if (el.keyword) {
@@ -109,7 +115,7 @@
       },
       openFolder(flag, id, name){
         // flag为0表示返回，为1表示继续
-        const childUrl = '/catalogcontent'+ '?id=' + id
+        const childUrl = '/catalogcontent?id=' + id
         fetchList(childUrl).then(data =>{
           data.files.forEach(el=>{
             el.itemChecked = false

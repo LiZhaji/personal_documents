@@ -143,9 +143,10 @@
         this.keyName = this.$route.params.name
         const id = this.$route.params.id
         const isTime = this.$route.params.isTime
+        const time = this.$route.params.time
         let childUrl
         if (isTime) {
-          childUrl = '/gettimefile?id=' + id
+          childUrl = '/gettimefile?time=' + time
         }else{
           childUrl = '/filefiling/' + id
         }

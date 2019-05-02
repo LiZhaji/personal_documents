@@ -5,16 +5,16 @@
       <div class="time_order">
         <div class="title"><span>时光簿</span></div>
         <div class="content">
-          <div v-for="(item, index) in allTimeFiles" :key="index" @click="showInsightInfo(item.id, item.date, 1)">
+          <div v-for="(item, index) in allTimeFiles" :key="index" @click="showInsightInfo(item, ' ', ' ', 1)">
             <svg class="icon" aria-hidden="true"><use xlink:href="#icon-aFile"></use></svg>
-            <p>{{item.date}}</p>
+            <p>{{item}}</p>
           </div>
         </div>
       </div>
       <div class="intelligent_orders">
         <div class="title"><span>智能归档</span></div>
         <div class="content">
-          <div v-for="(item, index) in allIntelFiles" :key="index" @click="showInsightInfo(item.id, item.name, 0)">
+          <div v-for="(item, index) in allIntelFiles" :key="index" @click="showInsightInfo(item, item.id, item.name, 0)">
             <svg class="icon" aria-hidden="true"><use xlink:href="#icon-aFile"></use></svg>
             <p>{{item.name}}</p>
           </div>
@@ -25,7 +25,7 @@
     <div class="owned_folders">
       <div class="title"><span>自定义归档</span></div>
       <div class="content">
-        <div v-for="(item, index) in allDefinedFiles" :key="index" @click="showInsightInfo(item.id, item.name, 0)">
+        <div v-for="(item, index) in allDefinedFiles" :key="index" @click="showInsightInfo(item, item.id, item.name, 0)">
           <svg class="icon" aria-hidden="true"><use xlink:href="#icon-aFile"></use></svg>
           <p>{{item.name}}</p>
         </div>
@@ -66,14 +66,15 @@
           this.allDefinedFiles = data
         })
       },
-      showInsightInfo(id, name, isTime){
+      showInsightInfo(time, id, name, isTime){
         this.$router.push({
           name: 'InsightInfo',
           params:{
             fromInsight: true,
             isTime: isTime,
             id: id,
-            name: name
+            name: name,
+            time: time
           }
         })
         this.$store.commit('setIntelFileTime', Date.now())

@@ -37,4 +37,7 @@ export default {
   setCheckedFilesFull(state){
     state.checkedFiles = []
   },
+  setRoot(state,root){
+    state.root = root
+  }
 }

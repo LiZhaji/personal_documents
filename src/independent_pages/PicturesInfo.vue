@@ -1,7 +1,10 @@
 <template>
   <div class="pictures_info">
     <div class="pic_show">
-      <el-carousel :class="{showSpecificInfo:showSpecificInfo,cancelSpecificInfo:!showSpecificInfo}" @change="changes"
+      <div v-show="isTailor" class="tailor">
+        <VueCropper ref="cropper" :img="getPicUrl(nowPicture.url)" ></VueCropper>
+      </div>
+      <el-carousel v-show="!isTailor" :class="{showSpecificInfo:showSpecificInfo,cancelSpecificInfo:!showSpecificInfo}" @change="changes"
                    indicator-position="outside" :autoplay="F" height="690px" :initial-index="initIndex">
         <el-carousel-item v-for="(item,index) in allPictures " :key="index">
           <span></span>
@@ -14,6 +17,7 @@
       <a href="nowPicture.url" download="img"><span class="iconfont icon-download">下载</span></a>
       <span class="iconfont icon-share-nocircle" @click="share">分享</span>
       <span class="iconfont icon-print" @click="printPic">打印</span>
+      <span class="iconfont icon-tailor" @click="tailor">裁剪</span>
       <span class="iconfont icon-show_info" @click="needSpecificInfo">显示详细信息</span>
     </div>
     <div class="specificInfo" v-show="showSpecificInfo">
@@ -29,6 +33,7 @@
       <p v-show="!nowPicture.info.createTime"><span>上传时间</span><span>{{unixChange(nowPicture.uploadTime)}}</span></p>
       <p><span>拍摄参数</span>{{nowPicture.info.modal}}<span v-show="!nowPicture.info.modal">未知</span></p>
       <p><span>拍摄地点</span>{{nowPicture.info.location}}<span v-show="!nowPicture.info.location">未知</span></p>
+      <p><span>OCR</span>{{nowPicture.info.ocr}}<span v-show="!nowPicture.info.ocr">无</span></p>
       <div class="clearFix"><span class="color_title">色系</span>
         <div class="color clearFix">
           <div v-for="(colorItem, index) in nowPicture.info.colors" :key="index"
@@ -65,6 +70,7 @@
 </template>
 
 <script>
+  import VueCropper from "vue-cropper";
   import {
     toggleTip,
     getFileSize,
@@ -78,6 +84,9 @@
   } from "../publics/public"
 
   export default {
+    components:{
+      VueCropper:VueCropper
+    },
     data() {
       return {
         F: false,
@@ -89,7 +98,8 @@
         isEntering: true,
         newTag: '',
         newRemark: '',
-        nowId: 0
+        nowId: 0,
+        isTailor: false
       }
     },
     mounted() {
@@ -191,6 +201,9 @@
       },
       needSpecificInfo() {
         this.showSpecificInfo = true
+      },
+      tailor(){
+        this.isTailor = true
       },
       share() {
 

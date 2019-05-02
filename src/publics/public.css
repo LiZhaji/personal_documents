@@ -113,6 +113,28 @@ table tbody tr:hover{
   /*margin: 5px 10px 5px 0px;*/
   padding: 0 10px 5px 0px;
 }
+.mergeBtn{
+  position: absolute;
+  top: 55px;
+  left: 300px;
+  padding: 5px 10px;
+  border: 1px solid #efefef;
+  border-radius: 5px;
+  color: cornflowerblue;
+  background-color: #efefef;
+  cursor: pointer;
+}
+.albumBtn{
+  position: absolute;
+  top: 55px;
+  left: 400px;
+  padding: 5px 10px;
+  border: 1px solid #efefef;
+  border-radius: 5px;
+  color: cornflowerblue;
+  background-color: #efefef;
+  cursor: pointer;
+}
 .clearFix:before,
 .clearFix:after{
   content: '';

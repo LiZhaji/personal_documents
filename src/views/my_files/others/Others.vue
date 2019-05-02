@@ -21,7 +21,7 @@
         <td class="file_importance">
           <svg @click="changeImportance(index)" class="icon" aria-hidden="true"><use :xlink:href="`#icon-importance${item.importance}`"></use></svg>
         </td>
-        <td><div class="file_name" @click.stop="showFile">
+        <td><div class="file_name" @click.stop="showFile(item)">
           <svg class="icon aFile" aria-hidden="true"><use :xlink:href=fileIconsOrOthers(index)></use></svg>
           <span >{{item.name}}</span>
         </div></td>
@@ -43,6 +43,7 @@
 <script>
   import axios from "axios"
   import FileOperation from "../../../components/FileOperation"
+  import JSZIP from "jszip"
   import { toggleTip,toggleCollection,toggleAttention,fetchList } from "../../../publics/public"
   export default {
     components:{
@@ -79,12 +80,23 @@
       window.EE.on('fetchOthers',()=>{this.fetchList()})
     },
     methods:{
+      showFile(item){
+        let zip = new JSZIP()
+        fetchList(this.getUrl(item.url)).then(data=>{
+          zip.loadAsync(data).then(zip=>{
+            console.log(zip,"查看zip")
+          })
+        })
+      },
       fetchList(){
         fetchList('/').then(data=>{
           this.others = data
         }).catch(error=>{
           toggleTip(this,error)
         })
+      },
+      getUrl(url){
+        return window.baseUrl + '/testpreview/' + url
       },
       fileIconsOrOthers(index){
         let temp = this.file_icons.indexOf(this.others[index].type) < 0 ? 'others' : this.others[index].type
@@ -109,9 +121,7 @@
       toggleAttention(index) {
         toggleAttention(this, this.others, index)
       },
-      showFile(){
-        window.open('http://192.168.0.133:8080/testpreview/zzz/%E6%97%B6%E9%97%B4%E8%A1%A8.pdf', '_blank');
-      }
+
     }
   }
 </script>

@@ -349,6 +349,7 @@
         console.log(this.mailContent.content, 'aaaaaaaaas')
       },
       closeMailBox() {
+        this.isContactTree = false
         this.$store.commit('closeMail')
       },
       delOneTag(id, name, index) {

@@ -152,6 +152,7 @@ export const formatTime = (second = 0) =>{
 export const fetchList = (childUrl)=>{
   // 获取所有列表
   const url = window.baseUrl + childUrl
+  axios.defaults.withCredentials=true;
   return axios.get(url).then(response => {
     if (response.status === 200){
       console.log('response:',response)

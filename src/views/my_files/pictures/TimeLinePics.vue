@@ -41,6 +41,8 @@
       </p>
       <span slot="reference" v-show="isDefineFile" class="defBtn" @click="defineFile">归档于</span>
     </el-popover>
+    <span v-show="isMerge" class="mergeBtn" @click="mergeImages">合并图片</span>
+    <span v-show="isAlbum" class="albumBtn" @click="albumImages">合成影集</span>
     <!-- 新建自定义归档-->
     <div v-show="createDefCatalog" class="newDef">
       <svg class="icon" aria-hidden="true">
@@ -70,12 +72,14 @@
         timeLinePics: {},
         checkedIds: [],
         checkedCategory: [],
-        isDefineFile:false,
-        defineFiles:[],
-        chooseDefineCatalog:false,
+        isDefineFile: false,
+        defineFiles: [],
+        chooseDefineCatalog: false,
         createDefCatalog: false,
-        defCatName:'',
-        checkedFiles:[]
+        defCatName: '',
+        checkedFiles: [],
+        isMerge: false,
+        isAlbum: false
       }
     },
     mounted(){
@@ -96,6 +100,33 @@
           toggleTip(this, error)
         })
       },
+      mergeImages(){
+        let urls = []
+        this.checkedFiles.forEach(el=>{
+          urls.push(el.url)
+        })
+        console.log(urls,111)
+        let formData = new FormData()
+        formData.append('urls', urls)
+        uploadOrUpdate(window.mergeUrl, formData).then(data=>{
+          if (data.success){
+            toggleTip(this, '合并图片成功，已保存至“处理”文件夹中')
+          }
+        })
+      },
+      albumImages(){
+        let urls = []
+        this.checkedFiles.forEach(el=>{
+          urls.push(el.url)
+        })
+        let formData = new FormData()
+        formData.append('urls', urls)
+        uploadOrUpdate(window.mergeUrl, formData).then(data=>{
+          if (data.success){
+            toggleTip(this, '合成影集成功，已保存至“处理”文件夹中')
+          }
+        })
+      },
       defaultOrder() {
         this.$router.push('/main/pictures')
       },
@@ -113,12 +144,6 @@
           this.checkedIds.splice(index, 1)
           this.checkedCategory.splice(index, 1)
           this.checkedFiles.splice(index, 1)
-        }
-        if (this.checkedIds.length != 0){
-          this.isDefineFile = true
-          this.$store.commit('setCheckedFiles', this.checkedFiles)
-        } else{
-          this.isDefineFile = false
         }
       },
       showInfo(id) {
@@ -186,9 +211,13 @@
       checkedIds(){
         if (this.checkedIds.length != 0) {
           this.isDefineFile = true
+          this.isMerge = true
+          this.isAlbum = true
+          this.$store.commit('setCheckedFiles', this.checkedFiles)
         } else {
           this.isDefineFile = false
-
+          this.isMerge = false
+          this.isAlbum = false
         }
       }
     }

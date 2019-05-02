@@ -37,6 +37,8 @@
       </tr>
       </tbody>
     </table>
+    <span v-show="isMerge" class="defBtn" @click="mergeDocus">合并文档</span>
+
   </div>
 </template>
 
@@ -49,7 +51,8 @@
     toggleAttention,
     unixChange,
     getFileSize,
-    fetchList
+    fetchList,
+  uploadOrUpdate
   } from "../../../publics/public"
   export default {
     components:{
@@ -61,7 +64,8 @@
     data() {
       return {
         checkedFiles:[],
-        allDocuments:[]
+        allDocuments:[],
+        isMerge: false
       }
     },
     mounted(){
@@ -70,6 +74,19 @@
       window.EE.on('fetchDocuments', ()=>this.fetchList())
     },
     methods:{
+      mergeDocus(){
+        let urls = []
+        this.checkedFiles.forEach(el=>{
+          urls.push(el.url)
+        })
+        let formData = new FormData()
+        formData.append('url', urls)
+        uploadOrUpdate(window.mergeUrl, formData).then(data=>{
+          if (data.success){
+            toggleTip(this, '合并成功，已保存至“处理”文件夹中')
+          }
+        })
+      },
       fetchList() {
         fetchList('/docuinfo').then(data=>{
           data.forEach(el=>{
@@ -113,15 +130,24 @@
         }else{
           this.checkedFiles.splice(index, 1)
         }
-        if (this.checkedFiles.length != 0){
-          this.$store.commit('setCheckedFiles', this.checkedFiles)
-        }
       },
       toggleCollection(index){
         toggleCollection(this, this.allDocuments, index)
       },
       toggleAttention(index){
         toggleAttention(this, this.allDocuments, index)
+      }
+    },
+    watch:{
+      checkedIds(){
+        if (this.checkedIds.length > 1) {
+          this.isMerge = true
+        } else {
+          this.isMerge = false
+        }
+        if (this.checkedIds.length != 0) {
+          this.$store.commit('setCheckedFiles', this.checkedFiles)
+        }
       }
     }
   }

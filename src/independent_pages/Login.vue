@@ -1,24 +1,27 @@
 <template>
   <div class="login">
-    <div class="smallBg">
+    <div class="center clearFix">
       <div class="outer">
-        <img class="logo" src="../assets/img/logo.png" alt="logo">
-        <div class="input_outer">
-          <div>
-            <span class="iconfont icon-user"></span>
-            <input v-model="user.name" type="text" placeholder="输入用户名">
-            <div class="aLine"></div>
-          </div>
-          <div>
-            <span class="iconfont icon-passward"></span>
-            <input v-model="user.password" type="password" placeholder="输入密码" @keyup.enter="login">
-            <div class="aLine"></div>
-          </div>
-          <div class="button_outer">
-            <button type="button" @click="login">登录</button>
+        <div>
+          <img class="logo" src="../assets/img/logo.png" alt="logo">
+          <div class="input_outer">
+            <div>
+              <span class="iconfont icon-user"></span>
+              <input v-model="user.name" type="text" placeholder="输入用户名">
+              <div class="aLine"></div>
+            </div>
+            <div>
+              <span class="iconfont icon-passward"></span>
+              <input v-model="user.password" type="password" placeholder="输入密码" @keyup.enter="login">
+              <div class="aLine"></div>
+            </div>
+            <div class="button_outer">
+              <button type="button" @click="login">登录</button>
+            </div>
           </div>
         </div>
       </div>
+      <div class="right"></div>
     </div>
   </div>
 </template>
@@ -45,6 +48,7 @@
         formData.append('password', this.user.password)
         uploadOrUpdate('/validation',formData).then(data=>{
           if (data.success) {
+            sessionStorage.setItem('root', data.root)
             this.$router.push('/main')
           }else {
             inputIsEmpty(this,data.errMsg)
@@ -57,32 +61,41 @@
 
 <style scoped>
 .login{
-  background: url("../assets/img/bg2.png");
-  text-align: center;
-  height: 750px;
+  background: url("../assets/img/bg2.png") center;
+  position: relative;
+  width: 100vw;
+  height: 100vh;
 }
-  .smallBg{
-    display: inline-block;
-    background: url("../assets/img/bg1.png");
-    background-size: cover;
-    width: 80%;
-    padding: 90px 845px 80px 0px;
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
-    text-align: left;
-    height: 700px;
-  }
-  .smallBg .logo{
-    width: 170px;
-  }
-  .outer{
-    padding: 50px 0px;
-    text-align: center;
-  }
+.center{
+  background: white;
+  width: 1000px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 
+}
+.right{
+  background: url("../assets/img/bg1.1.png") no-repeat;
+  background-size: 100% 100%;
+  float: right;
+  width: 700px;
+  height: 500px;
+
+}
+.center .logo{
+  width: 180px;
+  margin-top: 45px;
+}
+  .outer{
+    text-align: center;
+    float: left;
+  }
+ .outer>div{
+   margin: 0 auto;
+ }
   .input_outer{
-    margin: 110px 50px 5px 45px;
+    margin: 80px 50px 5px 45px;
     text-align: left;
   }
   .input_outer>div{

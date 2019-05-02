@@ -4,6 +4,7 @@
       <span @click="backToAll">返回 </span>
       <span v-show="fromSearch" @click="backToSearch">返回搜索页面 </span>
       <span class="editFile" @click="editFile">在线编辑</span>
+      <span class="" @click="dialogVisible = true">拆分文档</span>
     </div>
     <div class="file_info">
       <svg class="icon" aria-hidden="true" @click.stop="toggleCollectionNotIndex">
@@ -44,6 +45,19 @@
       </div>
     </div>
     <iframe :src="url" frameborder="0"></iframe>
+    <div class="separate_page">
+      <el-dialog
+        title="提示"
+        :visible.sync="dialogVisible"
+        width="30%">
+        <span>请输入要拆分的页码</span>
+        <span><input class="separate_input" v-model="ids" type="text" placeholder="以空格分隔"></span>
+        <span slot="footer" class="dialog-footer">
+    <el-button @click="dialogVisible = false">取消</el-button>
+    <el-button type="primary" @click="separateFile">确定</el-button>
+  </span>
+      </el-dialog>
+    </div>
   </div>
 </template>
 
@@ -57,7 +71,7 @@
     toggleAttentionNotIndex,
     toggleTip,
     addTag, delTag,
-    addRemark, delRemark
+    addRemark, delRemark, uploadOrUpdate
   } from "../../publics/public";
 
   export default {
@@ -67,8 +81,9 @@
         markup: '',
         newTag: '',
         newRemark:'',
-        hackReset: true,
         fromSearch: false,
+        dialogVisible: false,
+        ids:''
       }
     },
     mounted(){
@@ -112,6 +127,18 @@
       }
     },
     methods: {
+      separateFile(){
+        const ids = this.ids.split(' ')
+        let formData = new FormData()
+        formData.append('ids', ids)
+        formData.append('url', this.nowFile.url)
+        uploadOrUpdate('/', formData).then(data=>{
+          if (data.success){
+            toggleTip(this, '拆分成功，已保存至“处理”文件夹中')
+            this.dialogVisible = false
+          }
+        })
+      },
       backToSearch(){
         this.$router.push('/main/insightInfo')
       },
@@ -215,6 +242,13 @@
   .file_nav > span {
     cursor: pointer;
     margin-right: 20px;
+  }
+  .separate_input{
+    outline: none;
+    border: 1px solid lightgray;
+    border-radius: 5px;
+    padding: 5px;
+    width: 100px;
   }
   .have_content{
     margin-left: 85px;

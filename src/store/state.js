@@ -13,4 +13,5 @@ export default {
   searchKey:'',
   isMail: false,
   checkedFiles:[],
+  root:''
 }
