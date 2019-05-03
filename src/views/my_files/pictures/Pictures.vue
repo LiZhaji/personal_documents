@@ -3,6 +3,8 @@
     <FileOperation></FileOperation>
     <div class="file_nav">
       <span >全部图片</span>
+      <span v-show="isMerge" class="mergeBtn" @click="mergeImages">合并图片</span>
+      <span v-show="isAlbum" class="albumBtn" @click="albumImages">合成影集</span>
       <el-popover
         popper-class="order_picker"
         placement="top"
@@ -100,7 +102,9 @@
         createDefCatalog: false,
         defCatName:'',
         defineFiles:[],
-        checkedFiles:[]
+        checkedFiles:[],
+        isMerge: false,
+        isAlbum: false
       }
     },
     computed: {
@@ -125,6 +129,34 @@
       })
     },
     methods: {
+      mergeImages(){
+        let urls = []
+        this.checkedFiles.forEach(el=>{
+          urls.push(el.url)
+        })
+        let formData = new FormData()
+        formData.append('urls', urls)
+        uploadOrUpdate(window.mergeUrl, formData).then(data=>{
+          if (data.success){
+            this.fetchListDefault()
+            toggleTip(this, '合并图片成功，已保存至“处理文件”中')
+          }
+        })
+      },
+      albumImages(){
+        let urls = []
+        this.checkedFiles.forEach(el=>{
+          urls.push(el.url)
+        })
+        console.log(urls,222)
+        let formData = new FormData()
+        formData.append('urls', urls)
+        uploadOrUpdate('/imgalbum', formData).then(data=>{
+          if (data.success){
+            toggleTip(this, '合成影集成功，已保存至“处理文件”中')
+          }
+        })
+      },
       itemCheckedDefault(item){
         item.itemChecked = !item.itemChecked
         const index = this.checkedFiles.findIndex(el=>{return el.id === item.id})
@@ -228,6 +260,19 @@
       getFileSize(size) {
         return getFileSize(size)
       }
+    },
+    watch:{
+      checkedFiles(){
+        if (this.checkedFiles.length != 0) {
+          this.isMerge = true
+          this.isAlbum = true
+          this.$store.commit('setCheckedFiles', this.checkedFiles)
+        } else {
+          this.isDefineFile = false
+          this.isMerge = false
+          this.isAlbum = false
+        }
+      }
     }
   }
 </script>
@@ -242,7 +287,12 @@
   .file_nav_intel {
     color: cornflowerblue;
   }
-
+  .mergeBtn{
+    left: 300px;
+  }
+ .albumBtn{
+   left: 200px;
+ }
 
 
   /*目录树*/

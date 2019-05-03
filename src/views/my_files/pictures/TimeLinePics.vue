@@ -105,12 +105,12 @@
         this.checkedFiles.forEach(el=>{
           urls.push(el.url)
         })
-        console.log(urls,111)
         let formData = new FormData()
         formData.append('urls', urls)
         uploadOrUpdate(window.mergeUrl, formData).then(data=>{
           if (data.success){
-            toggleTip(this, '合并图片成功，已保存至“处理”文件夹中')
+            this.timeLine()
+            toggleTip(this, '合并图片成功，已保存至“处理文件”中')
           }
         })
       },
@@ -119,11 +119,12 @@
         this.checkedFiles.forEach(el=>{
           urls.push(el.url)
         })
+        console.log(urls,222)
         let formData = new FormData()
         formData.append('urls', urls)
-        uploadOrUpdate(window.mergeUrl, formData).then(data=>{
+        uploadOrUpdate('/imgalbum', formData).then(data=>{
           if (data.success){
-            toggleTip(this, '合成影集成功，已保存至“处理”文件夹中')
+            toggleTip(this, '合成影集成功，已保存至“处理文件”中')
           }
         })
       },
@@ -230,6 +231,12 @@
     position: relative;
     padding-left: 50px;
   }
+  .mergeBtn{
+    left: 160px;
+  }
+  .albumBtn{
+    left: 260px;
+  }
 
   .file_nav>span {
     color: cornflowerblue;
@@ -256,7 +263,7 @@
   .defBtn {
     position: absolute;
     top: 55px;
-    left: 195px;
+    left: 360px;
     padding: 5px 10px;
     border: 1px solid #efefef;
     border-radius: 5px;
@@ -268,7 +275,7 @@
   .newDef {
     position: fixed;
     top: 160px;
-    left: 550px;
+    left: 675px;
     padding: 5px 10px;
     color: cornflowerblue;
   }

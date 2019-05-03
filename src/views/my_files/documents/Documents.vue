@@ -37,7 +37,7 @@
       </tr>
       </tbody>
     </table>
-    <span v-show="isMerge" class="defBtn" @click="mergeDocus">合并文档</span>
+    <span class="merge_btn_doc" @click="mergeDocus">合并文档</span>
 
   </div>
 </template>
@@ -52,7 +52,7 @@
     unixChange,
     getFileSize,
     fetchList,
-  uploadOrUpdate
+    uploadOrUpdate, inputIsEmpty
   } from "../../../publics/public"
   export default {
     components:{
@@ -65,7 +65,6 @@
       return {
         checkedFiles:[],
         allDocuments:[],
-        isMerge: false
       }
     },
     mounted(){
@@ -75,16 +74,22 @@
     },
     methods:{
       mergeDocus(){
+        if (this.checkedFiles.length <= 1){
+          inputIsEmpty(this, '请至少选择2个文档')
+          return
+        }
         let urls = []
         this.checkedFiles.forEach(el=>{
           urls.push(el.url)
         })
         let formData = new FormData()
-        formData.append('url', urls)
-        uploadOrUpdate(window.mergeUrl, formData).then(data=>{
+        formData.append('urls', urls)
+        uploadOrUpdate('/pdfmerge', formData).then(data=>{
           if (data.success){
             toggleTip(this, '合并成功，已保存至“处理”文件夹中')
           }
+        }).catch(error=>{
+          toggleTip(this, error)
         })
       },
       fetchList() {
@@ -93,10 +98,10 @@
             el.info = JSON.parse(el.info)
             el.itemChecked = false
             if (el.keyword) {
-              el.keyword = el.keyword.split(' ')
+              el.keyword = el.keyword.split('|')
             }
             if (el.tag) {
-              el.tag = el.tag.split(' ')
+              el.tag = el.tag.split('|')
             }else {
               el.tag = []
             }
@@ -139,13 +144,8 @@
       }
     },
     watch:{
-      checkedIds(){
-        if (this.checkedIds.length > 1) {
-          this.isMerge = true
-        } else {
-          this.isMerge = false
-        }
-        if (this.checkedIds.length != 0) {
+      checkedFiles(){
+        if (this.checkedFiles.length != 0) {
           this.$store.commit('setCheckedFiles', this.checkedFiles)
         }
       }
@@ -158,6 +158,17 @@
     overflow: hidden;
     position: relative;
     padding-left: 50px;
+  }
+  .merge_btn_doc{
+    position: absolute;
+    top: 55px;
+    left: 150px;
+    padding: 5px 10px;
+    border: 1px solid #efefef;
+    border-radius: 5px;
+    color: cornflowerblue;
+    background-color: #efefef;
+    cursor: pointer;
   }
 
 </style>

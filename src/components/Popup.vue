@@ -32,15 +32,16 @@
         <p class="box_title" ref="newTaskHandle">新建任务</p>
         <div class="box_content">
           <p class="new_task_content">内容 <textarea v-model="newTask.content"></textarea></p>
+          <p class="new_task_content">备注 <textarea v-model="newTask.remark"></textarea></p>
           <p><span class="time">创建日期</span>{{getNowDay()}}</p>
-          <div class="block ">
-            <span class="demonstration tip_time">提醒时间</span>
-            <el-date-picker
-              v-model="newTask.tipTime"
-              type="datetime"
-              placeholder="选择时间">
-            </el-date-picker>
-          </div>
+<!--          <div class="block ">-->
+<!--            <span class="demonstration tip_time">提醒时间</span>-->
+<!--            <el-date-picker-->
+<!--              v-model="newTask.tipTime"-->
+<!--              type="datetime"-->
+<!--              placeholder="选择时间">-->
+<!--            </el-date-picker>-->
+<!--          </div>-->
           <p><span class="tag_new_task">标签</span>
             <el-select class="" v-model="newTask.tag" placeholder="请选择">
               <el-option
@@ -232,7 +233,7 @@
           value: '普通',
           label: '普通'
         }],
-        newTask: {content: '', createTime: '', tag: '', tipTime: '', remark: '', state: ''},
+        newTask: {content: '', createTime: '', tag: '', tipTime: '', comments:[{}], remark:'', state: ''},
         newTag: '',
         fileLocationShow: '/全部文件',
         fileLocation: 1,
@@ -240,9 +241,8 @@
         createFoldInUpload: false,
         // audioUrl: this.getAudioUrl,
         audioUrl: 'https://src.fanmingfei.com/nigel.mp3',
-        nowAudio: {name: '因三月.mp3', size: 12933, time: '', keyword: ['xx', 'yy'], tag: ['a', 'b'], comments: {}},
+        nowAudio: {name: '因三月.mp3', size: 12933, time: '', keyword: ['xx', 'yy'], tag: ['a', 'b'], comments: [{}]},
         isOpacity: false,
-        newTag: '',
         newRemark: '',
         duration: formatTime(),
         current: formatTime(),
@@ -550,8 +550,8 @@
         }
         this.newTask.createTime = this.getNowDay()
         this.newTask.state = 0
-        this.$store.dispatch('createNewTask', this.newTask)
-        this.newTask = {content: '', createTime: '', tag: '', tipTime: '', remark: '', state: ''}
+        this.$store.commit('createNewTask', this.newTask)
+        this.newTask = {content: '', createTime: '', tag: '', tipTime: '', comments:[{}], remark:'', state: ''}
         this.$store.commit('toggleNewTask')
       },
       getFolderImportance() {

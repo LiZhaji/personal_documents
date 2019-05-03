@@ -7,26 +7,15 @@
         v-model="rangeTime"
         type="month"
         default-value
-        placeholder="2019 年 04 月"
+        placeholder="2019 年 05 月"
         format="yyyy 年 MM 月"
       >
       </el-date-picker>
     </div>
-    <div >
-        <div class="task_table" >
-          <el-table id="table"
-          ref="filterTable"
-          :data="tasks"
-          style="width: 100%"
-         @select="selectItem"
-          @row-click="clickRow"
-         :row-class-name="getRowClassName"
-          >
-          <el-table-column
-            type="selection"
-            width="55"
-            @click="completed">
-          </el-table-column>
+    <div class="clearFix">
+      <div class="task_table" >
+        <el-table id="table" ref="filterTable" :data="tasks" style="width: 100%" @select="selectItem" @row-click="clickRow" :row-class-name="getRowClassName">
+          <el-table-column type="selection" width="55" @click="completed"></el-table-column>
           <el-table-column
             prop="content"
             label="内容"
@@ -61,13 +50,21 @@
             width="180">
           </el-table-column>
         </el-table>
-        </div>
-        <div class="task_info">
+      </div>
+      <div class="task_info">
         <p><span class="close" @click="closes">&times;</span>详细信息</p>
-        <p><span class="item_content1">内容</span><span class="item_content2" contenteditable="true">{{chosenItem.content}}</span></p>
-        <p><span class="item_tip_time1">提醒时间</span><span class="item_tip_time2">{{chosenItem.tipTime}}</span></p>
-        <p><span class="item_add_remark1">添加评论</span><textarea class="item_add_remark2" type="text" v-model="chosenItem.remark"></textarea></p>
-        <button class="item_del_btn" @click="delItem">删除</button>
+        <button class="item_del_btn" @click="delItem">删除此任务</button>
+        <p><span class="info_title">内容</span><span class="item_content2" contenteditable="true">{{chosenItem.content}}</span></p>
+        <p><span class="info_title">创建时间</span><span class="item_tip_time2">{{chosenItem.createTime}}</span></p>
+        <div class="remark_pic_info"><span class="info_title">评论</span>
+          <span class="remark" v-for="(item,index) in chosenItem.comments" :key="index">{{item.content}}</span>
+          <div class="input_outer">
+            <input class="remark_input" type="text" v-model="newRemark" placeholder="新增评论"
+                   v-on:keyup.enter="addRemark">
+            <span class="iconfont icon-checked_circle ok_remark_input"
+                  @click="addRemark"></span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -76,20 +73,15 @@
 <script>
   import OperationBG from "../../components/OperationBG"
   import { mapState } from "vuex"
+  import {getNowDay} from "../../publics/public";
   export default {
     components:{
       OperationBG: OperationBG
     },
     mounted(){
-      this.tasks = JSON.parse(localStorage.getItem('tasks')||[])
-    },
-    watch: {
-      tasks: {
-        deep: true,
-        handler() {
-          localStorage.setItem('tasks', JSON.stringify(this.tasks))
-        }
-      }
+      // 给state的tasks赋值
+      this.$store.commit('getTasks')
+      this.chosenItem = this.tasks[this.nowIndex]
     },
     computed:{
       ...mapState(['tasks']),
@@ -113,9 +105,15 @@
         chosenItem:{},
         nowIndex:0,
         completeIndex:'',
+        newRemark:''
       }
     },
     methods:{
+      addRemark(){
+        this.chosenItem.comments.push({content: this.newRemark, time: getNowDay()})
+        this.tasks[this.nowIndex] = this.chosenItem
+        this.newRemark = ''
+      },
       getRowClassName({row}){
         const arr = [
           {
@@ -156,12 +154,23 @@
         this.chosenItem = row
         this.tasks.forEach(task=>task.checked=false)
         row.checked = true
+        const index = this.tasks.findIndex(el=>{ return el == row})
+        this.nowIndex = index
       },
       delItem(){
-        this.$store.dispatch('delItemTask',this.nowIndex)
+        this.tasks.splice(this.nowIndex, 1)
+        this.chosenItem = this.tasks[this.nowIndex]
       },
       completed(){
         console.log('111')
+      }
+    },
+    watch(){
+      tasks:{
+        deep: true
+        handler:{
+          localStorage.setItem('tasks',JSON.stringify(this.tasks))
+        }
       }
     },
     beforeDestroy() {
@@ -191,42 +200,51 @@
   .task_info{
     background-color: white;
     border-radius:5px;
-    border:1px solid #5e5e5e;
+    box-shadow: 0px 0px 10px 0px lightgray;
     box-sizing: border-box;
-    float: left;
-    width: 30%;
+    float: right;
+    width: 28%;
+    margin-bottom: 10px;
+    margin-right: 20px;
+  }
+  .task_info .remark_input{
+    outline: none;
+    border-radius: 5px;
+    width: 130px;
+    height: 20px;
+    border: 1px solid lightgray;
+    padding: 2px 17px 2px 4px;
+    font-size: 12px;
+  }
+  .task_info .ok_remark_input{
+    position: absolute;
+    right: 5px;
+    top: 5px;
+    cursor: pointer;
+  }
+  .task_info .input_outer{
+    position: relative;
+    display: inline-block;
   }
   .task_info .close{
     font-size: 25px;
     margin-right: 10px;
     cursor: pointer;
   }
-  .task_info>p{
+  .task_info .info_title{
+    margin: 10px 20px;
+  }
+  .task_info>p,
+  .task_info>div{
     margin: 10px;
     padding: 10px;
-  }
-  .item_content1,.item_tip_time1,.item_add_remark1{
-    margin: 5px 10px;
-  }
-  .item_content2,.item_tip_time2{
-    color: gray;
-  }
-  .item_add_remark2{
-    width: 70%;
-    height: 60px;
-    resize: none;
-    border: 1px solid rgba(112, 112, 112, 0.73);
-    border-radius:5px;
-    outline: none;
-    padding: 5px;
-    vertical-align: top;
   }
   .item_del_btn{
     height: 32px;
     background-color: white;
     border-radius: 5px;
     overflow: hidden;
-    margin: 10px 15px;
+    margin: 10px 40px;
     color: #248dc7;
     border: 1px solid #248dc7;
     cursor: pointer;

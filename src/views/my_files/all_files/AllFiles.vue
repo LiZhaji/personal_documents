@@ -119,6 +119,9 @@
         fetchList(childUrl).then(data =>{
           data.files.forEach(el=>{
             el.itemChecked = false
+            if (!el.info){
+              el.info = {}
+            }
             if (el.keyword) {
               el.keyword = el.keyword.split(',')
             }

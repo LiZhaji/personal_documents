@@ -43,7 +43,8 @@
       </p>
       <span slot="reference" v-show="isDefineFile" class="defBtn" @click="defineFile">归档于</span>
     </el-popover>
-    <span v-show="isMerge" class="defBtn" @click="mergeImages">合并图片</span>
+    <span v-show="isMerge" class="mergeBtn" @click="mergeImages">合并图片</span>
+    <span v-show="isAlbum" class="albumBtn" @click="albumImages">合成影集</span>
     <!-- 新建自定义归档-->
     <div v-show="createDefCatalog" class="newDef">
       <svg class="icon" aria-hidden="true">
@@ -82,7 +83,8 @@
         createDefCatalog: false,
         defCatName:'',
         checkedFiles:[],
-        isMerge:false
+        isMerge: false,
+        isAlbum: false
       }
     },
     mounted(){
@@ -106,11 +108,30 @@
         })
       },
       mergeImages(){
+        let urls = []
+        this.checkedFiles.forEach(el=>{
+          urls.push(el.url)
+        })
         let formData = new FormData()
-        formData.append('ids', this.checkedIds)
+        formData.append('urls', urls)
         uploadOrUpdate(window.mergeUrl, formData).then(data=>{
           if (data.success){
-            toggleTip(this, '合并成功，已保存至“处理”文件夹中')
+            this.intelOrder()
+            toggleTip(this, '合并图片成功，已保存至“处理文件”中')
+          }
+        })
+      },
+      albumImages(){
+        let urls = []
+        this.checkedFiles.forEach(el=>{
+          urls.push(el.url)
+        })
+        console.log(urls,222)
+        let formData = new FormData()
+        formData.append('urls', urls)
+        uploadOrUpdate('/imgalbum', formData).then(data=>{
+          if (data.success){
+            toggleTip(this, '合成影集成功，已保存至“处理文件”中')
           }
         })
       },
@@ -208,10 +229,12 @@
         if (this.checkedIds.length != 0) {
           this.isDefineFile = true
           this.isMerge = true
+          this.isAlbum = true
           this.$store.commit('setCheckedFiles', this.checkedFiles)
         } else {
           this.isDefineFile = false
           this.isMerge = false
+          this.isAlbum = false
         }
       }
     }
@@ -223,6 +246,12 @@
     overflow: hidden;
     position: relative;
     padding-left: 50px;
+  }
+  .mergeBtn{
+    left: 200px;
+  }
+  .albumBtn{
+    left: 300px;
   }
   .file_nav_intel {
     color: cornflowerblue;
@@ -301,7 +330,7 @@
   .defBtn {
     position: absolute;
     top: 55px;
-    left: 195px;
+    left: 400px;
     padding: 5px 10px;
     border: 1px solid #efefef;
     border-radius: 5px;
@@ -313,7 +342,7 @@
   .newDef {
     position: fixed;
     top: 160px;
-    left: 600px;
+    left: 710px;
     padding: 5px 10px;
     color: cornflowerblue;
   }
@@ -330,46 +359,5 @@
     outline: none;
   }
 
-  /*自定义归档*/
-  .def_catalog {
-    padding: 5px;
-    cursor: pointer;
-  }
 
-  .def_catalog:hover {
-    background-color: #efefef;
-    border-radius: 5px;
-  }
-
-  .defBtn {
-    position: absolute;
-    top: 55px;
-    left: 250px;
-    padding: 5px 10px;
-    border: 1px solid #efefef;
-    border-radius: 5px;
-    color: cornflowerblue;
-    background-color: #efefef;
-    cursor: pointer;
-  }
-
-  .newDef {
-    position: fixed;
-    top: 160px;
-    left: 600px;
-    padding: 5px 10px;
-    color: cornflowerblue;
-  }
-
-  .newDef > svg {
-    font-size: 20px;
-  }
-
-  .newDef > input {
-    padding: 5px;
-    font-size: 13px;
-    border: 1px solid #efefef;
-    border-radius: 5px;
-    outline: none;
-  }
 </style>

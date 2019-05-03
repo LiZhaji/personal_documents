@@ -9,11 +9,13 @@ export default {
   toggleNewFolder(state){
     state.isNewFolder = !state.isNewFolder
   },
-  createNewTask(state,newTask){
-    state.tasks.push(newTask)
+  getTasks(state){
+    state.tasks = JSON.parse(localStorage.getItem('tasks') || [])
   },
-  delItemTask(state,index){
-    state.tasks.splice(index, 1)
+  createNewTask(state,newTask){
+    state.tasks = JSON.parse(localStorage.getItem('tasks') || [])
+    state.tasks.push(newTask)
+    localStorage.setItem('tasks', JSON.stringify(state.tasks))
   },
   setNowFile(state,nowFile){
     state.nowFile = nowFile
@@ -36,8 +38,5 @@ export default {
   },
   setCheckedFilesFull(state){
     state.checkedFiles = []
-  },
-  setRoot(state,root){
-    state.root = root
   }
 }

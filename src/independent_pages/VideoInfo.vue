@@ -10,10 +10,10 @@
         <video id="media" :src="getVideoUrl()" controls></video>
       </div>
       <div class="shot_cut">
-        <div class="general_view" id="general_view"><span :style="{width: (cutTime.width + 'px'),left: (cutTime.left + 'px')}"></span></div>
-        <span @click="getCutTime(event)">{{formatTime(nowVideo.info.duration)}}</span>
-        <span>开始时间{{cutTime.startTime}}</span>
-        <span>~结束时间{{cutTime.endTime}}</span>
+        <div @click="getCutTime" class="general_view" id="general_view"><span :style="{width: (cutTime.width + 'px'),left: (cutTime.left + 'px')}"></span></div>
+        <span>{{formatTime(nowVideo.info.duration)}}</span>
+        <span class="time">开始时间 {{cutTime.startTime}}</span>~
+        <span class="time">结束时间 {{cutTime.endTime}}</span>
         <button @click="upCutTime">裁剪</button>
       </div>
       <div class="shot_labels_show_outer"><span>{{labelName}}</span>
@@ -55,9 +55,9 @@
         </span>
         <div class="input_outer">
           <input class="remark_input" type="text" v-model="newRemark" placeholder="新增评论"
-                 v-on:keyup.enter="addRemark(nowVideo.id, item.id)" :class="Object.keys(nowVideo.comments).length != 0 ? 'have_content': ''">
+                 v-on:keyup.enter="addRemark(nowVideo.id)" :class="Object.keys(nowVideo.comments).length != 0 ? 'have_content': ''">
           <span class="iconfont icon-checked_circle remark_tag_input"
-                @click="addRemark(nowVideo.id, item.id)"></span>
+                @click="addRemark(nowVideo.id)"></span>
         </div>
       </div>
       <!--      <div class="remark_video_info"><span>用户评价</span>-->
@@ -97,35 +97,49 @@
         validShotLabels: [],
         validSegments: [],
         labelName: '暂无选择',
-        cutTime:{startTime:formatTime(), endTime:formatTime(), width:'', left:''}
+        cutTime:{startTime:formatTime(), endTime:formatTime(), width:'', left:'', startSecond:0, endSecond:0}
       }
     },
     mounted() {
       this.getVideo()
     },
     methods: {
-      getCutTime(event){
+      getCutTime(){
         const duration = parseInt(this.nowVideo.info.duration)
         const parentW = parseInt(document.getElementById("general_view").offsetWidth)
         const parentLeft = parseInt(document.getElementById("general_view").offsetLeft)
         const left = event.clientX - parentLeft
-        const clickTime = formatTime(left / parentW * duration)
-        this.cutTime.left = left
-        if (!this.cutTime.startTime) {
+        const clickSecond = parseInt(left / parentW * duration)
+        const clickTime = formatTime(clickSecond)
+        var media = document.getElementById("media")
+        media.currentTime = clickSecond
+        if (!this.cutTime.startSecond) {
+          this.cutTime.startSecond = clickSecond
           this.cutTime.startTime = clickTime
-        }else if (clickTime > this.cutTime.startTime) {
+          this.cutTime.left = left
+        }else if(!this.cutTime.endSecond){
+          this.cutTime.endSecond = clickSecond
           this.cutTime.endTime = clickTime
-        }else {
-          this.cutTime.startTime = clickTime
+        }else{
+          if (clickSecond < this.cutTime.startSecond) {
+            this.cutTime.startSecond = clickSecond
+            this.cutTime.startTime = clickTime
+            this.cutTime.left = left
+          }else{
+            this.cutTime.endSecond = clickSecond
+            this.cutTime.endTime = clickTime
+          }
         }
+        const spanW = (this.cutTime.endSecond - this.cutTime.startSecond) / duration * parentW
+        this.cutTime.width = spanW
         console.log(this.cutTime,2222)
       },
       upCutTime(){
         let formData = new FormData()
-        formData.append('st', this.cutTime.startTime)
-        formData.append('et', this.cutTime.endTime)
         formData.append('url', this.nowVideo.url)
-        uploadOrUpdate('/').then(data=>{
+        formData.append('start', this.cutTime.startSecond)
+        formData.append('end', this.cutTime.endSecond)
+        uploadOrUpdate('/videocut', formData).then(data=>{
           if (data.success){
             this.cutTime = {startTime:formatTime(),endTime:formatTime()}
             toggleTip(this, '裁剪成功，已保存至“处理”文件夹')
@@ -144,7 +158,7 @@
           let st = el.starttime / duration * parentW
           this.validSegments.push({startPosition: st, width: w, startTime: el.starttime})
         })
-        console.log('validSegments:', this.validSegments)
+        // console.log('validSegments:', this.validSegments)
       },
       timeLocation(time) {
         var media = document.getElementById("media")
@@ -224,10 +238,7 @@
           toggleTip(this, error)
         })
       },
-      addRemark(pid, id) {
-        const index = this.nowVideo.comment.findIndex(el => {
-          el.id == id
-        })
+      addRemark(pid) {
         // 1.本地验证
         if (!this.newRemark) {
           inputIsEmpty(this, '不能添加空评论')
@@ -235,7 +246,7 @@
         }
         addRemark(pid, this.newRemark).then(data => {
           if (data.success) {
-            this.nowVideo.comment.splice(index, 1)
+            this.nowVideo.comments.push({content: this.newRemark})
             this.newRemark = ''
           }
         }).catch(error => {
@@ -257,17 +268,23 @@
 
 <style scoped>
   .have_content{
-    margin-left: 126px;
+    margin-left: 80px;
   }
   /*裁剪开始*/
   .shot_cut{
     background-color: #cfcfcf;
     border-radius: 5px;
     height: 30px;
+    padding: 0 3px;
+    margin-top: 10px;
+    color: #1f1f1f;
+  }
+  .shot_cut .time {
+    font-size: 14px;
   }
   .general_view{
     display: inline-block;
-    width: 90%;
+    width: 50%;
     background-color: #eeeeee;
     border-radius: 5px;
     height: 10px;
@@ -276,18 +293,24 @@
     position: relative;
   }
   .general_view>span{
-    background-color: #ff3a66;
-    height: 20px;
+    background-color: #6495ed57;
+    height: 30px;
+    border-radius: 5px;
     position: absolute;
+    top: -10px;
   }
   .shot_cut>span{
     margin: 5px;
   }
   .shot_cut>button{
-    padding: 5px 10px;
-    background-color: #825b45;
+    padding: 4px 10px;
+    background-color: cornflowerblue;
     outline: none;
-    border: 1px solid lightgray;
+    border: 1px solid cornflowerblue;
+    border-radius: 5PX;
+    color: white;
+    cursor: pointer;
+    margin-left: 30px;
   }
   /*裁剪结束*/
   .shot_labels {
@@ -461,7 +484,7 @@
   }
 
   .specific_info .ok_tag_input,
-  .specific_info .ok_remark_input {
+  .specific_info .remark_tag_input {
     position: absolute;
     right: 5px;
     top: 5px;

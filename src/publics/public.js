@@ -147,7 +147,7 @@ export const formatTime = (second = 0) =>{
   const h = parseInt(second / 60 / 60).toString().padStart(2,'0')
   const m = parseInt(second / 60 % 60).toString().padStart(2,'0')
   const s = parseInt(second % 60).toString().padStart(2,'0')
-  return (h + ':'+ m + ':' + s)
+  return (h + ' : '+ m + ' : ' + s)
 }
 export const fetchList = (childUrl)=>{
   // 获取所有列表

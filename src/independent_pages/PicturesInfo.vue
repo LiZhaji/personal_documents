@@ -1,10 +1,10 @@
 <template>
   <div class="pictures_info">
     <div class="pic_show">
-      <div v-show="isTailor" class="tailor">
-        <VueCropper ref="cropper" :img="getPicUrl(nowPicture.url)" ></VueCropper>
+      <div v-if="isTailor" class="tailor">
+        <VueCropper ref="cropper" :img="getPicUrll(nowPicture.url)"></VueCropper>
       </div>
-      <el-carousel v-show="!isTailor" :class="{showSpecificInfo:showSpecificInfo,cancelSpecificInfo:!showSpecificInfo}" @change="changes"
+      <el-carousel v-if="!isTailor" :class="{showSpecificInfo:showSpecificInfo,cancelSpecificInfo:!showSpecificInfo}" @change="changes"
                    indicator-position="outside" :autoplay="F" height="690px" :initial-index="initIndex">
         <el-carousel-item v-for="(item,index) in allPictures " :key="index">
           <span></span>
@@ -70,7 +70,7 @@
 </template>
 
 <script>
-  import VueCropper from "vue-cropper";
+  import { VueCropper }  from 'vue-cropper'
   import {
     toggleTip,
     getFileSize,
@@ -84,8 +84,8 @@
   } from "../publics/public"
 
   export default {
-    components:{
-      VueCropper:VueCropper
+    components: {
+      VueCropper
     },
     data() {
       return {
@@ -103,33 +103,44 @@
       }
     },
     mounted() {
-      this.nowId = this.$route.query.id
-      // 1.获取所有图片  2.显示之前点击图片
-      fetchList('/imageinfo').then(data => {
-        data.forEach(el => {
-          el.info = JSON.parse(el.info)
-          // el.comments = JSON.parse(el.comments)
-          if (el.keyword) {
-            el.keyword = el.keyword.split('|')
-          }
-          if (el.tag) {
-            el.tag = el.tag.split('|')
-          } else {
-            el.tag = []
-          }
-        })
-        this.allPictures = data
-        this.initIndex = this.allPictures.findIndex(el => {
-          return el.id == this.nowId
-        })
-        this.nowPicture = this.allPictures[this.initIndex]
-      }).catch((error) => {
-        toggleTip(this, error)
-      })
+      this.getAllPics()
     },
     methods: {
+      getAllPics(){
+        this.nowId = this.$route.query.id
+        // 1.获取所有图片  2.显示之前点击图片
+        fetchList('/imageinfo').then(data => {
+          data.forEach(el => {
+            if (!el.info){
+              el.info = JSON.stringify({})
+            }
+            el.info = JSON.parse(el.info)
+            if (el.keyword) {
+              el.keyword = el.keyword.split('|')
+            }
+            if (el.tag) {
+              el.tag = el.tag.split('|')
+            } else {
+              el.tag = []
+            }
+          })
+          this.allPictures = data
+          this.initIndex = this.allPictures.findIndex(el => {
+            return el.id == this.nowId
+          })
+          this.nowPicture = this.allPictures[this.initIndex]
+          console.log(this.nowPicture,111)
+        }).catch((error) => {
+          toggleTip(this, error)
+        })
+      },
       getPicUrl(url) {
         var baseUrl = window.baseUrl + "/testpreview/"
+        return baseUrl + url
+      },
+      getPicUrll(url) {
+        var baseUrl = window.baseUrl + "/testpreview/"
+        console.log(baseUrl + url,111)
         return baseUrl + url
       },
       unixChange(timeStamp) {
@@ -364,12 +375,22 @@
   .cancelSpecificInfo {
     width: 100%;
   }
-
+  .pic_show{
+    height: 100%;
+  }
+  .tailor{
+    width: 76%;
+    height: 800px;
+  }
   .el-carousel {
     height: 100%;
     text-align: center;
   }
 
+  .cropper-box-canvas{
+    width: 100%;
+    height: 800px;
+  }
   .el-carousel__item > span {
     height: 100%;
     display: inline-block;

@@ -5,6 +5,7 @@
       <span v-show="fromSearch" @click="backToSearch">返回搜索页面 </span>
       <span class="editFile" @click="editFile">在线编辑</span>
       <span class="" @click="dialogVisible = true">拆分文档</span>
+      <span class="" v-show="nowFile.name.split('.').pop() == 'pdf'" @click="pdfToPng">转图片</span>
     </div>
     <div class="file_info">
       <svg class="icon" aria-hidden="true" @click.stop="toggleCollectionNotIndex">
@@ -127,16 +128,30 @@
       }
     },
     methods: {
+      pdfToPng(){
+        let formData = new FormData()
+        formData.append('url', this.nowFile.url)
+        uploadOrUpdate('/pdftopng', formData).then(data=>{
+          if (data.success){
+            toggleTip(this, '转换成功，已保存至“处理文件”中')
+            this.dialogVisible = false
+          }
+        }).catch(error=>{
+          toggleTip(this, error)
+        })
+      },
       separateFile(){
         const ids = this.ids.split(' ')
         let formData = new FormData()
-        formData.append('ids', ids)
         formData.append('url', this.nowFile.url)
-        uploadOrUpdate('/', formData).then(data=>{
+        formData.append('indexs', ids)
+        uploadOrUpdate('/pdfsplit', formData).then(data=>{
           if (data.success){
-            toggleTip(this, '拆分成功，已保存至“处理”文件夹中')
+            toggleTip(this, '拆分成功，已保存至“处理文件”中')
             this.dialogVisible = false
           }
+        }).catch(error=>{
+          toggleTip(his, error)
         })
       },
       backToSearch(){
@@ -248,7 +263,7 @@
     border: 1px solid lightgray;
     border-radius: 5px;
     padding: 5px;
-    width: 100px;
+    width: 150px;
   }
   .have_content{
     margin-left: 85px;
