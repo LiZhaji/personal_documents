@@ -27,7 +27,7 @@
 </template>
 
 <script>
-  import { inputIsEmpty, uploadOrUpdate} from "../publics/public";
+  import {inputIsEmpty, toggleTip, uploadOrUpdate} from "../publics/public";
 
   export default {
     data() {
@@ -53,6 +53,8 @@
           }else {
             inputIsEmpty(this,data.errMsg)
           }
+        }).catch(error=>{
+          toggleTip(this, error)
         })
       }
     }
@@ -60,6 +62,13 @@
 </script>
 
 <style scoped>
+  .sanjiao{
+    width: 0;
+    height: 0;
+    border-left: 50px solid transparent;
+    border-right: 50px solid transparent;
+    border-bottom: 50px solid black;
+  }
 .login{
   background: url("../assets/img/bg2.png") center;
   position: relative;

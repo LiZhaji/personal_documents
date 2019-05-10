@@ -5,6 +5,7 @@ export default {
   isNewTask: false,
   isNewFolder: false,
   isAudioPlay: false,
+  nowAudio:'',
   isCatalogTree: false,
   tasks: [],
   nowFile: {},

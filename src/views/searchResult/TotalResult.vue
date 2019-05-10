@@ -22,6 +22,11 @@
         </div>
         <div class="pics_outer">
           <div class="title">图片 <span class="no_result" v-show="!fives.pics">暂无图片搜索结果</span></div>
+          <!-- 合并图片,合成影集 -->
+          <span v-if="fives.pics.length > 0" class="mergeBtn" @click="mergeImages">
+      <svg class="icon" aria-hidden="true"><use xlink:href="#icon-merge"></use></svg>合并图片</span>
+          <span v-if="fives.pics.length > 0" class="albumBtn" @click="albumImages">
+      <svg class="icon" aria-hidden="true"><use xlink:href="#icon-album_white"></use></svg>合成影集</span>
           <div class="pics">
             <div class="pics_item" v-for="(item, index) in fives.pics"
                  :key="index" :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
@@ -65,6 +70,8 @@
         </div>
         <div class="docs_outer">
           <div class="title"> 文档 <span class="no_result" v-show="!fives.docs">暂无文档搜索结果</span></div>
+          <span v-if="fives.docs.length > 0" class="merge_btn_doc" @click="mergeDocus">
+            <svg class="icon" aria-hidden="true"><use xlink:href="#icon-merge_doc_white"></use></svg>合并文档 </span>
           <div class="docs_item" v-for="item in fives.docs" @click.stop="itemCheck(item)"
                :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
             <span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span>
@@ -191,10 +198,9 @@
         </svg>
         <span v-html="item.name"></span>
       </p>
-      <span slot="reference" v-show="isDefineFile" class="defBtn" @click="defineFile">归档于</span>
+      <span slot="reference" v-show="isDefineFile" class="defBtn" @click="defineFile">
+        <svg class="icon" aria-hidden="true"><use xlink:href="#icon-define"></use></svg>归档于</span>
     </el-popover>
-    <span v-show="isMerge" class="defBtn" @click="mergeImages">合并图片</span>
-    <span v-show="isAlbum" class="defBtn" @click="albumImages">合成影集</span>
     <!-- 新建自定义归档-->
     <div v-show="createDefCatalog" class="newDef">
       <svg class="icon" aria-hidden="true">
@@ -219,12 +225,12 @@
         fives: {folders: [], docs: [], pics: [], videos: [], audios: [], others: []},
         checkedIds: [],
         checkedCategory: [],
+        checkedFiles: [],
         forNav: false,
         defineFiles: [],
         chooseDefineCatalog: false,
         createDefCatalog: false,
         defCatName: '',
-        checkedFiles: [],
         searchResult: true,
         catalog: [],
         folders: [],
@@ -268,35 +274,60 @@
           }]
         })
       },
+      mergeDocus(){
+        let urls = []
+        this.checkedFiles.forEach(el=>{
+          if (el.catalog != 1) return
+          urls.push(el.url)
+        })
+        if (urls.length <= 1){
+          inputIsEmpty(this, '请至少选择2个文档')
+          return
+        }
+        let formData = new FormData()
+        formData.append('urls', urls)
+        uploadOrUpdate('/pdfmerge', formData).then(data=>{
+          if (data.success){
+            toggleTip(this, '合并成功，已保存至“处理”文件夹中')
+          }
+        }).catch(error=>{
+          toggleTip(this, error)
+        })
+      },
       mergeImages(){
         let urls = []
-        this.checkedCategory.forEach((el, index)=>{
-          if (el == 2) {
-            const sitem = this.checkedFiles.slice(index, index + 1)
-            urls.push(sitem.url)
-          }
+        this.checkedFiles.forEach(el=>{
+          if (el.catalog != 2) return
+          urls.push(el.url)
         })
+        if (urls.length <= 1){
+          inputIsEmpty(this, '请至少选择2张图片')
+          return
+        }
         let formData = new FormData()
         formData.append('urls', urls)
         uploadOrUpdate(window.mergeUrl, formData).then(data=>{
           if (data.success){
-            toggleTip(this, '合并成功，已保存至“处理”文件夹中')
+            toggleTip(this, '合并图片成功，已保存至“处理文件”中')
           }
         })
       },
       albumImages(){
         let urls = []
-        this.checkedCategory.forEach((el, index)=>{
-          if (el == 2) {
-            const sitem = this.checkedFiles.slice(index, index + 1)
-            urls.push(sitem.url)
-          }
+        toggleTip(this, '过滤图片中')
+        this.checkedFiles.forEach(el=>{
+          if (el.catalog != 2) return
+          urls.push(el.url)
         })
+        if (urls.length <= 1){
+          inputIsEmpty(this, '请至少选择2张图片')
+          return
+        }
         let formData = new FormData()
         formData.append('urls', urls)
-        uploadOrUpdate(window.mergeUrl, formData).then(data=>{
+        uploadOrUpdate('/imgalbum', formData).then(data=>{
           if (data.success){
-            toggleTip(this, '合并成功，已保存至“处理”文件夹中')
+            toggleTip(this, '合成影集成功，已保存至“处理文件”中')
           }
         })
       },
@@ -397,12 +428,12 @@
               }
             })
           }
-          this.fives.folders =[...data.CATALOG,...data.INSIGHT]
-          this.fives.docs = data.DOCUMENT
-          this.fives.pics = data.IMAGE
-          this.fives.videos = data.VIDEO
-          this.fives.audios = data.AUDIO
-          this.fives.others = data.OTHER
+          this.fives.folders =[...data.CATALOG,...data.INSIGHT] || []
+          this.fives.docs = data.DOCUMENT || []
+          this.fives.pics = data.IMAGE || []
+          this.fives.videos = data.VIDEO || []
+          this.fives.audios = data.AUDIO || []
+          this.fives.others = data.OTHER || []
           const dataCount = []
           for (let key in this.fives){
             const len = this.fives[key] ? this.fives[key].length : 0
@@ -500,10 +531,12 @@
         if (this.checkedIds.length != 0) {
           this.isDefineFile = true
           this.isMerge = true
+          this.isAlbum = true
           this.$store.commit('setCheckedFiles', this.checkedFiles)
         } else {
           this.isDefineFile = false
           this.isMerge = false
+          this.isAlbum = false
         }
       }
     }
@@ -543,16 +576,9 @@
   }
 
   .defBtn {
-    position: absolute;
-    top: 30px;
-    left: 50px;
-    padding: 5px 10px;
-    border: 1px solid #efefef;
-    border-radius: 5px;
-    color: cornflowerblue;
-    background-color: #ddd;
-    cursor: pointer;
-  }
+     top: 30px;
+     left: 50px;
+   }
 
   .newDef {
     position: fixed;

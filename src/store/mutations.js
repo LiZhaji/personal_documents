@@ -35,6 +35,7 @@ export default {
   },
   setCheckedFiles(state,checkedFiles){
     state.checkedFiles = checkedFiles
+    console.log(state.checkedFiles,888888)
   },
   setCheckedFilesFull(state){
     state.checkedFiles = []

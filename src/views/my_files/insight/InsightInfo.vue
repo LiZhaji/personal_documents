@@ -2,7 +2,7 @@
   <div class="insight_info">
     <div class="bg"></div>
     <div class="file_nav">
-      <span ><span @click="backupToInsight">智能归档</span> > {{keyName}}</span>
+      <span ><span @click="backupTo">{{getTitle()}}</span> > {{keyName}}</span>
     </div>
     <div class="six_info_outer">
       <div  class="bigger" :class="(fives.pics || fives.videos) ? 'float_left' : 'float_right'">
@@ -67,7 +67,8 @@
         </svg>
         <span v-html="item.name"></span>
       </p>
-      <span slot="reference" v-show="isDefineFile" class="defBtn" @click="defineFile">归档于</span>
+      <span slot="reference" v-show="isDefineFile" class="defBtn" @click="defineFile">
+        <svg class="icon" aria-hidden="true"><use xlink:href="#icon-define"></use></svg>归档于</span>
     </el-popover>
     <!-- 新建自定义归档-->
     <div v-show="createDefCatalog" class="newDef">
@@ -100,7 +101,8 @@
         createDefCatalog: false,
         defCatName:'',
         checkedFiles:[],
-        isDefineFile:false
+        isDefineFile:false,
+        isTime:1
       }
     },
     computed:{
@@ -136,17 +138,17 @@
           }]
         })
       },
-      backupToInsight(){
-        this.$router.push('/main/insight')
+      backupTo(){
+        this.$router.push('/main/defineFiles')
       },
       fetchNowTelFile(){
         this.keyName = this.$route.params.name
         const id = this.$route.params.id
-        const isTime = this.$route.params.isTime
-        const time = this.$route.params.time
+        this.isTime = this.$route.params.isTime
+        const item = this.$route.params.item
         let childUrl
-        if (isTime) {
-          childUrl = '/gettimefile?time=' + time
+        if (this.isTime) {
+          childUrl = '/gettimefile?time=' + item
         }else{
           childUrl = '/filefiling/' + id
         }
@@ -184,6 +186,9 @@
             }
           })
         })
+      },
+      getTitle(){
+        return  this.isTime ?"时光簿":"自定义归档"
       },
       openFile(fileItem) {
         switch (fileItem.category) {
@@ -353,8 +358,8 @@
 
   .newDef {
     position: fixed;
-    top: 30px;
-    left: 100px;
+    top: 120px;
+    left: 565px;
     padding: 5px 10px;
     color: cornflowerblue;
   }

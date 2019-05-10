@@ -389,7 +389,7 @@
   }
 
   .shot_labels_show span.small_shots {
-    background-color: yellow;
+    background-color: #bf3f0d;
     height: 30px;
     position: absolute;
     cursor: pointer;

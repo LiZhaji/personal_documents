@@ -74,6 +74,7 @@ table tbody tr:hover{
 }
 .file_importance svg{
   font-size: 25px;
+  margin-right: 10px;
 }
 .task_list .el-input--prefix .el-input__inner {
   border: none;
@@ -108,31 +109,42 @@ table tbody tr:hover{
   cursor: pointer;
 }
 /*所有的关键字显示*/
-.keyword{
+.keyword,.ocr{
   display: inline-block;
   /*margin: 5px 10px 5px 0px;*/
   padding: 0 10px 5px 0px;
 }
 .mergeBtn{
   position: absolute;
-  top: 55px;
-  left: 300px;
+  top: 5px;
+  left: 80px;
   padding: 5px 10px;
   border: 1px solid #efefef;
   border-radius: 5px;
-  color: cornflowerblue;
-  background-color: #efefef;
+  color: white;
+  background-color: #efe5a0;
   cursor: pointer;
 }
 .albumBtn{
   position: absolute;
-  top: 55px;
-  left: 400px;
+  top: 5px;
+  left: 205px;
   padding: 5px 10px;
   border: 1px solid #efefef;
   border-radius: 5px;
-  color: cornflowerblue;
-  background-color: #efefef;
+  color: white;
+  background-color: #aeefbe;
+  cursor: pointer;
+}
+.defBtn {
+  position: absolute;
+  top: 30px;
+  left: 50px;
+  padding: 5px 10px;
+  border: 1px solid #efefef;
+  border-radius: 5px;
+  color: white;
+  background-color: #ea9e9e;
   cursor: pointer;
 }
 .clearFix:before,
@@ -211,6 +223,8 @@ table tbody tr:hover{
 .six_info_outer .audios_item,
 .six_info_outer .others_item{
   position: relative;
+  margin: 10px;
+  padding-left: 10px;
 }
 .six_info_outer .icon-checked_circle{
   left: 0px;
@@ -234,4 +248,15 @@ table tbody tr:hover{
 }
 .six_info_outer .count_box{
   height: 100px;
+}
+.merge_btn_doc{
+  position: absolute;
+  top: 5px;
+  left: 80px;
+  padding: 5px 10px;
+  border: 1px solid #efefef;
+  border-radius: 5px;
+  color: white;
+  background-color: #7edae4;
+  cursor: pointer;
 }

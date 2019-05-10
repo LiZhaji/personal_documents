@@ -19,16 +19,16 @@
       <tr v-for="(item, index) in allVideos" :key="index" @click="clickItem(item)" :class="{item_checked:item.itemChecked}" >
         <td ><span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span></td>
         <td class="file_importance">
-          <svg class="icon" aria-hidden="true"><use :xlink:href="`#icon-importance${item.importance}`"></use></svg>
+          <svg class="icon" aria-hidden="true"><use :xlink:href="`#icon-importance${item.scale}`"></use></svg>
         </td>
         <td class="file_name"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-file_mp4"></use></svg>
           <span @click.stop="videoPlay(item.id)">{{item.name}}</span></td>
         <td>{{unixChange(item.serverTime)}}</td>
         <td>{{getFileSize(item.size)}}</td>
-        <td class="star"><svg class="icon" aria-hidden="true" @click.stop="toggleCollection(index)">
+        <td class="star"><svg class="icon" aria-hidden="true" @click.stop="toggleCollection(item)">
           <use v-show="!item.collection" xlink:href="#icon-collection"></use>
           <use v-show="item.collection" xlink:href="#icon-collection_fill"></use>
-        </svg><svg class="icon" aria-hidden="true" @click.stop="toggleAttention(index)">
+        </svg><svg class="icon" aria-hidden="true" @click.stop="toggleAttention(item)">
           <use v-show="!item.attention" xlink:href="#icon-like"></use>
           <use v-show="item.attention" xlink:href="#icon-like_fill"></use>
         </svg></td>
@@ -108,12 +108,11 @@
           this.$store.commit('setCheckedFiles', this.checkedFiles)
         }
     },
-      toggleCollection(index){
-        console.log(this.allAudios[index].collection)
-        toggleCollection(this, this.allAudios, index)
+      toggleCollection(item){
+        toggleCollection(this, item)
       },
-      toggleAttention(index){
-        toggleAttention(this, this.allAudios, index)
+      toggleAttention(item){
+        toggleAttention(this, item)
       },
       unixChange(timeStamp){
         return unixChange(timeStamp)

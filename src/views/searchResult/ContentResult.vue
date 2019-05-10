@@ -7,7 +7,12 @@
     <div class="six_info_outer clearFix">
       <div class="bigger" :class="(fives.pics || fives.videos) ? 'float_left' : 'float_right'">
         <div class="pics_outer">
-          <div class="title">图片 <span class="no_result" v-show="!fives.pics">暂无图片搜索结果</span></div>
+          <div class="title">图片 <span class="no_result" v-show="!fives.pics.length">暂无图片搜索结果</span></div>
+          <!-- 合并图片,合成影集 -->
+          <span v-if="fives.pics.length > 0" class="mergeBtn" @click="mergeImages">
+      <svg class="icon" aria-hidden="true"><use xlink:href="#icon-merge"></use></svg>合并图片</span>
+          <span v-if="fives.pics.length > 0" class="albumBtn" @click="albumImages">
+      <svg class="icon" aria-hidden="true"><use xlink:href="#icon-album_white"></use></svg>合成影集</span>
           <div class="pics">
             <div class="pics_item" v-for="(item, index) in fives.pics"
                  :key="index" :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
@@ -20,7 +25,7 @@
           </div>
         </div>
         <div class="videos_outer">
-          <div class="title">视频 <span class="no_result" v-show="!fives.videos || !fives.videos.length">暂无视频搜索结果</span></div>
+          <div class="title">视频 <span class="no_result" v-show="!fives.videos.length">暂无视频搜索结果</span></div>
           <div class="videos">
             <div class="videos_item" v-for="(item, index) in fives.videos"  :key="index" :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
               <span class="checkbox iconfont icon-checked_circle" @click.stop="itemCheck(item)"></span>
@@ -37,7 +42,9 @@
           <div ref="fiveCount" class="count_box"></div>
         </div>
         <div class="docs_outer">
-          <div class="title">文档 <span class="no_result" v-show="!fives.docs">暂无文档搜索结果</span></div>
+          <div class="title">文档 <span class="no_result" v-show="!fives.docs.length">暂无文档搜索结果</span></div>
+          <span v-if="fives.docs.length > 0" class="merge_btn_doc" @click="mergeDocus">
+            <svg class="icon" aria-hidden="true"><use xlink:href="#icon-merge_doc_white"></use></svg>合并文档 </span>
           <div class="docs_item" v-for="item in fives.docs" @click.stop="itemCheck(item)" :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
             <span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span>
             <svg class="icon" aria-hidden="true"><use :xlink:href=fileIconsOrOthers(item.id)></use></svg>
@@ -45,7 +52,7 @@
           </div>
         </div>
         <div class="audios_outer">
-          <div class="title">音频 <span class="no_result" v-show="!fives.audios">暂无音频搜索结果</span></div>
+          <div class="title">音频 <span class="no_result" v-show="!fives.audios.length">暂无音频搜索结果</span></div>
           <div v-for="item in fives.audios" @click.stop="itemCheck(item)" :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
             <span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span>
             <svg class="icon" aria-hidden="true"><use xlink:href="#icon-mp3"></use></svg>
@@ -70,9 +77,9 @@
         </svg>
         <span v-html="item.name"></span>
       </p>
-      <span slot="reference" v-show="isDefineFile" class="defBtn" @click="defineFile">归档于</span>
+      <span slot="reference" v-show="isDefineFile" class="defBtn" @click="defineFile">
+        <svg class="icon" aria-hidden="true"><use xlink:href="#icon-define"></use></svg>归档于</span>
     </el-popover>
-    <span v-show="isMerge" class="defBtn" @click="mergeImages">合并图片</span>
     <!-- 新建自定义归档-->
     <div v-show="createDefCatalog" class="newDef">
       <svg class="icon" aria-hidden="true">
@@ -82,6 +89,7 @@
       <span class="iconfont icon-checked_circle" @click="newDefCatOk"></span>
       <span class="iconfont icon-close" @click="cancelNewDefCat"></span>
     </div>
+
   </div>
 </template>
 
@@ -98,6 +106,7 @@
         fives:{docs:[], pics: [], videos:[], audios: [], others: []},
         checkedIds:[],
         checkedCategory:[],
+        checkedFiles: [],
         forNav:false,
         defineFiles:[],
         chooseDefineCatalog:false,
@@ -105,7 +114,8 @@
         defCatName:'',
         mailFiles:[],
         isDefineFile:false,
-        isMerge:false
+        isMerge: false,
+        isAlbum: false
       }
     },
     computed:{
@@ -116,6 +126,7 @@
       this.fetchNowTelFile()
     },
     methods:{
+
       createEcharts(){
         this.echarts = echarts.init(this.$refs.fiveCount)
         this.echarts.setOption({
@@ -144,34 +155,76 @@
       backupToInsight(){
         this.$router.push('/main/insight')
       },
-      mergeImages(){
-        let ids = []
-        this.checkedCategory.forEach((el, index)=>{
-          if (el == 2) {
-            const id = this.checkedIds.slice(index, index + 1)
-            ids.push(id)
-          }
+      mergeDocus(){
+        let urls = []
+        this.checkedFiles.forEach(el=>{
+          if (el.catalog != 1) return
+          urls.push(el.url)
         })
+        if (urls.length <= 1){
+          inputIsEmpty(this, '请至少选择2个文档')
+          return
+        }
         let formData = new FormData()
-        formData.append('ids', ids)
-        uploadOrUpdate(window.mergeUrl, formData).then(data=>{
+        formData.append('urls', urls)
+        uploadOrUpdate('/pdfmerge', formData).then(data=>{
           if (data.success){
             toggleTip(this, '合并成功，已保存至“处理”文件夹中')
           }
+        }).catch(error=>{
+          toggleTip(this, error)
         })
       },
-      fetchNowTelFile(){
+      mergeImages(){
+        let urls = []
+        this.checkedFiles.forEach(el=>{
+          if (el.catalog != 2) return
+          urls.push(el.url)
+        })
+        console.log(urls,888)
+        if (urls.length <= 1){
+          inputIsEmpty(this, '请至少选择2张图片')
+          return
+        }
+        let formData = new FormData()
+        formData.append('urls', urls)
+        uploadOrUpdate(window.mergeUrl, formData).then(data=>{
+          if (data.success){
+            toggleTip(this, '合并图片成功，已保存至“处理文件”中')
+          }
+        })
+      },
+      albumImages(){
+        let urls = []
+        toggleTip(this, '过滤图片中')
+        this.checkedFiles.forEach(el=>{
+          if (el.catalog != 2) return
+          urls.push(el.url)
+        })
+        if (urls.length <= 1){
+          inputIsEmpty(this, '请至少选择2张图片')
+          return
+        }
+        let formData = new FormData()
+        formData.append('urls', urls)
+        uploadOrUpdate('/imgalbum', formData).then(data=>{
+          if (data.success){
+            toggleTip(this, '合成影集成功，已保存至“处理文件”中')
+          }
+        })
+      },
+      fetchNowTelFile() {
         const childUrl = '/search'
         let formData = new FormData()
-        formData.append('way',this.searchWay)
-        formData.append('text',this.searchKey)
-        uploadOrUpdate(childUrl, formData).then(data=>{
-          for (let key in data){
-            data[key].forEach(el=> {
+        formData.append('way', this.searchWay)
+        formData.append('text', this.searchKey)
+        uploadOrUpdate(childUrl, formData).then(data => {
+          for (let key in data) {
+            data[key].forEach(el => {
               el.itemChecked = false
-              if (el.info) {
-                el.info = JSON.parse(el.info)
-              }
+              // if (el.info) {
+              //   el.info = JSON.parse(el.info)
+              // }
               if (el.keyword) {
                 el.keyword = el.keyword.split('|')
               }
@@ -182,11 +235,12 @@
               }
             })
           }
-          this.fives.docs = data.DOCUMENT
-          this.fives.pics = data.IMAGE
-          this.fives.videos = data.VIDEO
-          this.fives.audios = data.AUDIO
-          this.fives.others = data.OTHER
+          this.fives.docs = data.DOCUMENT || []
+          this.fives.pics = data.IMAGE || []
+          this.fives.videos = data.VIDEO || []
+          this.fives.audios = data.AUDIO || []
+          this.fives.others = data.OTHER || []
+          console.log(this.fives)
           const dataCount = []
           for (let key in this.fives){
             const len = this.fives[key] ? this.fives[key].length : 0
@@ -250,16 +304,12 @@
           this.checkedIds.push(item.id)
           this.checkedCategory.push(item.category)
           this.mailFiles.push({id: item.id, name: item.name})
+          this.checkedFiles.push(item)
         }else{
           this.checkedIds.splice(index, 1)
           this.checkedCategory.splice(index, 1)
           this.mailFiles.splice(index, 1)
-        }
-        if (this.checkedIds.length != 0){
-          this.isDefineFile = true
-          this.$store.commit('setMailFiles', this.mailFiles)
-        } else{
-          this.isDefineFile = false
+          this.checkedFiles.splice(index, 1)
         }
       },
       fileIconsOrOthers(id){
@@ -322,10 +372,12 @@
         if (this.checkedIds.length != 0) {
           this.isDefineFile = true
           this.isMerge = true
+          this.isAlbum = true
           this.$store.commit('setCheckedFiles', this.checkedFiles)
         } else {
           this.isDefineFile = false
           this.isMerge = false
+          this.isAlbum = false
         }
       }
     }
@@ -362,15 +414,8 @@
   }
 
   .defBtn {
-    position: absolute;
     top: 30px;
     left: 50px;
-    padding: 5px 10px;
-    border: 1px solid #efefef;
-    border-radius: 5px;
-    color: cornflowerblue;
-    background-color: #ddd;
-    cursor: pointer;
   }
 
   .newDef {

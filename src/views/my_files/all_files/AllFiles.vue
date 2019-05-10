@@ -21,7 +21,7 @@
       <tr v-for="(item, index) in allFolders" :key="'folder' + item.id" :class="{item_checked:item.itemChecked}">
         <td ><span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span></td>
         <td class="file_importance">
-          <svg @click="changeImportance(index)" class="icon" aria-hidden="true"><use :xlink:href="`#icon-importance${item.importance}`"></use></svg>
+          <svg @click="changeImportance(index)" class="icon" aria-hidden="true"><use :xlink:href="`#icon-importance${item.scale}`"></use></svg>
         </td>
         <td><div class="file_name" @click.stop="openFolder(1, item.id, item.name)">
           <svg class="icon" aria-hidden="true"><use xlink:href="#icon-aFile"></use></svg>
@@ -34,7 +34,7 @@
       <tr v-for="(item, index) in allFiles" :key="'file' + item.id" @click="clickItemFile(item)" :class="{item_checked:item.itemChecked}">
         <td ><span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span></td>
         <td class="file_importance">
-          <svg @click="changeImportance(index)" class="icon" aria-hidden="true"><use :xlink:href="`#icon-importance${item.importance}`"></use></svg>
+          <svg @click="changeImportance(index)" class="icon" aria-hidden="true"><use :xlink:href="`#icon-importance${item.scale}`"></use></svg>
         </td>
         <td><div class="file_name" @click.stop="openFile(item)">
           <svg class="icon" aria-hidden="true"><use :xlink:href="fileIconsOrOthers(item.id)"></use></svg>
@@ -43,10 +43,10 @@
         <td v-show="item.info.createTime">{{unixChange(item.info.createTime)}}</td>
         <td v-show="!item.info.createTime">{{unixChange(item.uploadTime)}}</td>
         <td>{{getFileSize(item.size)}}</td>
-        <td class="star"><svg class="icon" aria-hidden="true" @click.stop="toggleCollection(index)">
+        <td class="star"><svg class="icon" aria-hidden="true" @click.stop="toggleCollection(item)">
           <use v-show="!item.collection" xlink:href="#icon-collection"></use>
           <use v-show="item.collection" xlink:href="#icon-collection_fill"></use>
-        </svg><svg class="icon" aria-hidden="true" @click.stop="toggleAttention(index)">
+        </svg><svg class="icon" aria-hidden="true" @click.stop="toggleAttention(item)">
           <use v-show="!item.attention" xlink:href="#icon-like"></use>
           <use v-show="item.attention" xlink:href="#icon-like_fill"></use>
         </svg></td>
@@ -194,11 +194,11 @@
           this.$store.commit('setCheckedFiles', this.checkedFiles)
         }
       },
-      toggleCollection(index){
-        toggleCollection(this, this.allFiles, index)
+      toggleCollection(item){
+        toggleCollection(this, item)
       },
-      toggleAttention(index){
-        toggleAttention(this, this.allFiles, index)
+      toggleAttention(item){
+        toggleAttention(this, item)
       },
       unixChange(timeStamp){
         return unixChange(timeStamp)

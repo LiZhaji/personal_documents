@@ -12,14 +12,14 @@
         </el-carousel-item>
       </el-carousel>
     </div>
-    <div class="nav" :class="{showSpecificInfo:showSpecificInfo,cancelSpecificInfo:!showSpecificInfo}"
-         v-show="isEntering">
-      <a href="nowPicture.url" download="img"><span class="iconfont icon-download">下载</span></a>
-      <span class="iconfont icon-share-nocircle" @click="share">分享</span>
-      <span class="iconfont icon-print" @click="printPic">打印</span>
-      <span class="iconfont icon-tailor" @click="tailor">裁剪</span>
-      <span class="iconfont icon-show_info" @click="needSpecificInfo">显示详细信息</span>
-    </div>
+<!--    <div class="nav" :class="{showSpecificInfo:showSpecificInfo,cancelSpecificInfo:!showSpecificInfo}"-->
+<!--         v-show="isEntering">-->
+<!--      <a href="nowPicture.url" download="img"><span class="iconfont icon-download">下载</span></a>-->
+<!--      <span class="iconfont icon-share-nocircle" @click="share">分享</span>-->
+<!--      <span class="iconfont icon-print" @click="printPic">打印</span>-->
+<!--      <span class="iconfont icon-tailor" @click="tailor">裁剪</span>-->
+<!--      <span class="iconfont icon-show_info" @click="needSpecificInfo">显示详细信息</span>-->
+<!--    </div>-->
     <div class="specificInfo" v-show="showSpecificInfo">
       <p class="info_title"><span class="cancel iconfont icon-close2" @click="cancelSpecificInfo" title="点击关闭详情"></span>图片详情
       </p>
@@ -32,8 +32,8 @@
       </p>
       <p v-show="!nowPicture.info.createTime"><span>上传时间</span><span>{{unixChange(nowPicture.uploadTime)}}</span></p>
       <p><span>拍摄参数</span>{{nowPicture.info.modal}}<span v-show="!nowPicture.info.modal">未知</span></p>
-      <p><span>拍摄地点</span>{{nowPicture.info.location}}<span v-show="!nowPicture.info.location">未知</span></p>
-      <p><span>OCR</span>{{nowPicture.info.ocr}}<span v-show="!nowPicture.info.ocr">无</span></p>
+      <div class="clearFix"><span class="location_title">拍摄地点</span><div class="location_outer">{{nowPicture.info.location}}<span v-show="!nowPicture.info.location">未知</span></div></div>
+      <div class="clearFix"><span class="ocr_title">OCR</span><div class="ocr_outer">{{nowPicture.info.ocrInfo}}<span v-show="!nowPicture.info.ocrInfo">无</span></div></div>
       <div class="clearFix"><span class="color_title">色系</span>
         <div class="color clearFix">
           <div v-for="(colorItem, index) in nowPicture.info.colors" :key="index"
@@ -297,11 +297,15 @@
     float: left;
   }
 
-  .specificInfo .keyword_title {
+  .specificInfo .keyword_title,
+  .specificInfo .ocr_title,
+  .specificInfo .location_title{
     float: left;
   }
 
-  .specificInfo .keyword_outer {
+  .specificInfo .keyword_outer,
+  .specificInfo .ocr_outer,
+  .specificInfo .location_outer{
     width: 235px;
     display: inline-block;
   }

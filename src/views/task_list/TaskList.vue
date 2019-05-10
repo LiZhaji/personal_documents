@@ -54,9 +54,9 @@
       <div class="task_info">
         <p><span class="close" @click="closes">&times;</span>详细信息</p>
         <button class="item_del_btn" @click="delItem">删除此任务</button>
-        <p><span class="info_title">内容</span><span class="item_content2" contenteditable="true">{{chosenItem.content}}</span></p>
-        <p><span class="info_title">创建时间</span><span class="item_tip_time2">{{chosenItem.createTime}}</span></p>
-        <div class="remark_pic_info"><span class="info_title">评论</span>
+        <p class="clearFix"><span class="info_title">内容</span><span class="item_content2" contenteditable="true">{{chosenItem.content}}</span></p>
+        <p class="clearFix"><span class="info_title">创建时间</span><span class="item_tip_time2">{{chosenItem.createTime}}</span></p>
+        <div class="remark_pic_info clearFix"><span class="info_title">评论</span>
           <span class="remark" v-for="(item,index) in chosenItem.comments" :key="index">{{item.content}}</span>
           <div class="input_outer">
             <input class="remark_input" type="text" v-model="newRemark" placeholder="新增评论"
@@ -78,6 +78,20 @@
     components:{
       OperationBG: OperationBG
     },
+    data() {
+      return {
+        navContent:{
+          icon: '&#xe732;',
+          text: '我的任务清单'
+        },
+        rangeTime:'',
+        multipleSelection:[],
+        chosenItem:{},
+        nowIndex:0,
+        completeIndex:'',
+        newRemark:''
+      }
+    },
     mounted(){
       // 给state的tasks赋值
       this.$store.commit('getTasks')
@@ -92,20 +106,6 @@
         set(val){
           this.$store.state.tasks = val
         }
-      }
-    },
-    data() {
-      return {
-        navContent:{
-          icon: '&#xe732;',
-          text: '我的任务清单'
-        },
-        rangeTime:'',
-        multipleSelection:[],
-        chosenItem:{},
-        nowIndex:0,
-        completeIndex:'',
-        newRemark:''
       }
     },
     methods:{
@@ -159,7 +159,9 @@
       },
       delItem(){
         this.tasks.splice(this.nowIndex, 1)
-        this.chosenItem = this.tasks[this.nowIndex]
+        localStorage.setItem('tasks',JSON.stringify(this.tasks))
+        // this.chosenItem = this.tasks[this.nowIndex]
+        this.chosenItem = this.tasks[0]
       },
       completed(){
         console.log('111')
@@ -232,7 +234,11 @@
     cursor: pointer;
   }
   .task_info .info_title{
-    margin: 10px 20px;
+    margin: 0px 10px;
+    display: inline-block;
+    width: 70px;
+    float: left;
+    color: gray;
   }
   .task_info>p,
   .task_info>div{
@@ -251,6 +257,10 @@
     line-height: 30px;
     padding: 0px 25px;
     font-size: 14px;
+  }
+  .item_content2{
+    display: inline-block;
+    width: 210px;
   }
   .el-table__header-wrapper,.el-table__body-wrapper{
     /*display: inline-block;*/

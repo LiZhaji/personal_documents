@@ -17,23 +17,23 @@
       </tr>
       </thead>
       <tbody>
-      <tr v-for="(item, index) in myCollections" :key="index" @click="clickItem(index)" :class="{item_checked:item.itemChecked}">
+      <tr v-for="(item, index) in myCollections" :key="index" @click="clickItem(item)" :class="{item_checked:item.itemChecked}">
         <td ><span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span></td>
         <td class="file_importance">
-          <svg @click="changeImportance(index)" class="icon" aria-hidden="true"><use :xlink:href="`#icon-importance${item.importance}`"></use></svg>
+          <svg @click="changeImportance(index)" class="icon" aria-hidden="true"><use :xlink:href="`#icon-importance${item.scale}`"></use></svg>
         </td>
         <td><div class="file_name">
-          <svg class="icon aFile" aria-hidden="true"><use :xlink:href="`#icon-file_${item.type}`"></use></svg>
+          <svg class="icon aFile" aria-hidden="true"><use :xlink:href=fileIconsOrOthers(item.id)></use></svg>
           <span >{{item.name}}</span>
         </div></td>
-        <td>{{item.time}}</td>
-        <td>{{item.size}}</td>
-        <td class="star"><svg class="icon" aria-hidden="true" @click.stop="toggleCollection(index)">
+        <td>{{unixChange(item.serverTime)}}</td>
+        <td>{{getFileSize(item.size)}}</td>
+        <td class="star"><svg class="icon" aria-hidden="true" @click.stop="toggleCollection(item)">
           <use v-show="!item.collection" xlink:href="#icon-collection"></use>
           <use v-show="item.collection" xlink:href="#icon-collection_fill"></use>
-        </svg><svg class="icon" aria-hidden="true" @click.stop="toggleAttention(index)">
-          <use v-show="!item.like" xlink:href="#icon-like"></use>
-          <use v-show="item.like" xlink:href="#icon-like_fill"></use>
+        </svg><svg class="icon" aria-hidden="true" @click.stop="toggleAttention(item)">
+          <use v-show="!item.attention" xlink:href="#icon-like"></use>
+          <use v-show="item.attention" xlink:href="#icon-like_fill"></use>
         </svg></td>
       </tr>
       </tbody>
@@ -42,21 +42,34 @@
 </template>
 
 <script>
+  import { mapState } from "vuex"
   import FileOperation from "../../components/FileOperation"
-  import {toggleCollection, toggleAttention, clickItem, fetchList} from "../../publics/public"
+  import {toggleCollection, toggleAttention, unixChange, fetchList, getFileSize} from "../../publics/public"
   export default {
     components:{
       FileOperation: FileOperation,
     },
     data() {
       return {
-        myCollections:[]
+        myCollections: [],
+        checkedFiles: []
       }
+    },
+    computed:{
+      ...mapState(['file_icons'])
     },
     mounted(){
       this.getCollections()
     },
     methods:{
+      getFileSize(size){
+        return getFileSize(size)
+      },
+      fileIconsOrOthers(id){
+        const nowFile = this.myCollections.find(el=>{ return el.id == id})
+        const ext = nowFile.name.split('.').pop()
+        return "#icon-file_" + (this.file_icons.indexOf(ext) < 0 ? 'others' : ext)
+      },
       getCollections(){
         fetchList('/getcollections').then(data=>{
           data.forEach(el=>{
@@ -65,17 +78,33 @@
           this.myCollections = data
         })
       },
-      clickItem(index){
-        clickItem(this.myCollections, index, this.nowChecked)
+      clickItem(item){
+        item.itemChecked = !item.itemChecked
+        const index = this.checkedFiles.findIndex(el=>{return el.id === item.id})
+        if (item.itemChecked && index < 0){
+          this.checkedFiles.push({id: item.id, name: item.name, url:item.url})
+        }else{
+          this.checkedFiles.splice(index, 1)
+        }
       },
-      toggleCollection(index){
-        toggleCollection(this, this.myCollections, index)
+      toggleCollection(item){
+        toggleCollection(this, item)
       },
-      toggleAttention(index){
-        toggleAttention(this, this.myCollections, index)
+      toggleAttention(item){
+        toggleAttention(this, item)
+      },
+      unixChange(timeStamp){
+        return unixChange(timeStamp)
       },
       changeImportance(index){
 
+      }
+    },
+    watch:{
+      checkedFiles(){
+        if (this.checkedFiles.length != 0) {
+          this.$store.commit('setCheckedFiles', this.checkedFiles)
+        }
       }
     }
   }

@@ -19,7 +19,7 @@
       <tr v-for="(item, index) in allDocuments" :key="index" @click="clickItem(item)" :class="{item_checked:item.itemChecked}">
         <td ><span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span></td>
         <td class="file_importance">
-          <svg @click.stop="changeImportance(index)" class="icon" aria-hidden="true"><use :xlink:href="`#icon-importance${item.importance}`"></use></svg>
+          <svg @click.stop="changeImportance(index)" class="icon" aria-hidden="true"><use :xlink:href="`#icon-importance${item.scale}`"></use></svg>
         </td>
         <td><div class="file_name" >
           <svg class="icon aFile" aria-hidden="true"><use :xlink:href=fileIconsOrOthers(item.id)></use></svg>
@@ -27,17 +27,16 @@
         </div></td>
         <td>{{unixChange(item.serverTime)}}</td>
         <td>{{getFileSize(item.size)}}</td>
-        <td class="star"><svg class="icon" aria-hidden="true" @click.stop="toggleCollection(index)">
+        <td class="star"><svg class="icon" aria-hidden="true" @click.stop="toggleCollection(item)">
           <use v-show="!item.collection" xlink:href="#icon-collection"></use>
           <use v-show="item.collection" xlink:href="#icon-collection_fill"></use>
-        </svg><svg class="icon" aria-hidden="true" @click.stop="toggleAttention(index)">
-          <use v-show="!item.like" xlink:href="#icon-like"></use>
-          <use v-show="item.like" xlink:href="#icon-like_fill"></use>
+        </svg><svg class="icon" aria-hidden="true" @click.stop="toggleAttention(item)">
+          <use v-show="!item.attention" xlink:href="#icon-like"></use>
+          <use v-show="item.attention" xlink:href="#icon-like_fill"></use>
         </svg></td>
       </tr>
       </tbody>
     </table>
-    <span class="merge_btn_doc" @click="mergeDocus">合并文档</span>
 
   </div>
 </template>
@@ -73,28 +72,14 @@
       window.EE.on('fetchDocuments', ()=>this.fetchList())
     },
     methods:{
-      mergeDocus(){
-        if (this.checkedFiles.length <= 1){
-          inputIsEmpty(this, '请至少选择2个文档')
-          return
-        }
-        let urls = []
-        this.checkedFiles.forEach(el=>{
-          urls.push(el.url)
-        })
-        let formData = new FormData()
-        formData.append('urls', urls)
-        uploadOrUpdate('/pdfmerge', formData).then(data=>{
-          if (data.success){
-            toggleTip(this, '合并成功，已保存至“处理”文件夹中')
-          }
-        }).catch(error=>{
-          toggleTip(this, error)
-        })
-      },
+
       fetchList() {
         fetchList('/docuinfo').then(data=>{
+          data = data || []
           data.forEach(el=>{
+            if (!el.info){
+              el.info = JSON.stringify({})
+            }
             el.info = JSON.parse(el.info)
             el.itemChecked = false
             if (el.keyword) {
@@ -136,11 +121,11 @@
           this.checkedFiles.splice(index, 1)
         }
       },
-      toggleCollection(index){
-        toggleCollection(this, this.allDocuments, index)
+      toggleCollection(item){
+        toggleCollection(this, item)
       },
-      toggleAttention(index){
-        toggleAttention(this, this.allDocuments, index)
+      toggleAttention(item){
+        toggleAttention(this, item)
       }
     },
     watch:{
@@ -158,17 +143,6 @@
     overflow: hidden;
     position: relative;
     padding-left: 50px;
-  }
-  .merge_btn_doc{
-    position: absolute;
-    top: 55px;
-    left: 150px;
-    padding: 5px 10px;
-    border: 1px solid #efefef;
-    border-radius: 5px;
-    color: cornflowerblue;
-    background-color: #efefef;
-    cursor: pointer;
   }
 
 </style>

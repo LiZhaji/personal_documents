@@ -12,12 +12,14 @@
           <p><span class="tag_file">标签</span><input class="tag_file_input" type="text" v-model="newTag"
                                                     placeholder="以空格分隔"></p>
           <div class="importance_file"><span class="importance_title">标记</span>
-            <input id="importance-11" class="importance-1" name="importance" type="radio" value=-1
-                   @click="getFolderImportance"><label for="importance-11">重要</label>
-            <input id="importance11" class="importance1" name="importance" type="radio" value=1
-                   @click="getFolderImportance"><label for="importance11">重要吗</label>
-            <input id="importance01" class="importance0" name="importance" type="radio" value=0
-                   @click="getFolderImportance" checked="checked"><label for="importance01">一般</label>
+            <input id="importance4" class="importance4" name="importance" type="radio" value=4
+                   @click="getFolderImportance"><label for="importance4">非常重要</label>
+            <input id="importance3" class="importance3" name="importance" type="radio" value=3
+                   @click="getFolderImportance"><label for="importance3">比较重要</label>
+            <input id="importance2" class="importance2" name="importance" type="radio" value=2
+                   @click="getFolderImportance"><label for="importance2">重要</label>
+            <input id="importance1" class="importance1" name="importance" type="radio" value=1
+                   @click="getFolderImportance" checked><label for="importance1">一般</label>
           </div>
           <div class="buttons">
             <button type="button" class="yes" @click="submitFile">确定</button>
@@ -34,14 +36,14 @@
           <p class="new_task_content">内容 <textarea v-model="newTask.content"></textarea></p>
           <p class="new_task_content">备注 <textarea v-model="newTask.remark"></textarea></p>
           <p><span class="time">创建日期</span>{{getNowDay()}}</p>
-<!--          <div class="block ">-->
-<!--            <span class="demonstration tip_time">提醒时间</span>-->
-<!--            <el-date-picker-->
-<!--              v-model="newTask.tipTime"-->
-<!--              type="datetime"-->
-<!--              placeholder="选择时间">-->
-<!--            </el-date-picker>-->
-<!--          </div>-->
+          <!--          <div class="block ">-->
+          <!--            <span class="demonstration tip_time">提醒时间</span>-->
+          <!--            <el-date-picker-->
+          <!--              v-model="newTask.tipTime"-->
+          <!--              type="datetime"-->
+          <!--              placeholder="选择时间">-->
+          <!--            </el-date-picker>-->
+          <!--          </div>-->
           <p><span class="tag_new_task">标签</span>
             <el-select class="" v-model="newTask.tag" placeholder="请选择">
               <el-option
@@ -69,14 +71,14 @@
           <p><span class="name_folder">名称</span><input class="name_folder_input" v-model="newFolderUpload.name"
                                                        type="text"></p>
           <p><span class="time_folder">创建日期</span>{{getNowDay()}}</p>
-          <div class="importance_folder"><span class="importance_title">标记</span>
-            <input id="importance-1" class="importance-1" name="importance" type="radio" value=-1
-                   @click="getFolderImportance"><label for="importance-1">重要</label>
-            <input id="importance1" class="importance1" name="importance" type="radio" value=1
-                   @click="getFolderImportance"><label for="importance1">重要吗</label>
-            <input id="importance0" class="importance0" name="importance" type="radio" value=0
-                   @click="getFolderImportance" checked="checked"><label for="importance0">一般</label>
-          </div>
+          <!--          <div class="importance_folder"><span class="importance_title">标记</span>-->
+          <!--            <input id="importance-1" class="importance-1" name="importance" type="radio" value=-1-->
+          <!--                   @click="getFolderImportance"><label for="importance-1">重要</label>-->
+          <!--            <input id="importance1" class="importance1" name="importance" type="radio" value=1-->
+          <!--                   @click="getFolderImportance"><label for="importance1">重要吗</label>-->
+          <!--            <input id="importance0" class="importance0" name="importance" type="radio" value=0-->
+          <!--                   @click="getFolderImportance" checked="checked"><label for="importance0">一般</label>-->
+          <!--          </div>-->
           <div class="buttons">
             <button type="button " class="yes" @click="createNewFolder">确定</button>
             <button type="button " class="cancel" @click="cancelNewFolder">取消</button>
@@ -100,7 +102,7 @@
         <div class="info">
           <p><span>文件类型</span><span>{{getType(nowAudio.name)}}</span></p>
           <p><span>文件大小</span><span>{{getFileSize(nowAudio.size)}}</span></p>
-          <p><span>上传时间</span><span>{{nowAudio.time}}</span></p>
+          <p><span>上传时间</span><span>{{unixChange(nowAudio.serverTime)}}</span></p>
           <p><span>关键词</span><span class="keyword" v-for="item in nowAudio.keyword">{{item}}</span></p>
           <div class="tag_audio"><span>标签</span>
             <span class="tag" v-for="(item,index) in nowAudio.tag" :key="index">
@@ -165,7 +167,8 @@
       <div class="content">
         <div class="mail_title"><span>标题</span><input type="text" v-model="mailContent.title" placeholder="请输入标题"></div>
         <div class="mail_contact"><span>发送至</span>
-          <input type="text" v-model="mailContent.contactName ? mailContent.contactName : mailContent.contact" placeholder="添加联系人">
+          <input type="text" v-model="mailContent.contactName ? mailContent.contactName : mailContent.contact"
+                 placeholder="添加联系人">
           <span @click="chooseContact" class="iconfont icon-add"></span>
         </div>
         <div class="mail_words"><span>内容</span>
@@ -187,7 +190,9 @@
       </div>
     </div>
     <!-- 联系人目录树-->
-    <div class="contacts_tree" v-if="isContactTree"><el-tree :data="contacts" :props="defaultProps" @current-change="chooseContactOk"></el-tree></div>
+    <div class="contacts_tree" v-if="isContactTree">
+      <el-tree :data="contacts" :props="defaultProps" @current-change="chooseContactOk"></el-tree>
+    </div>
   </div>
 </template>
 
@@ -207,14 +212,14 @@
     getNowDay,
     fetchList,
     addTag, delTag,
-    addRemark, delRemark
+    addRemark, delRemark, unixChange
   } from "../publics/public"
 
   export default {
     name: "Popup",
     data() {
       return {
-        isContactTree:false,
+        isContactTree: false,
         inUpFile: false,
         T: true,
         file: '',
@@ -233,30 +238,28 @@
           value: '普通',
           label: '普通'
         }],
-        newTask: {content: '', createTime: '', tag: '', tipTime: '', comments:[{}], remark:'', state: ''},
+        newTask: {content: '', createTime: '', tag: '', tipTime: '', comments: [], remark: '', state: ''},
         newTag: '',
         fileLocationShow: '/全部文件',
         fileLocation: 1,
         newFolderUpload: {pid: 1, name: '', importance: -1},
         createFoldInUpload: false,
-        // audioUrl: this.getAudioUrl,
         audioUrl: 'https://src.fanmingfei.com/nigel.mp3',
-        nowAudio: {name: '因三月.mp3', size: 12933, time: '', keyword: ['xx', 'yy'], tag: ['a', 'b'], comments: [{}]},
         isOpacity: false,
         newRemark: '',
         duration: formatTime(),
         current: formatTime(),
         catalog: [],
         defaultProps: {children: 'children', label: 'label'},
-        mailContent: {title: '',contactName:'',  contact: '', content: ''},
-        contacts:[{
+        mailContent: {title: '', contactName: '', contact: '', content: ''},
+        contacts: [{
           label: '所有联系人',
           children: []
         }]
       }
     },
     computed: {
-      ...mapState(['isUpFile', 'isNewTask', 'isNewFolder', 'isAudioPlay', 'isCatalogTree', 'isMail', 'checkedFiles', 'file_icons']),
+      ...mapState(['isUpFile', 'checkedFiles', 'isNewTask', 'isNewFolder', 'isAudioPlay', 'nowAudio', 'isCatalogTree', 'isMail', 'checkedFiles', 'file_icons']),
       isAudioPlay: {
         get() {
           return this.$store.state.isAudioPlay
@@ -280,17 +283,20 @@
       }
     },
     methods: {
-      chooseContactOk(data, obj){
-        console.log(data,'00000')
+      unixChange(timeStamp){
+        return unixChange(timeStamp)
+      },
+      chooseContactOk(data, obj) {
+        console.log(data, '00000')
         this.mailContent.contactName = data.name
         this.mailContent.contact = data.mailAddr
         this.isContactTree = false
       },
       chooseContact() {
         this.isContactTree = true
-        fetchList('/mailinfo').then(data=>{
+        fetchList('/mailinfo').then(data => {
           let children = []
-          data.contacts.forEach(el=>{
+          data.contacts.forEach(el => {
             const label = el.remark + ' ' + el.email
             const child = {label: label, name: el.remark, mailAddr: el.email}
             children.push(child)
@@ -314,7 +320,7 @@
             toggleTip(this, '发送成功')
             this.$store.commit('closeMail')
             this.$store.commit('setCheckedFilesFull')
-            this.mailContent = {title: '',contactName:'',  contact: '', content: ''}
+            this.mailContent = {title: '', contactName: '', contact: '', content: ''}
           } else {
             toggleTip(this, '发送失败，请检查')
             this.$store.commit('closeMail')
@@ -412,19 +418,16 @@
         this.catalog = []
         fetchList('/catalogtree').then(data => {
           // data表示最外层，全部文件
-          this.catalog.push({id: data.id, label: data.name})
-          this.getNodes(this.catalog[0], data.nodes)
+          this.catalog.push({id: data.id, label: data.name, children:[]})
+          this.getNodes(this.catalog[0].children, data.nodes)
         })
       },
       getNodes(parent, nodes) {
-        // parent表示当前nodes的父文件夹
-        if (!parent.children) {
-          parent.children = []
-        }
+        // parent和nodes平级
         nodes.forEach((el, index) => {
-          parent.children.push({id: el.id, label: el.name})
+          parent.push({id: el.id, label: el.name, children:[]})
           if (el.nodes) {
-            this.getNodes(parent.children[index], el.nodes)
+            this.getNodes(parent[index].children, el.nodes)
           }
         })
       },
@@ -551,7 +554,7 @@
         this.newTask.createTime = this.getNowDay()
         this.newTask.state = 0
         this.$store.commit('createNewTask', this.newTask)
-        this.newTask = {content: '', createTime: '', tag: '', tipTime: '', comments:[{}], remark:'', state: ''}
+        this.newTask = {content: '', createTime: '', tag: '', tipTime: '', comments: [], remark: '', state: ''}
         this.$store.commit('toggleNewTask')
       },
       getFolderImportance() {
@@ -577,8 +580,8 @@
         return getNowDay()
       },
       getAudioUrl() {
-        var baseUrl = ''
-        this.audioUrl = baseUrl + this.nowAudio.url
+        // this.audioUrl = window.baseUrl + '/testpreview/' + this.nowAudio.url
+        return window.baseUrl + '/testpreview/' + this.nowAudio.url
       },
       // 音频操作
       createWaveSurfer() {
@@ -586,9 +589,11 @@
           container: this.$refs.wave,
           waveColor: 'lightgray',
           progressColor: 'cornflowerblue',
-          height: 100
+          height: 100,
+          mediaControls: true
         })
-        this.wavesurfer.load(this.audioUrl)
+        // this.wavesurfer.load(this.getAudioUrl)
+        this.wavesurfer.load(this.getAudioUrl())
         this.wavesurfer.on('audioprocess', () => {
           this.getCurrent()
         })
@@ -612,8 +617,8 @@
       },
       closeAudioPlay() {
         // 1.停止播放 2.弹窗关闭
-        this.wavesurfer.pause()
         this.isAudioPlay = false
+        this.wavesurfer.pause()
       },
       getType(name) {
         const type = name.split('.').pop()
@@ -683,7 +688,7 @@
 
 <style scoped>
   /*邮件联系人目录树*/
-  .contacts_tree{
+  .contacts_tree {
     position: absolute;
     width: 200px;
     min-height: 50px;
@@ -697,6 +702,7 @@
     padding: 10px;
     background-color: white;
   }
+
   /*发送邮件开始*/
   .mail_box {
     position: absolute;
@@ -730,7 +736,8 @@
   .mail_box > .content {
     padding: 15px;
   }
-  .content .icon-add{
+
+  .content .icon-add {
     display: inline;
   }
 
@@ -976,19 +983,25 @@
     left: -20px;
   }
 
-  .importance_folder > .importance-1 + label:before,
-  .importance_file > .importance-1 + label:before {
-    background-color: #f4ea2a;
-  }
-
-  .importance_folder > .importance0 + label:before,
-  .importance_file > .importance0 + label:before {
-    background-color: #bfbfbf;
-  }
 
   .importance_folder > .importance1 + label:before,
   .importance_file > .importance1 + label:before {
+    background-color: #bfbfbf;
+  }
+
+  .importance_folder > .importance2 + label:before,
+  .importance_file > .importance2 + label:before {
     background-color: #1296db;
+  }
+
+  .importance_folder > .importance3 + label:before,
+  .importance_file > .importance3 + label:before {
+    background-color: #f4ea2a;
+  }
+
+  .importance_folder > .importance4 + label:before,
+  .importance_file > .importance4 + label:before {
+    background-color: #db0000;
   }
 
   input[type='radio']:checked + label:before {

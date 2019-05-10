@@ -17,7 +17,7 @@
       <div v-for="(item, key) in timeLinePics" class="month_div">
         <div>
           <svg class="icon" aria-hidden="true">
-            <use xlink:href="#icon-importance1"></use>
+            <use xlink:href="#icon-importance2"></use>
           </svg>
           {{key}}
         </div>
@@ -39,10 +39,13 @@
         </svg>
         {{item.name}}
       </p>
-      <span slot="reference" v-show="isDefineFile" class="defBtn" @click="defineFile">归档于</span>
+      <span slot="reference" v-show="isDefineFile" class="defBtn" @click="defineFile">
+        <svg class="icon" aria-hidden="true"><use xlink:href="#icon-define"></use></svg>归档于</span>
     </el-popover>
-    <span v-show="isMerge" class="mergeBtn" @click="mergeImages">合并图片</span>
-    <span v-show="isAlbum" class="albumBtn" @click="albumImages">合成影集</span>
+    <span v-show="isMerge" class="mergeBtn" @click="mergeImages">
+      <svg class="icon" aria-hidden="true"><use xlink:href="#icon-merge"></use></svg>合并图片</span>
+    <span v-show="isAlbum" class="albumBtn" @click="albumImages">
+      <svg class="icon" aria-hidden="true"><use xlink:href="#icon-album"></use></svg>合成影集</span>
     <!-- 新建自定义归档-->
     <div v-show="createDefCatalog" class="newDef">
       <svg class="icon" aria-hidden="true">
@@ -235,7 +238,7 @@
     left: 160px;
   }
   .albumBtn{
-    left: 260px;
+    left: 280px;
   }
 
   .file_nav>span {
@@ -263,7 +266,7 @@
   .defBtn {
     position: absolute;
     top: 55px;
-    left: 360px;
+    left: 400px;
     padding: 5px 10px;
     border: 1px solid #efefef;
     border-radius: 5px;
@@ -275,7 +278,7 @@
   .newDef {
     position: fixed;
     top: 160px;
-    left: 675px;
+    left: 730px;
     padding: 5px 10px;
     color: cornflowerblue;
   }

@@ -3,8 +3,9 @@
     <div class="file_nav">
       <span @click="backToAll">返回 </span>
       <span v-show="fromSearch" @click="backToSearch">返回搜索页面 </span>
+<!--      <a href="javascript:POBrowser.openWindowModeless('edit/30','width=1200px;height=800px;');">在线编辑ss</a>-->
       <span class="editFile" @click="editFile">在线编辑</span>
-      <span class="" @click="dialogVisible = true">拆分文档</span>
+      <span class="" v-show="nowFile.name.split('.').pop() == 'pdf'" @click="dialogVisible = true">拆分文档</span>
       <span class="" v-show="nowFile.name.split('.').pop() == 'pdf'" @click="pdfToPng">转图片</span>
     </div>
     <div class="file_info">
@@ -68,8 +69,8 @@
     getFileSize,
     unixChange,
     inputIsEmpty,
-    toggleCollectionNotIndex,
-    toggleAttentionNotIndex,
+    toggleCollection,
+    toggleAttention,
     toggleTip,
     addTag, delTag,
     addRemark, delRemark, uploadOrUpdate
@@ -168,11 +169,11 @@
         pdfUrlTemp.push('.pdf')
         return pdfUrlTemp.join("")
       },
-      toggleCollectionNotIndex() {
-        toggleCollectionNotIndex(this, this.nowFile)
+      toggleCollection() {
+        toggleCollection(this, this.nowFile)
       },
-      toggleAttentionNotIndex() {
-        toggleAttentionNotIndex(this, this.nowFile)
+      toggleAttention() {
+        toggleAttention(this, this.nowFile)
       },
       delOneTag(id, name, index) {
         delTag(id, name).then(data => {

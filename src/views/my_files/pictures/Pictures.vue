@@ -3,8 +3,10 @@
     <FileOperation></FileOperation>
     <div class="file_nav">
       <span >全部图片</span>
-      <span v-show="isMerge" class="mergeBtn" @click="mergeImages">合并图片</span>
-      <span v-show="isAlbum" class="albumBtn" @click="albumImages">合成影集</span>
+      <span v-show="isMerge" class="mergeBtn" @click="mergeImages">
+        <svg class="icon" aria-hidden="true"><use xlink:href="#icon-merge"></use></svg>合并图片</span>
+      <span v-show="isAlbum" class="albumBtn" @click="albumImages">
+        <svg class="icon" aria-hidden="true"><use xlink:href="#icon-album"></use></svg>合成影集</span>
       <el-popover
         popper-class="order_picker"
         placement="top"
@@ -34,7 +36,7 @@
         <td><span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span></td>
         <td class="file_importance">
           <svg class="icon" aria-hidden="true">
-            <use :xlink:href="`#icon-importance${item.importance}`"></use>
+            <use :xlink:href="`#icon-importance${item.scale}`"></use>
           </svg>
         </td>
         <td class="file_preview">
@@ -45,11 +47,11 @@
         <td>{{unixChange(item.serverTime)}}</td>
         <td>{{getFileSize(item.size)}}</td>
         <td class="star">
-          <svg class="icon" aria-hidden="true" @click.stop="toggleCollection(index)">
+          <svg class="icon" aria-hidden="true" @click.stop="toggleCollection(item)">
             <use v-show="!item.collection" xlink:href="#icon-collection"></use>
             <use v-show="item.collection" xlink:href="#icon-collection_fill"></use>
           </svg>
-          <svg class="icon" aria-hidden="true" @click.stop="toggleAttention(index)">
+          <svg class="icon" aria-hidden="true" @click.stop="toggleAttention(item)">
             <use v-show="!item.attention" xlink:href="#icon-like"></use>
             <use v-show="item.attention" xlink:href="#icon-like_fill"></use>
           </svg>
@@ -248,11 +250,11 @@
         const baseUrl = window.baseUrl + "/testpreview/"
         return baseUrl + url
       },
-      toggleCollection(index) {
-        toggleCollection(this, this.allPictures, index)
+      toggleCollection(item){
+        toggleCollection(this, item)
       },
-      toggleAttention(index) {
-        toggleAttention(this, this.allPictures, index)
+      toggleAttention(item){
+        toggleAttention(this, item)
       },
       unixChange(timeStamp) {
         return unixChange(timeStamp)
@@ -288,12 +290,15 @@
     color: cornflowerblue;
   }
   .mergeBtn{
-    left: 300px;
+    left: 265px;
   }
  .albumBtn{
-   left: 200px;
+   left: 150px;
  }
-
+  .file_nav svg{
+    font-size: 16px;
+    color: cornflowerblue;
+  }
 
   /*目录树*/
   .catalog_tree {

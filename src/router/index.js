@@ -36,6 +36,7 @@ import KeywordTagResult from "../views/searchResult/KeywordTagResult";
 import NameResult from "../views/searchResult/NameResult";
 import ContentResult from "../views/searchResult/ContentResult";
 import HistoryOperations from "../views/history_operations/HistoryOperations";
+import DefineFiles from "../views/my_files/define_files/DefineFiles"
 
 export default new Router({
   routes: [
@@ -138,6 +139,9 @@ export default new Router({
         },{
           path: '/main/historyOperations',
           component:HistoryOperations
+        },{
+          path: '/main/defineFiles',
+          component:DefineFiles
         }
       ]
     },{

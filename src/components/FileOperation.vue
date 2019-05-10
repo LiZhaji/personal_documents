@@ -12,7 +12,7 @@
       <span class="iconfont icon-moveto"><span class="font">移动到</span></span>
       <span class="iconfont icon-rename"><span class="font">重命名</span></span>
       <span class="iconfont icon-mail" @click="mail"><span class="font">发送邮件</span></span>
-      <span class="iconfont icon-refresh"><span class="font">刷新</span></span>
+      <span class="iconfont icon-refresh" @click="refresh"><span class="font">刷新</span></span>
     </div>
   </div>
 
@@ -24,6 +24,7 @@
   import axios from "axios"
   import FileSaver from "file-saver"
   export default {
+    inject: ['reload'],
     data() {
       return {
         singleUrl:'',
@@ -51,14 +52,18 @@
       // }
     },
     methods:{
+      refresh(){
+        this.reload()
+      },
       mail(){
         this.$store.commit('openMail')
       },
       downloadFile(){
         let urls = []
-        // const baseUrl = window.baseUrl + "/testpreview/"
+        const baseUrl = window.baseUrl + "/testpreview/"
         this.checkedFiles.forEach(el=>{
-          urls.push('/api/testpreview/' + el.url)
+          // urls.push('/api/testpreview/' + el.url)
+          urls.push(baseUrl + el.url)
         })
         let zip = new JSZIP()
         let cache = {}

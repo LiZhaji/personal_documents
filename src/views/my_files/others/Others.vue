@@ -19,7 +19,7 @@
       <tr v-for="(item, index) in others" :key="index" @click="clickItem(item)" :class="{item_checked:item.itemChecked}">
         <td ><span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span></td>
         <td class="file_importance">
-          <svg @click="changeImportance(index)" class="icon" aria-hidden="true"><use :xlink:href="`#icon-importance${item.importance}`"></use></svg>
+          <svg @click="changeImportance(index)" class="icon" aria-hidden="true"><use :xlink:href="`#icon-importance${item.scale}`"></use></svg>
         </td>
         <td><div class="file_name" @click.stop="showFile(item)">
           <svg class="icon aFile" aria-hidden="true"><use :xlink:href=fileIconsOrOthers(index)></use></svg>
@@ -27,12 +27,12 @@
         </div></td>
         <td>{{item.time}}</td>
         <td>{{item.size}}</td>
-        <td class="star"><svg class="icon" aria-hidden="true" @click.stop="toggleCollection(index)">
+        <td class="star"><svg class="icon" aria-hidden="true" @click.stop="toggleCollection(item)">
           <use v-show="!item.collection" xlink:href="#icon-collection"></use>
           <use v-show="item.collection" xlink:href="#icon-collection_fill"></use>
-        </svg><svg class="icon" aria-hidden="true" @click.stop="toggleAttention(index)">
-          <use v-show="!item.like" xlink:href="#icon-like"></use>
-          <use v-show="item.like" xlink:href="#icon-like_fill"></use>
+        </svg><svg class="icon" aria-hidden="true" @click.stop="toggleAttention(item)">
+          <use v-show="!item.attention" xlink:href="#icon-like"></use>
+          <use v-show="item.attention" xlink:href="#icon-like_fill"></use>
         </svg></td>
       </tr>
       </tbody>
@@ -41,7 +41,7 @@
 </template>
 
 <script>
-  import axios from "axios"
+  import { mapState } from "vuex"
   import FileOperation from "../../../components/FileOperation"
   import JSZIP from "jszip"
   import { toggleTip,toggleCollection,toggleAttention,fetchList } from "../../../publics/public"
@@ -51,29 +51,12 @@
     },
     data() {
       return {
-        file_icons:['doc','exe','zip','txt','pdf','ppt','xls','css','mp3','avi','mp4','movie','jpg','png','gif'],
         checkedFiles:[],
-        others:[
-          {
-            importance:0,// -1,0,1
-            name:'服务外包省赛概要三十三.pbg',
-            time:new Date(),
-            type:'pbg',
-            size:'22k',
-            collection:true,
-            like:true
-          },
-          {
-            importance:1,// -1,0,1
-            name:'你好好密密麻麻.rfg',
-            time:new Date(),
-            type:'rfg',
-            size:'19k',
-            collection:false,
-            like:true
-          }
-        ]
+        others:[]
       }
+    },
+    computed:{
+      ...mapState(['file_icons'])
     },
     mounted(){
       this.fetchList()
@@ -89,7 +72,7 @@
         })
       },
       fetchList(){
-        fetchList('/').then(data=>{
+        fetchList('/others').then(data=>{
           this.others = data
         }).catch(error=>{
           toggleTip(this,error)
@@ -115,11 +98,11 @@
           this.$store.commit('setCheckedFiles', this.checkedFiles)
         }
       },
-      toggleCollection(index){
-        toggleCollection(this, this.others, index)
+      toggleCollection(item){
+        toggleCollection(this, item)
       },
-      toggleAttention(index) {
-        toggleAttention(this, this.others, index)
+      toggleAttention(item){
+        toggleAttention(this, item)
       },
 
     }

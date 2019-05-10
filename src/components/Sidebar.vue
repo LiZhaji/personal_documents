@@ -17,7 +17,8 @@
     <transition name="sidebarNav_right">
       <ul class="activities_of_files" v-show="isMyFile">
         <li @click="toActivities"><span class="iconfont icon-undo"></span><span class="activity_name">返回</span></li>
-        <router-link to="/main/insight"><li :class="{chosen: '/main/insight'=== $route.path}"><span class="iconfont icon-lately-files"></span><span class="activity_name">洞见</span></li></router-link>
+        <router-link to="/main/insight"><li :class="{chosen: '/main/insight'=== $route.path}"><span class="iconfont icon-fangdajing"></span><span class="activity_name">洞见</span></li></router-link>
+        <router-link to="/main/defineFiles"><li :class="{chosen: '/main/defineFiles'=== $route.path}"><span class="iconfont icon-define"></span><span class="activity_name">归档</span></li></router-link>
         <router-link to="/main/allFiles"><li :class="{chosen: '/main/allFiles'=== $route.path}"><span class="iconfont icon-all-files"></span><span class="activity_name">全部文件</span></li></router-link>
         <router-link to="/main/pictures"><li :class="{chosen: '/main/pictures'=== $route.path}"><span class="iconfont icon-picture"></span><span class="activity_name">图片</span></li></router-link>
         <router-link to="/main/documents"><li :class="{chosen: '/main/documents'=== $route.path}"><span class="iconfont icon-documents"></span><span class="activity_name">文档</span></li></router-link>

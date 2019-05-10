@@ -16,7 +16,6 @@
       return {}
     },
     mounted() {
-      console.log(this.navContent.text)
     }
   }
 </script>
@@ -35,6 +34,7 @@
     margin: 20px 0px;
     font-size: 14px;
     height: 20px;
+    color: gray;
   }
   .theirIcon{
     margin-right: 10px;

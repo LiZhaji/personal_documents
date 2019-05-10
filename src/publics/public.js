@@ -9,17 +9,17 @@ export const toggleTip = (obj, msg) =>{
     offset: 80
   })
 }
-export const toggleCollection =(obj, list, index)=>{
-  let id = list[index].id
-  let collect = list[index].collection ? 1 : 0
+export const toggleCollection =(obj, item)=>{
+  let id = item.id
+  let collect = item.collection ? 1 : 0
   let formData=new FormData()
   formData.append("id",id)
   formData.append("collect",collect);
   var url = window.baseUrl + "/collect"
   axios.post(url, formData).then( (response) => {
     if (response.data.success) {
-      list[index].collection = !list[index].collection
-      if(list[index].collection ) {
+      item.collection = !item.collection
+      if(item.collection ) {
         toggleTip(obj, '已收藏')
       }else{
         toggleTip(obj, '已取消收藏')
@@ -29,17 +29,17 @@ export const toggleCollection =(obj, list, index)=>{
     toggleTip(obj, error)
   })
 }
-export const toggleAttention =(obj, list, index)=>{
-  let id = list[index].id
-  let attention = list[index].attention ? 1 : 0
+export const toggleAttention =(obj, item)=>{
+  let id = item.id
+  let attention = item.attention ? 1 : 0
   let formData=new FormData()
   formData.append("id",id)
   formData.append("attention",attention);
   var url = window.baseUrl + "/attention"
   axios.post(url, formData).then( (response) => {
     if (response.data.success) {
-      list[index].attention = !list[index].attention
-      if(list[index].attention ) {
+      item.attention = !item.attention
+      if(item.attention ) {
         toggleTip(obj, '已关注')
       }else{
         toggleTip(obj, '已取消关注')
@@ -49,46 +49,7 @@ export const toggleAttention =(obj, list, index)=>{
     toggleTip(obj, error)
   })
 }
-export const toggleCollectionNotIndex =(obj, fileItem)=>{
-  let id = fileItem.id
-  let collect = fileItem.collection ? 1 : 0
-  let formData=new FormData()
-  formData.append("id",id)
-  formData.append("collect",collect);
-  var url = window.baseUrl + "/collect"
-  axios.post(url, formData).then( (response) => {
-    if (response.data.success) {
-      fileItem.collection = !fileItem.collection
-      if(fileItem.collection ) {
-        toggleTip(obj, '已收藏')
-      }else{
-        toggleTip(obj, '已取消收藏')
-      }
-    }
-  }).catch(function (error) {
-    toggleTip(obj, error)
-  })
-}
-export const toggleAttentionNotIndex =(obj, fileItem)=>{
-  let id = fileItem.id
-  let attention = fileItem.attention ? 1 : 0
-  let formData=new FormData()
-  formData.append("id",id)
-  formData.append("attention",attention);
-  var url = window.baseUrl + "/attention"
-  axios.post(url, formData).then( (response) => {
-    if (response.data.success) {
-      fileItem.attention = !fileItem.attention
-      if(fileItem.attention ) {
-        toggleTip(obj, '已关注')
-      }else{
-        toggleTip(obj, '已取消关注')
-      }
-    }
-  }).catch(function (error) {
-    toggleTip(obj, error)
-  })
-}
+
 export const clickItem =(list, index, nowChecked)=>{
   list[index].itemChecked = !list[index].itemChecked
   if(list[index].itemChecked) {
@@ -117,8 +78,8 @@ export const unixChange = (timestamp)=>{
   var Y = date.getFullYear() + '-';
   var M = (date.getMonth()+1 < 10 ? '0' + (date.getMonth()+1) : date.getMonth()+1) + '-';
   var D = (date.getDate() < 10 ? '0' + date.getDate() : date.getDate()) + ' ';
-  var h = date.getHours() + ':';
-  var m = date.getMinutes();
+  var h = (date.getHours() < 10 ? '0'+ date.getHours(): date.getHours()) + ':';
+  var m = (date.getMinutes() < 10 ? '0'+ date.getMinutes(): date.getMinutes());
   return Y+M+D+h+m;
 }
 export const getFileSize = (size)=> {

@@ -41,10 +41,13 @@
         </svg>
         {{item.name}}
       </p>
-      <span slot="reference" v-show="isDefineFile" class="defBtn" @click="defineFile">归档于</span>
+      <span slot="reference" v-show="isDefineFile" class="defBtn" @click="defineFile">
+        <svg class="icon" aria-hidden="true"><use xlink:href="#icon-define"></use></svg>归档于</span>
     </el-popover>
-    <span v-show="isMerge" class="mergeBtn" @click="mergeImages">合并图片</span>
-    <span v-show="isAlbum" class="albumBtn" @click="albumImages">合成影集</span>
+    <span v-show="isMerge" class="mergeBtn" @click="mergeImages">
+      <svg class="icon" aria-hidden="true"><use xlink:href="#icon-merge"></use></svg>合并图片</span>
+    <span v-show="isAlbum" class="albumBtn" @click="albumImages">
+      <svg class="icon" aria-hidden="true"><use xlink:href="#icon-album"></use></svg>合成影集</span>
     <!-- 新建自定义归档-->
     <div v-show="createDefCatalog" class="newDef">
       <svg class="icon" aria-hidden="true">
@@ -251,7 +254,7 @@
     left: 200px;
   }
   .albumBtn{
-    left: 300px;
+    left: 320px;
   }
   .file_nav_intel {
     color: cornflowerblue;
@@ -330,7 +333,7 @@
   .defBtn {
     position: absolute;
     top: 55px;
-    left: 400px;
+    left: 440px;
     padding: 5px 10px;
     border: 1px solid #efefef;
     border-radius: 5px;
@@ -342,7 +345,7 @@
   .newDef {
     position: fixed;
     top: 160px;
-    left: 710px;
+    left: 770px;
     padding: 5px 10px;
     color: cornflowerblue;
   }
