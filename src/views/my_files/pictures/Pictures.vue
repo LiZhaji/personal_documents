@@ -3,10 +3,10 @@
     <FileOperation></FileOperation>
     <div class="file_nav">
       <span >全部图片</span>
-      <span v-show="isMerge" class="mergeBtn" @click="mergeImages">
-        <svg class="icon" aria-hidden="true"><use xlink:href="#icon-merge"></use></svg>合并图片</span>
-      <span v-show="isAlbum" class="albumBtn" @click="albumImages">
-        <svg class="icon" aria-hidden="true"><use xlink:href="#icon-album"></use></svg>合成影集</span>
+<!--      <span v-show="isMerge" class="mergeBtn" @click="mergeImages">-->
+<!--        <svg class="icon" aria-hidden="true"><use xlink:href="#icon-merge"></use></svg>合并图片</span>-->
+<!--      <span v-show="isAlbum" class="albumBtn" @click="albumImages">-->
+<!--        <svg class="icon" aria-hidden="true"><use xlink:href="#icon-album"></use></svg>合成影集</span>-->
       <el-popover
         popper-class="order_picker"
         placement="top"
@@ -126,9 +126,7 @@
     mounted() {
       // 获取所有图片,默认排列
       this.fetchListDefault()
-      window.EE.on('fetchImages', () => {
-        this.fetchList()
-      })
+      window.EE.on('fetchListDefault', () => {this.fetchListDefault()})
     },
     methods: {
       mergeImages(){

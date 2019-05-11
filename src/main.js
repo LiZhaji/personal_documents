@@ -15,8 +15,8 @@ Vue.config.productionTip = false
 Vue.use(ElementUI)
 
 window.EE = ee()
-// window.baseUrl = 'http://192.168.0.133:8080'
-window.baseUrl = 'http://996cpq.natappfree.cc'
+window.baseUrl = 'http://192.168.0.133:8080'
+// window.baseUrl = 'http://996cpq.natappfree.cc'
 // window.baseUrl = 'http://10.30.38.233:8080'
 // window.baseUrl = 'http://172.20.10.2:8080'
 window.mergeUrl = '/imgmerge'

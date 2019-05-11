@@ -170,10 +170,13 @@
       },
       mergeDocus(){
         let urls = []
+        console.log(this.checkedFiles)
         this.checkedFiles.forEach(el=>{
-          if (el.catalog != 1) return
+          if (el.category != 1) return
           urls.push(el.url)
         })
+        console.log(urls)
+
         if (urls.length <= 1){
           inputIsEmpty(this, '请至少选择2个文档')
           return
@@ -191,7 +194,7 @@
       mergeImages(){
         let urls = []
         this.checkedFiles.forEach(el=>{
-          if (el.catalog != 2) return
+          if (el.category != 2) return
           urls.push(el.url)
         })
         if (urls.length <= 1){
@@ -210,7 +213,7 @@
         let urls = []
         toggleTip(this, '过滤图片中')
         this.checkedFiles.forEach(el=>{
-          if (el.catalog != 2) return
+          if (el.category != 2) return
           urls.push(el.url)
         })
         if (urls.length <= 1){
@@ -503,7 +506,6 @@
     margin: 10px;
     position: relative;
     text-align: center;
-    overflow: hidden;
     cursor: pointer;
   }
   .six_info_outer .videos>.videos_item>.img_outer>img{

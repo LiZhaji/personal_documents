@@ -46,7 +46,7 @@
           <span v-if="fives.docs.length > 0" class="merge_btn_doc" @click="mergeDocus">
             <svg class="icon" aria-hidden="true"><use xlink:href="#icon-merge_doc_white"></use></svg>合并文档 </span>
           <div class="docs_item" v-for="item in fives.docs" @click.stop="itemCheck(item)" :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
-            <span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span>
+            <span v-show="item.itemChecked" class="ic.videos>.videos_itemonfont icon-checked_circle"></span>
             <svg class="icon" aria-hidden="true"><use :xlink:href=fileIconsOrOthers(item.id)></use></svg>
             <span @click="openFile(item)" v-html="item.name"></span>
           </div>
@@ -158,7 +158,7 @@
       mergeDocus(){
         let urls = []
         this.checkedFiles.forEach(el=>{
-          if (el.catalog != 1) return
+          if (el.category != 1) return
           urls.push(el.url)
         })
         if (urls.length <= 1){
@@ -178,7 +178,7 @@
       mergeImages(){
         let urls = []
         this.checkedFiles.forEach(el=>{
-          if (el.catalog != 2) return
+          if (el.category != 2) return
           urls.push(el.url)
         })
         console.log(urls,888)
@@ -198,7 +198,7 @@
         let urls = []
         toggleTip(this, '过滤图片中')
         this.checkedFiles.forEach(el=>{
-          if (el.catalog != 2) return
+          if (el.category != 2) return
           urls.push(el.url)
         })
         if (urls.length <= 1){
@@ -496,7 +496,6 @@
     margin: 10px;
     position: relative;
     text-align: center;
-    overflow: hidden;
     cursor: pointer;
   }
   .six_info_outer .videos>.videos_item>.img_outer>img{

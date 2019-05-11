@@ -49,7 +49,7 @@
   export default {
     data() {
       return {
-        isMyFile: false
+        isMyFile: true
       }
     },
     methods:{

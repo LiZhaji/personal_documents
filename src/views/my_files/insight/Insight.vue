@@ -126,9 +126,20 @@
       ...mapState(['file_icons'])
     },
     methods:{
+      addFileIcon(){
+        const spans = [...document.querySelectorAll(".el-tree-node__label")]
+        console.log(spans)
+        spans.forEach(el=>{
+          const oldText = el.innerHtml
+          console.log(oldText,1111)
+          el.innerHtml = '<svg class="icon" aria-hidden="true"> <use xlink:href="#icon-aFile"></use> </svg>' + oldText
+
+        })
+      },
       fetchIntelList(){
         fetchList('/labeltree').then(data=>{
           this.getNode(this.catalog, data)
+          this.addFileIcon()
         })
       },
       getNode(parent, nodes){
@@ -172,7 +183,6 @@
             this.fives.videos = data.VIDEO
             this.fives.audios = data.AUDIO
             this.fives.others = data.OTHER
-          console.log(this.fives)
         })
       },
       getPicUrl(url) {

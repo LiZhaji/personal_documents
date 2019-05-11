@@ -480,6 +480,8 @@
         this.isCatalogTree = true
       },
       cancelUpFile() {
+        this.curFile = {name: '点击选择', tag: ''}
+        this.fileLocation = 1
         this.$store.commit('toggleUpFile')
         this.isCatalogTree = false
       },
@@ -517,6 +519,8 @@
         // 3.提交到后台，成功后显示消息
         uploadOrUpdate('/upload', formData).then(data => {
           if (data.success) {
+            this.curFile = {name: '点击选择', tag: ''}
+            this.fileLocation = 1
             toggleTip(this, '上传成功')
             // 执行/发布一个事件用来自动更新列表
             switch (this.curType) {
@@ -524,7 +528,9 @@
                 window.EE.emit('fetchDocuments');
                 break;
               case "image":
-                window.EE.emit('fetchImages');
+                window.EE.emit('fetchListDefault');
+                window.EE.emit('timeLine');
+                window.EE.emit('intelOrder');
                 break;
               case "video":
                 window.EE.emit('fetchVideos');
@@ -690,7 +696,7 @@
   /*邮件联系人目录树*/
   .contacts_tree {
     position: absolute;
-    width: 200px;
+    width: 265px;
     min-height: 50px;
     top: 50%;
     left: 40%;
@@ -746,15 +752,19 @@
   }
 
   .mail_box > .content > .mail_title > span,
-  .mail_box > .content > .mail_contact > span,
+  .mail_box > .content > .mail_contact > span:first-child,
   .mail_box > .content > .mail_words > span,
-  .mail_box > .content > .checked_files > span {
+  .mail_box > .content > .checked_files > span:first-child {
     color: cornflowerblue;
     display: inline-block;
     padding: 10px;
     width: 70px;
   }
+  .mail_box span.icon-add{
+    color: cornflowerblue;
+    padding: 10px;
 
+  }
   .content button {
     padding: 5px 20px;
     outline: none;

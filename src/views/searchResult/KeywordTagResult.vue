@@ -172,7 +172,7 @@
       mergeDocus(){
         let urls = []
         this.checkedFiles.forEach(el=>{
-          if (el.catalog != 1) return
+          if (el.category != 1) return
           urls.push(el.url)
         })
         if (urls.length <= 1){
@@ -192,7 +192,7 @@
       mergeImages(){
         let urls = []
         this.checkedFiles.forEach(el=>{
-          if (el.catalog != 2) return
+          if (el.category != 2) return
           urls.push(el.url)
         })
         if (urls.length <= 1){
@@ -209,9 +209,8 @@
       },
       albumImages(){
         let urls = []
-        toggleTip(this, '过滤图片中')
         this.checkedFiles.forEach(el=>{
-          if (el.catalog != 2) return
+          if (el.category != 2) return
           urls.push(el.url)
         })
         if (urls.length <= 1){
@@ -222,7 +221,12 @@
         formData.append('urls', urls)
         uploadOrUpdate('/imgalbum', formData).then(data=>{
           if (data.success){
-            toggleTip(this, '合成影集成功，已保存至“处理文件”中')
+            toggleTip(this, '合成影集',data.file,'成功，已保存至“处理文件”中')
+            const routerData = this.$router.resolve({
+              path: '/videoInfo',
+              query: {id: data.index}
+            })
+            window.open(routerData.href, '_blank')
           }
         })
       },
@@ -432,8 +436,8 @@
 
   .newDef {
     position: fixed;
-    top: 30px;
-    left: 100px;
+    top: 135px;
+    left: 390px;
     padding: 5px 10px;
     color: cornflowerblue;
   }
@@ -505,7 +509,6 @@
     margin: 10px;
     position: relative;
     text-align: center;
-    overflow: hidden;
     cursor: pointer;
   }
   .six_info_outer .videos>.videos_item>.img_outer>img{

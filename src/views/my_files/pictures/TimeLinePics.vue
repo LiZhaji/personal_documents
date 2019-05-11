@@ -32,29 +32,29 @@
       <div class="the_time_line"></div>
     </div>
     <!-- 自定义归档目录 -->
-    <el-popover placement="top" width="160" popper-class="define_catalog_outer">
-      <p class="def_catalog" v-show="chooseDefineCatalog" v-for="item in defineFiles" @click="defCatalogOk(item.id)">
-        <svg v-show="item.id >= 0" class="icon" aria-hidden="true">
-          <use xlink:href="#icon-aFile"></use>
-        </svg>
-        {{item.name}}
-      </p>
-      <span slot="reference" v-show="isDefineFile" class="defBtn" @click="defineFile">
-        <svg class="icon" aria-hidden="true"><use xlink:href="#icon-define"></use></svg>归档于</span>
-    </el-popover>
-    <span v-show="isMerge" class="mergeBtn" @click="mergeImages">
-      <svg class="icon" aria-hidden="true"><use xlink:href="#icon-merge"></use></svg>合并图片</span>
-    <span v-show="isAlbum" class="albumBtn" @click="albumImages">
-      <svg class="icon" aria-hidden="true"><use xlink:href="#icon-album"></use></svg>合成影集</span>
+<!--    <el-popover placement="top" width="160" popper-class="define_catalog_outer">-->
+<!--      <p class="def_catalog" v-show="chooseDefineCatalog" v-for="item in defineFiles" @click="defCatalogOk(item.id)">-->
+<!--        <svg v-show="item.id >= 0" class="icon" aria-hidden="true">-->
+<!--          <use xlink:href="#icon-aFile"></use>-->
+<!--        </svg>-->
+<!--        {{item.name}}-->
+<!--      </p>-->
+<!--      <span slot="reference" v-show="isDefineFile" class="defBtn" @click="defineFile">-->
+<!--        <svg class="icon" aria-hidden="true"><use xlink:href="#icon-define"></use></svg>归档于</span>-->
+<!--    </el-popover>-->
+<!--    <span v-show="isMerge" class="mergeBtn" @click="mergeImages">-->
+<!--      <svg class="icon" aria-hidden="true"><use xlink:href="#icon-merge"></use></svg>合并图片</span>-->
+<!--    <span v-show="isAlbum" class="albumBtn" @click="albumImages">-->
+<!--      <svg class="icon" aria-hidden="true"><use xlink:href="#icon-album"></use></svg>合成影集</span>-->
     <!-- 新建自定义归档-->
-    <div v-show="createDefCatalog" class="newDef">
-      <svg class="icon" aria-hidden="true">
-        <use xlink:href="#icon-aFile"></use>
-      </svg>
-      <input type="text" v-model="defCatName" placeholder="请输入文件名">
-      <span class="iconfont icon-checked_circle" @click="newDefCatOk"></span>
-      <span class="iconfont icon-close" @click="cancelNewDefCat"></span>
-    </div>
+<!--    <div v-show="createDefCatalog" class="newDef">-->
+<!--      <svg class="icon" aria-hidden="true">-->
+<!--        <use xlink:href="#icon-aFile"></use>-->
+<!--      </svg>-->
+<!--      <input type="text" v-model="defCatName" placeholder="请输入文件名">-->
+<!--      <span class="iconfont icon-checked_circle" @click="newDefCatOk"></span>-->
+<!--      <span class="iconfont icon-close" @click="cancelNewDefCat"></span>-->
+<!--    </div>-->
   </div>
 </template>
 
@@ -87,6 +87,7 @@
     },
     mounted(){
       this.timeLine()
+      window.EE.on('timeLine', () => {this.timeLine()})
     },
     methods:{
       timeLine() {

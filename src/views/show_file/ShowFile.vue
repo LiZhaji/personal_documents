@@ -134,8 +134,13 @@
         formData.append('url', this.nowFile.url)
         uploadOrUpdate('/pdftopng', formData).then(data=>{
           if (data.success){
-            toggleTip(this, '转换成功，已保存至“处理文件”中')
+            toggleTip(this, '转换',data.file,'成功，已保存至“处理文件”中')
             this.dialogVisible = false
+            const routeData = this.$router.resolve({
+              name: 'PicturesInfo',
+              query: {id: data.index}
+            });
+            window.open(routeData.href, '_blank');
           }
         }).catch(error=>{
           toggleTip(this, error)

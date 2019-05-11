@@ -47,14 +47,14 @@
           <div class="title">音频 <span class="no_result" v-show="!fives.audios">暂无音频搜索结果</span></div>
           <p class="audios_item" v-for="item in fives.audios" @click.stop="itemCheck(item)" :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
             <span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span>
-            <svg class="icon" aria-hidden="true"><use xlink:href="#icon-mp3"></use></svg>
+            <svg class="icon" aria-hidden="true"><use xlink:href="#icon-file_mp3"></use></svg>
             <span v-html="item.name" @click="openFile(item)"></span></p>
         </div>
         <div class="others">
           <div class="title">其他 <span class="no_result" v-show="!fives.others">暂无其他</span></div>
           <p class="others_item" v-for="item in fives.others" @click.stop="itemCheck(item)" :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
             <span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span>
-            <svg class="icon" aria-hidden="true"><use xlink:href="#icon-others"></use></svg>
+            <svg class="icon" aria-hidden="true"><use :xlink:href=fileIconsOrOthers(item.id)></use></svg>
             <span v-html="item.name" @click="openFile(item)"></span></p>
         </div>
       </div>
@@ -253,7 +253,7 @@
         }
       },
       fileIconsOrOthers(id){
-        const nowFile = this.fives.docs.find(el=>{ return el.id == id})
+        const nowFile = this.fives.docs.find(el=>{ return el.id == id}) || this.fives.others.find(el=>{ return el.id == id})
         const ext = nowFile.name.split('.').pop()
         return "#icon-file_" + (this.file_icons.indexOf(ext) < 0 ? 'others' : ext)
       },

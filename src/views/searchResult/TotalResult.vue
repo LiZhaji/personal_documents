@@ -277,9 +277,11 @@
       mergeDocus(){
         let urls = []
         this.checkedFiles.forEach(el=>{
-          if (el.catalog != 1) return
+          if (el.category != 1) return
           urls.push(el.url)
         })
+        console.log(urls)
+
         if (urls.length <= 1){
           inputIsEmpty(this, '请至少选择2个文档')
           return
@@ -288,7 +290,7 @@
         formData.append('urls', urls)
         uploadOrUpdate('/pdfmerge', formData).then(data=>{
           if (data.success){
-            toggleTip(this, '合并成功，已保存至“处理”文件夹中')
+            toggleTip(this, '合并成功，已保存至“处理文件”中')
           }
         }).catch(error=>{
           toggleTip(this, error)
@@ -297,7 +299,7 @@
       mergeImages(){
         let urls = []
         this.checkedFiles.forEach(el=>{
-          if (el.catalog != 2) return
+          if (el.category != 2) return
           urls.push(el.url)
         })
         if (urls.length <= 1){
@@ -314,9 +316,8 @@
       },
       albumImages(){
         let urls = []
-        toggleTip(this, '过滤图片中')
         this.checkedFiles.forEach(el=>{
-          if (el.catalog != 2) return
+          if (el.category != 2) return
           urls.push(el.url)
         })
         if (urls.length <= 1){
@@ -415,9 +416,9 @@
           for (let key in data) {
             data[key].forEach(el => {
               el.itemChecked = false
-              // if (el.info) {
-              //   el.info = JSON.parse(el.info)
-              // }
+              if (el.info) {
+                el.info = JSON.parse(el.info)
+              }
               if (el.keyword) {
                 el.keyword = el.keyword.split('|')
               }
@@ -448,7 +449,7 @@
         })
       },
       getPicUrl(url) {
-        var baseUrl = window.baseUrl + "/testpreview/"
+        const baseUrl = window.baseUrl + "/testpreview/"
         return baseUrl + url
       },
       itemCheck(item) {
@@ -459,7 +460,7 @@
         if (item.itemChecked && index < 0) {
           this.checkedIds.push(item.id)
           this.checkedCategory.push(item.category)
-          this.checkedFiles.push({id: item.id, name: item.name,url: item.url})
+          this.checkedFiles.push({id: item.id, name: item.name,url: item.url,category: item.category})
         } else {
           this.checkedIds.splice(index, 1)
           this.checkedCategory.splice(index, 1)
@@ -686,7 +687,6 @@
     margin: 10px;
     position: relative;
     text-align: center;
-    overflow: hidden;
     cursor: pointer;
   }
 

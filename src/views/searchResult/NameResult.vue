@@ -494,7 +494,6 @@
     margin: 10px;
     position: relative;
     text-align: center;
-    overflow: hidden;
     cursor: pointer;
   }
   .six_info_outer .videos>.videos_item>.img_outer>img{

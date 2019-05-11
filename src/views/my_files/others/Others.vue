@@ -22,11 +22,11 @@
           <svg @click="changeImportance(index)" class="icon" aria-hidden="true"><use :xlink:href="`#icon-importance${item.scale}`"></use></svg>
         </td>
         <td><div class="file_name" @click.stop="showFile(item)">
-          <svg class="icon aFile" aria-hidden="true"><use :xlink:href=fileIconsOrOthers(index)></use></svg>
+          <svg class="icon" aria-hidden="true"><use :xlink:href=fileIconsOrOthers(item.id)></use></svg>
           <span >{{item.name}}</span>
         </div></td>
-        <td>{{item.time}}</td>
-        <td>{{item.size}}</td>
+        <td>{{unixChange(item.serverTime)}}</td>
+        <td>{{getFileSize(item.size)}}</td>
         <td class="star"><svg class="icon" aria-hidden="true" @click.stop="toggleCollection(item)">
           <use v-show="!item.collection" xlink:href="#icon-collection"></use>
           <use v-show="item.collection" xlink:href="#icon-collection_fill"></use>
@@ -44,7 +44,7 @@
   import { mapState } from "vuex"
   import FileOperation from "../../../components/FileOperation"
   import JSZIP from "jszip"
-  import { toggleTip,toggleCollection,toggleAttention,fetchList } from "../../../publics/public"
+  import { toggleTip,toggleCollection,toggleAttention,fetchList,unixChange,getFileSize } from "../../../publics/public"
   export default {
     components:{
       FileOperation: FileOperation
@@ -72,7 +72,18 @@
         })
       },
       fetchList(){
-        fetchList('/others').then(data=>{
+        fetchList('/otherinfo').then(data=>{
+          data.forEach(el=>{
+            el.itemChecked = false
+            if (el.keyword) {
+              el.keyword = el.keyword.split('|')
+            }
+            if (el.tag) {
+              el.tag = el.tag.split('|')
+            }else {
+              el.tag = []
+            }
+          })
           this.others = data
         }).catch(error=>{
           toggleTip(this,error)
@@ -81,10 +92,10 @@
       getUrl(url){
         return window.baseUrl + '/testpreview/' + url
       },
-      fileIconsOrOthers(index){
-        let temp = this.file_icons.indexOf(this.others[index].type) < 0 ? 'others' : this.others[index].type
-        return "#icon-file_" + temp
-        // return "#icon-file_" + this.file_icons.indexOf(this.others[index].type) < 0 ? 'others' : this.others[index].type
+      fileIconsOrOthers(id){
+        const nowFile = this.others.find(el=>{ return el.id == id})
+        const ext = nowFile.name.split('.').pop()
+        return "#icon-file_" + (this.file_icons.indexOf(ext) < 0 ? 'others' : ext)
       },
       clickItem(item){
         item.itemChecked = !item.itemChecked
@@ -104,6 +115,12 @@
       toggleAttention(item){
         toggleAttention(this, item)
       },
+      unixChange(timeStamp){
+        return unixChange(timeStamp)
+      },
+      getFileSize(size){
+        return getFileSize(size)
+      }
 
     }
   }
