@@ -37,6 +37,7 @@ import NameResult from "../views/searchResult/NameResult";
 import ContentResult from "../views/searchResult/ContentResult";
 import HistoryOperations from "../views/history_operations/HistoryOperations";
 import DefineFiles from "../views/my_files/define_files/DefineFiles"
+import LocalFiles from "../views/my_files/localFiles/LocalFiles";
 
 export default new Router({
   routes: [
@@ -142,6 +143,9 @@ export default new Router({
         },{
           path: '/main/defineFiles',
           component:DefineFiles
+        },{
+          path: '/main/localFiles',
+          component: LocalFiles
         }
       ]
     },{

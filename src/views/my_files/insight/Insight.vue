@@ -430,7 +430,7 @@
   .pics_item:hover .checkbox,
   .videos_item:hover .checkbox{
     display: block;
-  }
+  }defaultProps
   /*自定义归档*/
   .def_catalog {
     padding: 5px;

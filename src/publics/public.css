@@ -172,7 +172,8 @@ table tbody tr:hover{
   color: #616161 !important;
 }
 /*卡片显示*/
-.six_info_outer .docs_item>svg{
+.six_info_outer .docs_item>svg,
+.six_info_outer .others_item>svg{
   font-size: 20px;
   margin-left: 10px;
 }
