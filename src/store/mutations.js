@@ -38,6 +38,9 @@ export default {
     console.log(state.checkedFiles,888888)
   },
   setCheckedFilesFull(state){
+    state.checkedFiles.forEach(el=>{
+      el.itemChecked = false
+    })
     state.checkedFiles = []
   }
 }

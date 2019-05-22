@@ -72,7 +72,6 @@
       window.EE.on('fetchDocuments', ()=>this.fetchList())
     },
     methods:{
-
       fetchList() {
         fetchList('/docuinfo').then(data=>{
           data = data || []

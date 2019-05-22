@@ -9,7 +9,7 @@
     <div class="six_info_outer">
       <div class="">
         <div class="pics_outer">
-          <div class="title">图片 <span class="no_result" v-show="!fives.pics">暂无图片</span></div>
+          <div class="title">图片 <span class="no_result" v-show="!fives.pics || !fives.pics.length">暂无图片</span></div>
           <div class="pics">
             <div class="pics_item" v-for="(item, index) in fives.pics"
                  :key="index" :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
@@ -34,7 +34,7 @@
           </div>
         </div>
         <div class="docs_outer">
-          <div class="title"> 文档 <span class="no_result" v-show="!fives.docs">暂无文档</span></div>
+          <div class="title"> 文档 <span class="no_result" v-show="!fives.docs.length">暂无文档</span></div>
           <div class="docs_item" v-for="item in fives.docs" @click.stop="itemCheck(item)"
                :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
             <span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span>
@@ -45,7 +45,7 @@
           </div>
         </div>
         <div class="audios_outer">
-          <div class="title">音频 <span class="no_result" v-show="!fives.audios">暂无音频</span></div>
+          <div class="title">音频 <span class="no_result" v-show="!fives.audios.length">暂无音频</span></div>
           <div v-for="item in fives.audios" @click.stop="itemCheck(item)"
                :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
             <span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span>
@@ -56,7 +56,7 @@
           </div>
         </div>
         <div class="others">
-          <div class="title">其他 <span class="no_result" v-show="!fives.others">暂无其他</span></div>
+          <div class="title">其他 <span class="no_result" v-show="!fives.others.length">暂无其他</span></div>
           <p v-for="item in fives.others" @click.stop="itemCheck(item)"
              :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
             <span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span>
@@ -121,25 +121,35 @@
     },
     mounted(){
       this.fetchIntelList()
+      console.log('insight mounted')
+    },
+    destroyed(){
+      console.log('insight destroy')
+
     },
     computed:{
       ...mapState(['file_icons'])
     },
     methods:{
       addFileIcon(){
-        const spans = [...document.querySelectorAll(".el-tree-node__label")]
-        console.log(spans)
+        const spans = Array.from(document.querySelectorAll(".el-tree-node__label"))
+        console.log(spans,777)
         spans.forEach(el=>{
-          const oldText = el.innerHtml
+          const oldText = el.innerHTML
           console.log(oldText,1111)
-          el.innerHtml = '<svg class="icon" aria-hidden="true"> <use xlink:href="#icon-aFile"></use> </svg>' + oldText
+          el.innerHTML = `<svg class="icon" style="margin-right: 10px;" aria-hidden="true"> <use xlink:href="#icon-aFile"></use> </svg>` + oldText
 
         })
       },
       fetchIntelList(){
         fetchList('/labeltree').then(data=>{
           this.getNode(this.catalog, data)
-          this.addFileIcon()
+          if (this.catalog.length > 0){
+            this.$nextTick(()=>{
+              this.addFileIcon()
+            })
+
+          }
         })
       },
       getNode(parent, nodes){
@@ -169,20 +179,20 @@
                   el.info = JSON.parse(el.info)
                 }
                 if (el.keyword) {
-                  el.keyword = el.keyword.split(' ')
+                  el.keyword = el.keyword.split('|')
                 }
                 if (el.tag) {
-                  el.tag = el.tag.split(' ')
+                  el.tag = el.tag.split('|')
                 } else {
                   el.tag = []
                 }
               })
             }
-            this.fives.docs = data.DOCUMENT
-            this.fives.pics = data.IMAGE
-            this.fives.videos = data.VIDEO
-            this.fives.audios = data.AUDIO
-            this.fives.others = data.OTHER
+            this.fives.docs = data.DOCUMENT || []
+            this.fives.pics = data.IMAGE || []
+            this.fives.videos = data.VIDEO || []
+            this.fives.audios = data.AUDIO || []
+            this.fives.others = data.OTHER || []
         })
       },
       getPicUrl(url) {

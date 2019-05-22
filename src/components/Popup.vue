@@ -324,7 +324,7 @@
           } else {
             toggleTip(this, '发送失败，请检查')
             this.$store.commit('closeMail')
-            this.$store.commit('setCheckedFilesFull')
+            // this.$store.commit('setCheckedFilesFull')
           }
         }).catch(error => {
           toggleTip(this, error)
@@ -579,6 +579,8 @@
           formData.append('name', this.newFolderUpload.name)
           uploadOrUpdate('/createcatalog', formData).then(data => {
             this.$store.commit('toggleNewFolder')
+            window.EE.emit('fetchAllFiles')
+
           })
         }
       },
@@ -854,7 +856,7 @@
   .up_file_box, .new_task_box, .new_folder_box {
     width: 500px;
     height: auto !important;
-    position: fixed;
+    position: fixed !important;
     left: 50%;
     top: 50%;
     margin-left: -200px;

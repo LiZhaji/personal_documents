@@ -25,7 +25,8 @@
         <p><img class="wordCloud" :src="nowFile.info.wordCloudUrl" alt="词云"></p>
       </div>
       <div class="tag_pic_info"><span>标签</span>
-        <span class="tag" v-for="(item,index) in nowFile.tag" :key="index" v-html="item ">
+        <span class="tag" v-for="(item,index) in nowFile.tag" :key="index" >
+          <span v-html="item"></span>
           <img @click="delOneRemark(item.id)" src="../../assets/img/close.png" alt="删除" title="点击删除">
         </span>
         <div class="input_outer">
@@ -35,7 +36,8 @@
         </div>
       </div>
       <div class="remark_pic_info"><span>评论</span>
-        <span class="remark" v-for="(item,index) in nowFile.comments" :key="index" v-html="item.content">
+        <span class="remark" v-for="(item,index) in nowFile.comments" :key="index">
+          <span  v-html="item.content"></span>
           <img @click="delOneRemark(item.id)" src="../../assets/img/close.png" alt="删除" title="点击删除">
         </span>
         <div class="input_outer">

@@ -2,7 +2,7 @@
   <div class="task_list">
     <OperationBG :navContent="navContent"></OperationBG>
     <div class="block timeSelect">
-      <span class="demonstration"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-importance1"></use></svg></span>
+      <span class="demonstration"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-importance2"></use></svg></span>
       <el-date-picker
         v-model="rangeTime"
         type="month"

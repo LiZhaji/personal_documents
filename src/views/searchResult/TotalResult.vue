@@ -244,7 +244,8 @@
       ...mapState(['file_icons','searchKey','searchWay'])
     },
     mounted() {
-     this.createEcharts()
+      // alert('totleResile')
+      this.createEcharts()
       this.fetchNowTelFile()
       window.aaa = this
     },
@@ -328,10 +329,33 @@
         formData.append('urls', urls)
         uploadOrUpdate('/imgalbum', formData).then(data=>{
           if (data.success){
-            toggleTip(this, '合成影集成功，已保存至“处理文件”中')
+            toggleTip(this, '合成影集',data.file,'成功，已保存至“处理文件”中')
+            const routerData = this.$router.resolve({
+              path: '/videoInfo',
+              query: {id: data.index}
+            })
+            window.open(routerData.href, '_blank')
           }
         })
       },
+      // albumImages(){
+      //   let urls = []
+      //   this.checkedFiles.forEach(el=>{
+      //     if (el.category != 2) return
+      //     urls.push(el.url)
+      //   })
+      //   if (urls.length <= 1){
+      //     inputIsEmpty(this, '请至少选择2张图片')
+      //     return
+      //   }
+      //   let formData = new FormData()
+      //   formData.append('urls', urls)
+      //   uploadOrUpdate('/imgalbum', formData).then(data=>{
+      //     if (data.success){
+      //       toggleTip(this, '合成影集成功，已保存至“处理文件”中')
+      //     }
+      //   })
+      // },
       openFolder(flag, id, name) {
         // flag为0表示返回，为1表示继续
         const childUrl = '/catalogcontent' + '?id=' + id
@@ -513,7 +537,7 @@
         })
         this.createDefCatalog = false
         this.chooseDefineCatalog = false
-        this.isDefineFile = false
+        // this.isDefineFile = false
       },
       cancelNewDefCat() {
         this.defCatName = ''
@@ -582,9 +606,9 @@
    }
 
   .newDef {
-    position: fixed;
-    top: 30px;
-    left: 100px;
+    position: absolute;
+    left: 155px;
+    top: 28px;
     padding: 5px 10px;
     color: cornflowerblue;
   }
@@ -625,6 +649,7 @@
     height: 100px;
     text-align: center;
     cursor: pointer;
+    font-size: 14px;
   }
 
   .six_info_outer .folders_outer .folder_item > svg {

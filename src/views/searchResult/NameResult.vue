@@ -153,10 +153,13 @@
       },
       mergeDocus(){
         let urls = []
+        console.log(this.checkedFiles)
         this.checkedFiles.forEach(el=>{
-          if (el.catalog != 1) return
+          if (el.category != 1) return
           urls.push(el.url)
         })
+        console.log(urls)
+
         if (urls.length <= 1){
           inputIsEmpty(this, '请至少选择2个文档')
           return
@@ -165,7 +168,7 @@
         formData.append('urls', urls)
         uploadOrUpdate('/pdfmerge', formData).then(data=>{
           if (data.success){
-            toggleTip(this, '合并成功，已保存至“处理”文件夹中')
+            toggleTip(this, '合并成功，已保存至“处理文件”中')
           }
         }).catch(error=>{
           toggleTip(this, error)
@@ -299,10 +302,12 @@
           this.checkedIds.push(item.id)
           this.checkedCategory.push(item.category)
           this.mailFiles.push({id: item.id, name: item.name})
+          this.checkedFiles.push(item)
         }else{
           this.checkedIds.splice(index, 1)
           this.checkedCategory.splice(index, 1)
           this.mailFiles.splice(index, 1)
+          this.checkedFiles.splice(index, 1)
         }
         if (this.checkedIds.length != 0){
           this.isDefineFile = true
@@ -414,9 +419,9 @@
   }
 
   .newDef {
-    position: fixed;
-    top: 30px;
-    left: 100px;
+    position: absolute;
+    top: 27px;
+    left: 145px;
     padding: 5px 10px;
     color: cornflowerblue;
   }

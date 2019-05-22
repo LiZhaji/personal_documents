@@ -4,9 +4,9 @@
     <div class="main_right">
       <Headerbar></Headerbar>
       <div class="content" >
-        <keep-alive>
+<!--        <keep-alive>-->
           <router-view v-if="isRouterAlive"/>
-        </keep-alive>
+<!--        </keep-alive>-->
       </div>
     </div>
     <Popup></Popup>
@@ -17,6 +17,8 @@
   import Siderbar from '../components/Sidebar'
   import Headerbar from '../components/Headerbar'
   import Popup from '../components/Popup'
+  import { mapState } from  "vuex"
+
   export default {
     name: 'staff',
     components:{
@@ -28,6 +30,9 @@
       return{
         isRouterAlive:true
       }
+    },
+    computed:{
+      ...mapState(['mergeOk'])
     },
     provide() {
       return {
