@@ -9,7 +9,7 @@
         <router-link to="/main/myCollections"><li :class="{chosen:'/main/myCollections' === $route.path}"><span class="iconfont icon-my-collections"></span><span class="activity_name">我的收藏</span></li></router-link>
         <router-link to="/main/myLikes"><li :class="{chosen:'/main/myLikes' === $route.path}"><span class="iconfont icon-my-follows"></span><span class="activity_name">我的关注</span></li></router-link>
         <router-link to="/main/mail"><li :class="{chosen:'/main/mail' === $route.path}"><span class="iconfont icon-mail"></span><span class="activity_name">邮箱管理</span></li></router-link>
-        <router-link to="/main/feedback"><li :class="{chosen:'/feedback' === $route.path}"><span class="iconfont icon-feedback"></span><span class="activity_name">意见反馈</span></li></router-link>
+        <router-link to="/main/feedback"><li :class="{chosen:'/main/feedback' === $route.path}"><span class="iconfont icon-feedback"></span><span class="activity_name">意见反馈</span></li></router-link>
         <router-link to="/main/empty"><li :class="{chosen:'/main/empty' === $route.path}"><span class="iconfont icon-empty"></span><span class="activity_name">回收站</span></li></router-link>
         <router-link to="/main/setup"> <li :class="{chosen:$route.path==='/main/setup'  }"><span class="iconfont icon-setup"></span><span class="activity_name">设置</span></li></router-link>
       </ul>

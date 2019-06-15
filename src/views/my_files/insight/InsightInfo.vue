@@ -7,7 +7,7 @@
     <div class="six_info_outer">
       <div  class="bigger" :class="(fives.pics || fives.videos) ? 'float_left' : 'float_right'">
         <div class="pics_outer">
-          <div class="title">图片 <span class="no_result" v-show="!fives.pics">暂无图片搜索结果</span></div>
+          <div class="title">图片 <span class="no_result" v-show="!fives.pics">暂无图片结果</span></div>
           <div class="pics">
             <div class="pics_item" v-for="(item, index) in fives.pics"
                  :key="index" :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
@@ -20,7 +20,7 @@
           </div>
         </div>
         <div class="videos_outer">
-          <div class="title">视频 <span class="no_result" v-show="!fives.videos || !fives.videos.length">暂无视频搜索结果</span></div>
+          <div class="title">视频 <span class="no_result" v-show="!fives.videos || !fives.videos.length">暂无视频结果</span></div>
           <div class="videos">
             <div class="videos_item" v-for="(item, index) in fives.videos"  :key="index" :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
               <span class="checkbox iconfont icon-checked_circle" @click.stop="itemCheck(item)"></span>
@@ -37,14 +37,14 @@
           <div ref="fiveCount" class="count_box"></div>
         </div>
         <div class="docs_outer">
-          <div class="title">文档 <span class="no_result" v-show="!fives.docs">暂无文档搜索结果</span></div>
+          <div class="title">文档 <span class="no_result" v-show="!fives.docs">暂无文档结果</span></div>
           <p class="docs_item" v-for="item in fives.docs" @click.stop="itemCheck(item)" :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
             <span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span>
             <svg class="icon" aria-hidden="true"><use :xlink:href=fileIconsOrOthers(item.id)></use></svg>
             <span @click="openFile(item)" v-html="item.name"></span></p>
         </div>
         <div class="audios_outer">
-          <div class="title">音频 <span class="no_result" v-show="!fives.audios">暂无音频搜索结果</span></div>
+          <div class="title">音频 <span class="no_result" v-show="!fives.audios">暂无音频结果</span></div>
           <p class="audios_item" v-for="item in fives.audios" @click.stop="itemCheck(item)" :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
             <span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span>
             <svg class="icon" aria-hidden="true"><use xlink:href="#icon-file_mp3"></use></svg>

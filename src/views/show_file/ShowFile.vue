@@ -2,9 +2,9 @@
   <div class="show_file clearFix">
     <div class="file_nav">
       <span @click="backToAll">返回 </span>
-      <span v-show="fromSearch" @click="backToSearch">返回搜索页面 </span>
+<!--      <span v-show="fromSearch" @click="backToSearch">返回搜索页面 </span>-->
 <!--      <a href="javascript:POBrowser.openWindowModeless('edit/30','width=1200px;height=800px;');">在线编辑ss</a>-->
-      <span class="editFile" @click="editFile">在线编辑</span>
+      <span class="editFile" v-show="nowFile.name.split('.').pop() == 'docx' || nowFile.name.split('.').pop() == 'ppt'" @click="editFile">在线编辑</span>
       <span class="" v-show="nowFile.name.split('.').pop() == 'pdf'" @click="dialogVisible = true">拆分文档</span>
       <span class="" v-show="nowFile.name.split('.').pop() == 'pdf'" @click="pdfToPng">转图片</span>
     </div>
@@ -169,7 +169,8 @@
        window.POBrowser.openWindowModeless(this.editName,'width=1200px;height=800px;')
       },
       backToAll() {
-        this.$router.replace('/main/documents')
+        // this.$router.replace('/main/documents')
+        this.$router.go(-1)
       },
       getPdfUrl(url) {
         const pdfUrlTemp = url.split('.').slice(0, url.split('.').length - 1)

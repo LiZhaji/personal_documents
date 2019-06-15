@@ -224,7 +224,7 @@ var POBrowser = {
     return true
   },
   getRootPath: function() {
-    return "http://192.168.0.133:8080"
+    return "http://192.168.0.100:8080"
   },
   isInstalled: function() {
     return bPOIsInstalled
@@ -256,7 +256,7 @@ var POBrowser = {
     //   var index = pathName.indexOf(window.location.pathname);
     //   strURL = pathName.substr(0, index) + strURL
     // }
-    strURL="http://192.168.0.133:8080/"+strURL
+    strURL="http://192.168.0.100:8080/"+strURL
     jQuery.post(this.getRootPath() + "/poserver.zz", {
         Info: "PageOfficeLink",
         pageurl: strURL,
@@ -293,7 +293,7 @@ var POBrowser = {
     //   var index = pathName.indexOf(window.location.pathname);
     //   strURL = pathName.substr(0, index) + strURL
     // }
-    strURL="http://192.168.0.133:8080/"+strURL
+    strURL="http://192.168.0.100:8080/"+strURL
     if (strOptions[strOptions.length - 1] != ';') strOptions = strOptions + ";";
     jQuery.post(this.getRootPath() + "/poserver.zz", {
         Info: "PageOfficeLink",

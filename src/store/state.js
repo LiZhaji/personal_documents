@@ -1,6 +1,6 @@
 // 状态对象
 export default {
-  file_icons:['doc','docx','exe','zip','txt','pdf','ppt','xls','md','css','mp3','wav','avi','mp4','movie','jpg','png','gif'],
+  file_icons:['doc','docx','exe','zip','txt','pdf','ppt','xls','md','css','mp3','wav','avi','mp4','movie','jpg','png','gif', 'jpeg'],
   isUpFile: false,
   isNewTask: false,
   isNewFolder: false,

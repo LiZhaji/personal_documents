@@ -716,8 +716,8 @@
   }
 
   .six_info_outer .videos > .videos_item > .img_outer > img {
-    width: 200px;
-    height: 100px;
+    width: 180px;
+    height: 120px;
     display: inline-block;
   }
 

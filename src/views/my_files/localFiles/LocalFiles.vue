@@ -8,8 +8,8 @@
       <el-switch
         v-model="toBackEnd"
         active-text="内容分析"
-        active-value="false"
-        inactive-text="">
+        inactive-text=""
+        @change="submitFile">
       </el-switch>
       <input class="search-input" type="text" placeholder="文件名搜索" v-model="searchKey" @change="search">
     </header>
@@ -19,8 +19,8 @@
           placeholder="输入关键字进行过滤"
           v-model="filterText">
         </el-input>
-        <el-tree :data="isSearch ? backup : catalog" :props="defaultProps" class="filter-tree"
-                 default-expand-all
+        <el-tree :data="isSearch ? backup : catalog" :props="defaultProps" class="filter-tree" node-key="id"
+                 :default-expanded-keys="[-1]"
                  :filter-node-method="filterNode"
                  ref="tree2":highlight-current="T" @current-change="nodeChange"></el-tree>
       </div>
@@ -30,8 +30,8 @@
             <div class="title">图片 <span class="no_result" v-show="!fives.pics || !fives.pics.length">暂无图片</span></div>
             <span v-if="fives.pics.length > 0" class="mergeBtn" @click="mergeImages">
       <svg class="icon" aria-hidden="true"><use xlink:href="#icon-merge"></use></svg>合并图片</span>
-            <span v-if="fives.pics.length > 0" class="albumBtn" @click="albumImages">
-      <svg class="icon" aria-hidden="true"><use xlink:href="#icon-album_white"></use></svg>合成GIF</span>
+<!--            <span v-if="fives.pics.length > 0" class="albumBtn" @click="albumImages">-->
+<!--      <svg class="icon" aria-hidden="true"><use xlink:href="#icon-album_white"></use></svg>合成GIF</span>-->
             <div class="pics">
               <div class="pics_item" v-for="(item, index) in fives.pics"
                    :key="index" :class="item.itemChecked ? 'blockItemCheckedClass' : 'loo'">
@@ -70,7 +70,7 @@
           </div>
           <div class="audios_outer">
             <div class="title">音频 <span class="no_result" v-show="!fives.audios|| !fives.audios.length">暂无音频</span></div>
-            <div v-for="item in fives.audios" @click.stop="itemCheck(item)"
+            <div class="audios_item" v-for="item in fives.audios" @click.stop="itemCheck(item)"
                  :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
               <span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span>
               <svg class="icon" aria-hidden="true">
@@ -81,11 +81,11 @@
           </div>
           <div class="others">
             <div class="title">其他 <span class="no_result" v-show="!fives.others|| !fives.others.length">暂无其他</span></div>
-            <p class="others_item" v-for="item in fives.others" @click.stop="itemCheck(item)"
+            <div class="others_item" v-for="item in fives.others" @click.stop="itemCheck(item)"
                :class="item.itemChecked ? 'blockItemCheckedClass' : ''">
               <span v-show="item.itemChecked" class="iconfont icon-checked_circle"></span>
               <svg class="icon" aria-hidden="true"><use :xlink:href=fileIconsOrOthers(item.file)></use></svg>
-              <span v-html="item.file.name"></span></p>
+              <span v-html="item.file.name"></span></div>
           </div>
         </div>
       </div>
@@ -107,7 +107,7 @@
 <script>
   import OperationBG from "../../../components/OperationBG";
   import { mapState } from "vuex";
-  import {fetchList, inputIsEmpty, toggleTip} from "../../../publics/public";
+  import {fetchList, inputIsEmpty, toggleTip, uploadOrUpdate} from "../../../publics/public";
 
   export default {
     components: {OperationBG},
@@ -118,7 +118,7 @@
           icon: '&#xe651;',
           text: '本地文件'
         },
-        toBackEnd: true,
+        toBackEnd: false,
         absolutePath: '无绑定',
         catalog: [],
         fives:{docs:[], pics: [], videos:[], audios: [], others: []},
@@ -131,7 +131,7 @@
         filterText:'',
         checkedFiles: [],
         finalImageUrl: '',
-        canvasHeight: ''
+        canvasHeight: '',
       }
     },
     mounted(){
@@ -165,9 +165,13 @@
         })
       },
       getFiles() {
+        const fileList = [...event.target.files]
+        console.log(fileList,222)
+        if(fileList.length == 0){
+          return
+        }
         this.files = []
         this.catalog = []
-        const fileList = [...event.target.files]
         this.absolutePath = fileList[0].webkitRelativePath.split('/')[0]
         const path = []
         let id = 0
@@ -269,7 +273,6 @@
       watchClick(){
         document.addEventListener('click', function () {
           this.mergeOk = false
-          console.log('ssss',this.mergeOk)
         })
       },
       search(){
@@ -409,7 +412,55 @@
           const canvasFill = canvas.getContext('2d');
         canvasFill.drawImage(video, 0, 0, 150, 100);
         return canvas.toDataURL("image/jpeg");
-      }
+      },
+      submitFile(val) {
+        if (!val){
+          return
+        }
+        // 1.本地验证输入
+        if (!this.files) {
+          toggleTip(this, '无文件需要上传')
+        }
+        this.files.forEach((el, index)=>{
+          let curType = el.name.split('.').pop()
+          let formData = new FormData()
+          formData.append("uploadfile", el.file)
+          formData.append("tag", '')
+          formData.append('filelocation', '')
+          // 3.提交到后台，成功后显示消息
+          uploadOrUpdate('/upload', formData).then(data => {
+            if (data.success) {
+              // 执行/发布一个事件用来自动更新列表
+              switch (curType) {
+                case "docu":
+                  window.EE.emit('fetchDocuments');
+                  break;
+                case "image":
+                  window.EE.emit('fetchListDefault');
+                  window.EE.emit('timeLine');
+                  window.EE.emit('intelOrder');
+                  break;
+                case "video":
+                  window.EE.emit('fetchVideos');
+                  break;
+                case "audio":
+                  window.EE.emit('fetchAudios');
+                  break;
+                case "others":
+                  window.EE.emit('fetchOthers');
+                  break;
+              }
+              window.EE.emit('fetchAllFiles')
+              if (index === this.files.length - 1){
+                toggleTip(this, '上传成功')
+              }
+            }
+          }).catch((error) => {
+            toggleTip(this, error)
+          })
+        })
+
+      },
     },
     watch: {
       filterText(val) {
@@ -537,10 +588,12 @@
     width: 820px;
     position: relative;
   }
-  .docs_outer .docs_item{
+  .docs_outer .docs_item,
+  .audios_outer .audios_item,
+  .others .others_item{
     padding: 5px 10px;
-    min-width: 150px;
-    /* width: 150px; */
+    /*min-width: 200px;*/
+     width: 200px;
     display: inline-block;
   }
   .six_info_outer .folders_outer .folder_item {
@@ -612,6 +665,12 @@
   .six_info_outer .pics>.pics_item:hover{
     background-color: rgba(221, 221, 221, 0.78);
   }
+  .six_info_outer .pics>.pics_item p{
+    width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   .blockItemCheckedClass{
     background-color: rgba(221, 221, 221, 0.78);
   }

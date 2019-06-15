@@ -168,7 +168,7 @@
         <div class="mail_title"><span>标题</span><input type="text" v-model="mailContent.title" placeholder="请输入标题"></div>
         <div class="mail_contact"><span>发送至</span>
           <input type="text" v-model="mailContent.contactName ? mailContent.contactName : mailContent.contact"
-                 placeholder="添加联系人">
+             @change="inputMailContact"    placeholder="添加联系人">
           <span @click="chooseContact" class="iconfont icon-add"></span>
         </div>
         <div class="mail_words"><span>内容</span>
@@ -191,7 +191,7 @@
     </div>
     <!-- 联系人目录树-->
     <div class="contacts_tree" v-if="isContactTree">
-      <el-tree :data="contacts" :props="defaultProps" @current-change="chooseContactOk"></el-tree>
+      <el-tree :data="contacts" :props="defaultProps" default-expand-all @current-change="chooseContactOk"></el-tree>
     </div>
   </div>
 </template>
@@ -286,6 +286,9 @@
       unixChange(timeStamp){
         return unixChange(timeStamp)
       },
+      inputMailContact(){
+        this.mailContent.contactName = ""
+      },
       chooseContactOk(data, obj) {
         console.log(data, '00000')
         this.mailContent.contactName = data.name
@@ -305,6 +308,11 @@
         })
       },
       sendMail() {
+        const reg = /^([a-zA-Z]|[0-9])(\w|\-)+@[a-zA-Z0-9]+\.([a-zA-Z]{2,4})$/;
+        if(!reg.test(this.mailContent.contact)){
+          inputIsEmpty(this, "邮箱地址无效!");
+          return
+        }
         let ids = []
         this.checkedFiles.forEach(el => {
           ids.push(el.id)
@@ -319,7 +327,7 @@
           if (data.success) {
             toggleTip(this, '发送成功')
             this.$store.commit('closeMail')
-            this.$store.commit('setCheckedFilesFull')
+            // this.$store.commit('setCheckedFilesFull')
             this.mailContent = {title: '', contactName: '', contact: '', content: ''}
           } else {
             toggleTip(this, '发送失败，请检查')
@@ -800,6 +808,9 @@
     height: 100px;
     text-align: center;
     vertical-align: top;
+    verflow: hidden;
+    margin: 0 5px
+
   }
 
   .mail_box > .content .checked_item > svg {
@@ -808,6 +819,10 @@
 
   .mail_box > .content .checked_item > p {
     font-size: 14px;
+    width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   /*发送邮件结束*/

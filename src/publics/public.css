@@ -37,6 +37,13 @@ table tbody tr:hover{
   background-color: rgba(131, 138, 140, 0.11);
   border-radius: 5px;
 }
+table tbody tr .file_name{
+  width: 530px;
+  word-break: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .item_checked{
   background-color: rgba(178, 185, 187, 0.11);
   border-radius: 5px;
@@ -186,7 +193,12 @@ table tbody tr:hover{
   font-size: 20px;
   margin-left: 10px;
 }
-
+.six_info_outer .videos>.videos_item>p{
+  width: 200px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  text-align: center;}
 .highlight_info {
   position: absolute;
   left: 175px;
@@ -235,6 +247,9 @@ table tbody tr:hover{
   position: relative;
   margin: 10px;
   padding-left: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .six_info_outer .icon-checked_circle{
   left: 0px;
@@ -247,8 +262,9 @@ table tbody tr:hover{
   float: left;
 }
 .float_right{
-  float: right;
+  float: left;
   margin-right: 10px;
+  margin-left: 10px;
 }
 .six_info_outer .bigger{
   width: 800px;
